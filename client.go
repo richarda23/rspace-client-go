@@ -7,17 +7,35 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"strconv"
 )
-
-type Status struct {
-	Message       string `json: "message"`
-	RSpaceVersion string `json: "rspaceVersion"`
-}
 
 const (
 	APIKEY   = "4FmuGC6OCVlW8QqNNz448PEMCutJtgBL"
 	BASE_URL = "https://demos.researchspace.com/api/v1"
 )
+type Status struct {
+	Message       string `json: "message"`
+	RSpaceVersion string `json: "rspaceVersion"`
+}
+
+type RecordListingConfig struct {
+    SortOrder string
+    PageSize int
+    PageNumber int
+    OrderBy string
+    Quiet bool
+}
+func New () RecordListingConfig {
+	return RecordListingConfig{
+         PageSize:20,
+	 OrderBy:"lastModified",
+	 PageNumber:1,
+	 SortOrder:"desc",
+	 Quiet: false,
+	}
+}
+
 
 func GetStatus() *Status {
 	statusStr := doGet(BASE_URL + "/status")
@@ -27,8 +45,11 @@ func GetStatus() *Status {
 	return &res
 }
 
-func Documents() {
-	docJson := doGet(BASE_URL + "/documents")
+func Documents(config RecordListingConfig) {
+	fmt.Println( config)
+        url := BASE_URL + "/documents?pageSize=" + strconv.Itoa(config.PageSize) +"&pageNumber=" + strconv.Itoa(config.PageNumber)
+	fmt.Println("url is " + url)
+	docJson := doGet(url)
 	var result map[string]interface{}
 	json.Unmarshal([]byte(docJson), &result)
 	docs := result["documents"].([]interface{})
@@ -40,7 +61,11 @@ func Documents() {
 		name := abbreviate(item["name"].(string), 30)
 		t, _ := time.Parse(time.RFC3339Nano, item["lastModified"].(string))
 		lm := t.Format(time.RFC3339)
-		fmt.Printf("%-10d%-30s%-20s\n", id, name, lm)
+		if config.Quiet {
+			fmt.Printf("%-10d\n", id)
+		} else {
+			fmt.Printf("%-10d%-30s%-20s\n", id, name, lm)
+		}
 	}
 
 }
