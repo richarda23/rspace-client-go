@@ -7,11 +7,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"log"
 )
 
 const (
 	APIKEY   = "4FmuGC6OCVlW8QqNNz448PEMCutJtgBL"
 	BASE_URL = "https://demos.researchspace.com/api/v1"
+	DOCUMENTS_URL=BASE_URL+"/documents"
 )
 
 
@@ -22,15 +24,57 @@ func GetStatus() *Status {
 	fmt.Println(res)
 	return &res
 }
-
-func Documents(config RecordListingConfig) {
-        url := BASE_URL + "/documents?pageSize=" + strconv.Itoa(config.PageSize) +"&pageNumber=" + strconv.Itoa(config.PageNumber)
+// Paginated listing of Documents
+func Documents(config RecordListingConfig) *DocumentList {
+        url := DOCUMENTS_URL + "?pageSize=" + strconv.Itoa(config.PageSize) +"&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := doGet(url)
 	var result = DocumentList {}
 	json.Unmarshal([]byte(docJson), &result)
-	fmt.Println(result.TotalHits)
-
+	return &result
 }
+
+func DocumentNew (post *DocumentPost) *DocumentInfo {
+	formData, _ := json.Marshal(post)
+	hc := http.Client{}
+	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
+	addAuthHeader(req)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := hc.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return unmarshal(resp)
+}
+
+func NewEmptyBasicDocument (name string, tags string) *DocumentInfo {
+	hc := http.Client{}
+	post := DocumentPost{}
+	post.Name = name
+	if len(tags) > 0 {
+	  post.Tags=tags
+	}
+	fmt.Println(post)
+	formData, _ := json.Marshal(post)
+	fmt.Println(string(formData))
+	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
+	addAuthHeader(req)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := hc.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return unmarshal(resp)
+}
+func unmarshal(resp *http.Response) *DocumentInfo {
+	data, _ := ioutil.ReadAll(resp.Body)
+	var result = &DocumentInfo {}
+	json.Unmarshal(data, result)
+	return result
+}
+func addAuthHeader (req *http.Request) {
+	req.Header.Add("apiKey", APIKEY)
+}
+
 func PrintDocs () {
 
 //	docs := result["documents"].([]interface{})
@@ -61,12 +105,11 @@ func abbreviate(toAbbreviate string, maxLen int) string {
 func doGet(url string) string {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Add("apiKey", APIKEY)
+	addAuthHeader(req)
 	resp, _ := client.Do(req)
 	data, _ := ioutil.ReadAll(resp.Body)
 	respStr := string(data)
-	fmt.Println(string(respStr))
-	return string(respStr)
+	return respStr
 }
 
 func main() {
