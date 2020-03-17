@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestAbs(t *testing.T) {
+func TestStatus(t *testing.T) {
 	got := GetStatus()
 	if got.Message != "OK" {
 		t.Errorf("Expected 'OK' but was %v", got.Message)
@@ -13,4 +13,10 @@ func TestAbs(t *testing.T) {
 		t.Errorf("RSpaceVersion must be non-empty")
 
 	}
+}
+
+func TestDocumentList(t *testing.T) {
+	cfg := NewRecordListingConfig()
+	 Documents(cfg)
+
 }
