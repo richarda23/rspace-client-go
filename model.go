@@ -31,11 +31,11 @@ type DocumentPost struct {
 	Name string  `json:"name"`
 	Tags string  `json:"tags"`
 	FormId FormId `json:"formId"`
-	Fields []FieldContent `json:"fieldContent"`
+	Fields []FieldContent `json:"fields"`
 
 }
 type FieldContent struct {
-	Content string
+	Content string `json:"content"`
 }
 type FormId struct {
 	Id int
@@ -58,6 +58,7 @@ type DocumentList struct {
   Documents []DocumentInfo
   Links  []Link `json: "_links"`
 }
+//Summary information about a Document
 type DocumentInfo struct {
   Id int
   GlobalId string
@@ -69,6 +70,34 @@ type DocumentInfo struct {
   Tags string
   FormInfo FormInfo
   UserInfo UserInfo
+}
+
+// FileInfo holds metadata about Files
+type FileInfo struct {
+	ContentType string
+	Size int
+	Caption string
+        Created string
+        Version int
+	Id int
+	GlobalId string
+	Name string
+}
+
+type Field struct {
+	Id int
+	GlobalId string
+	Name string
+	Type string
+	Content string
+	LastModified string
+	Files []FileInfo
+}
+
+//Full document including content
+type Document struct {
+	*DocumentInfo
+	Fields []Field
 }
 
 type FormInfo struct {

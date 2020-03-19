@@ -32,6 +32,15 @@ func Documents(config RecordListingConfig) *DocumentList {
 	json.Unmarshal([]byte(docJson), &result)
 	return &result
 }
+//DocumentById retrieves full document content
+func DocumentById(docId int) *Document {
+        url := fmt.Sprintf("%s/%d", DOCUMENTS_URL, docId) 
+	docJson := doGet(url)
+	fmt.Println(docJson)
+	var result = Document {}
+	json.Unmarshal([]byte(docJson), &result)
+	return &result
+}
 
 func DocumentNew (post *DocumentPost) *DocumentInfo {
 	formData, _ := json.Marshal(post)
@@ -45,17 +54,23 @@ func DocumentNew (post *DocumentPost) *DocumentInfo {
 	}
 	return unmarshal(resp)
 }
+func NewBasicDocumentWithContent (name string, tags string, contentHtml string) *DocumentInfo {
+	post := _basicPost(name, tags)
+	content := FieldContent{contentHtml}
+	fields := make([]FieldContent, 1)
+	fields[0] = content
+	post.Fields = fields
+        return doPostCreateDocument(post)
+}
 
 func NewEmptyBasicDocument (name string, tags string) *DocumentInfo {
+	post := _basicPost(name, tags)
+        return doPostCreateDocument(post)
+}
+
+func doPostCreateDocument (postData *DocumentPost) *DocumentInfo {
 	hc := http.Client{}
-	post := DocumentPost{}
-	post.Name = name
-	if len(tags) > 0 {
-	  post.Tags=tags
-	}
-	fmt.Println(post)
-	formData, _ := json.Marshal(post)
-	fmt.Println(string(formData))
+	formData, _ := json.Marshal(postData)
 	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
 	addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
@@ -65,6 +80,18 @@ func NewEmptyBasicDocument (name string, tags string) *DocumentInfo {
 	}
 	return unmarshal(resp)
 }
+
+func _basicPost (name string, tags string) *DocumentPost {
+	post := DocumentPost{}
+	post.Name = name
+	if len(tags) > 0 {
+	  post.Tags=tags
+	}
+	return &post
+}
+
+
+
 func unmarshal(resp *http.Response) *DocumentInfo {
 	data, _ := ioutil.ReadAll(resp.Body)
 	var result = &DocumentInfo {}
