@@ -53,9 +53,9 @@ func DocumentPostNew (name string, tags string, formId int, content []string) *D
 }
 
 type DocumentList struct {
+  Documents []DocumentInfo
   TotalHits int
   PageNumber int
-  Documents []DocumentInfo
   Links  []Link `json: "_links"`
 }
 //Summary information about a Document
@@ -82,6 +82,13 @@ type FileInfo struct {
 	Id int
 	GlobalId string
 	Name string
+}
+
+type FileList struct {
+  TotalHits int
+  PageNumber int
+  Links  []Link `json: "_links"`
+  Files []FileInfo
 }
 
 type Field struct {
