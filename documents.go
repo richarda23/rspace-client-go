@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
-	"log"
 )
 
 func GetStatus() *Status {
@@ -17,25 +17,27 @@ func GetStatus() *Status {
 	fmt.Println(res)
 	return &res
 }
+
 // Paginated listing of Documents
 func Documents(config RecordListingConfig) *DocumentList {
-        url := DOCUMENTS_URL + "?pageSize=" + strconv.Itoa(config.PageSize) +"&pageNumber=" + strconv.Itoa(config.PageNumber)
+	url := DOCUMENTS_URL + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := DoGet(url)
-	var result = DocumentList {}
-	json.Unmarshal([]byte(docJson), &result)
-	return &result
-}
-//DocumentById retrieves full document content
-func DocumentById(docId int) *Document {
-        url := fmt.Sprintf("%s/%d", DOCUMENTS_URL, docId) 
-	docJson := DoGet(url)
-	fmt.Println(docJson)
-	var result = Document {}
+	var result = DocumentList{}
 	json.Unmarshal([]byte(docJson), &result)
 	return &result
 }
 
-func DocumentNew (post *DocumentPost) *DocumentInfo {
+//DocumentById retrieves full document content
+func DocumentById(docId int) *Document {
+	url := fmt.Sprintf("%s/%d", DOCUMENTS_URL, docId)
+	docJson := DoGet(url)
+	fmt.Println(docJson)
+	var result = Document{}
+	json.Unmarshal([]byte(docJson), &result)
+	return &result
+}
+
+func DocumentNew(post *DocumentPost) *DocumentInfo {
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
@@ -49,21 +51,21 @@ func DocumentNew (post *DocumentPost) *DocumentInfo {
 	Unmarshal(resp, result)
 	return result
 }
-func NewBasicDocumentWithContent (name string, tags string, contentHtml string) *DocumentInfo {
+func NewBasicDocumentWithContent(name string, tags string, contentHtml string) *DocumentInfo {
 	post := BasicPost(name, tags)
 	content := FieldContent{contentHtml}
 	fields := make([]FieldContent, 1)
 	fields[0] = content
 	post.Fields = fields
-        return doPostCreateDocument(post)
+	return doPostCreateDocument(post)
 }
 
-func NewEmptyBasicDocument (name string, tags string) *DocumentInfo {
+func NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
 	post := BasicPost(name, tags)
-        return doPostCreateDocument(post)
+	return doPostCreateDocument(post)
 }
 
-func doPostCreateDocument (postData *DocumentPost) *DocumentInfo {
+func doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
 	hc := http.Client{}
 	formData, _ := json.Marshal(postData)
 	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))

@@ -2,54 +2,61 @@ package rspace
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 const (
-	APIKEY   = "4FmuGC6OCVlW8QqNNz448PEMCutJtgBL"
-	BASE_URL = "https://demos.researchspace.com/api/v1"
-	DOCUMENTS_URL=BASE_URL+"/documents"
-	FILES_URL=BASE_URL+"/files"
+	APIKEY        = "4FmuGC6OCVlW8QqNNz448PEMCutJtgBL"
+	BASE_URL      = "https://demos.researchspace.com/api/v1"
+	DOCUMENTS_URL = BASE_URL + "/documents"
+	FILES_URL     = BASE_URL + "/files"
+	FOLDERS_URL   = BASE_URL + "/folders"
 )
 
-func BasicPost (name string, tags string) *DocumentPost {
+func BasicPost(name string, tags string) *DocumentPost {
 	post := DocumentPost{}
 	post.Name = name
 	if len(tags) > 0 {
-	  post.Tags=tags
+		post.Tags = tags
 	}
 	return &post
 }
 
-func Unmarshal(resp *http.Response, result interface{} )  {
+func Unmarshal(resp *http.Response, result interface{}) {
 	data, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(data))
 	json.Unmarshal(data, result)
 }
-func AddAuthHeader (req *http.Request) {
+func AddAuthHeader(req *http.Request) {
 	req.Header.Add("apiKey", APIKEY)
 }
 
-func PrintDocs () {
+func PrintDocs() {
 
-//	docs := result["documents"].([]interface{})
-//	for _, value := range docs {
-//		item := value.(map[string]interface{})
+	//	docs := result["documents"].([]interface{})
+	//	for _, value := range docs {
+	//		item := value.(map[string]interface{})
 
-		// Each value is an interface{} type, that is type asserted as a string
-//		id := int(item["id"].(float64))
-//		name := abbreviate(item["name"].(string), 30)
-//		t, _ := time.Parse(time.RFC3339Nano, item["lastModified"].(string))
-//		lm := t.Format(time.RFC3339)
-//		if config.Quiet {
-//			fmt.Printf("%-10d\n", id)
-//		} else {
-//			fmt.Printf("%-10d%-30s%-20s\n", id, name, lm)
-//		}
-//	}
+	// Each value is an interface{} type, that is type asserted as a string
+	//		id := int(item["id"].(float64))
+	//		name := abbreviate(item["name"].(string), 30)
+	//		t, _ := time.Parse(time.RFC3339Nano, item["lastModified"].(string))
+	//		lm := t.Format(time.RFC3339)
+	//		if config.Quiet {
+	//			fmt.Printf("%-10d\n", id)
+	//		} else {
+	//			fmt.Printf("%-10d%-30s%-20s\n", id, name, lm)
+	//		}
+	//	}
 
 }
 
+// Abbreviate truncates a string to maximum length `maxLen`, including
+// 3 ellipsis characters.
 func Abbreviate(toAbbreviate string, maxLen int) string {
 	if len(toAbbreviate) > maxLen {
 		toAbbreviate = toAbbreviate[0:(maxLen-4)] + "..."
@@ -57,6 +64,8 @@ func Abbreviate(toAbbreviate string, maxLen int) string {
 	return toAbbreviate
 }
 
+//DoGet makes an authenticated API request to a URL expecting a string
+// response (typically JSON)
 func DoGet(url string) string {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
@@ -67,3 +76,22 @@ func DoGet(url string) string {
 	return respStr
 }
 
+// DoGetToFile saves the response from an HTTP GET request to the specified file.
+// If the response fails or the file cannot be created returns an error.
+// 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
+func DoGetToFile(url string, filepath string) error {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	AddAuthHeader(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, resp.Body)
+	return err
+}
