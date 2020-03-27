@@ -24,7 +24,7 @@ func NewRecordListingConfig() RecordListingConfig {
 	return RecordListingConfig{
 		PageSize:   20,
 		OrderBy:    "lastModified",
-		PageNumber: 1,
+		PageNumber: 0,
 		SortOrder:  "desc",
 		Quiet:      false,
 	}
@@ -92,8 +92,15 @@ type Folder struct {
 	ParentFolderId int
 }
 
+type FolderTreeItem struct {
+	*IndentifiableNamable
+	Created        string
+	LastModified   string
+	IsNotebook     bool `json :"notebook"`
+	Type string
+}
 type FolderList struct {
-	Folders    []Folder
+	Records    []FolderTreeItem
 	TotalHits  int
 	PageNumber int
 	Links      []Link `json: "_links"`
