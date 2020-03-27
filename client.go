@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -29,9 +28,18 @@ func BasicPost(name string, tags string) *DocumentPost {
 
 func Unmarshal(resp *http.Response, result interface{}) {
 	data, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(data))
-	json.Unmarshal(data, result)
+	if data != nil {
+		json.Unmarshal(data, result)
+	} else {
+		Log.Error("Error parsing result")
+	}
 }
+
+func Marshal (anything interface{}) string {
+	bytes, _  := json.Marshal(anything)
+	return string(bytes)
+}
+
 func AddAuthHeader(req *http.Request) {
 	req.Header.Add("apiKey", os.Getenv(APIKEY_ENV_NAME))
 }

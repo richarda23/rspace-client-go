@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -82,7 +81,7 @@ func _doUpload(path string, fileToReplaceId int) (*FileInfo, error) {
 	AddAuthHeader(req)
 	resp, err := hc.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 	result := &FileInfo{}
 	Unmarshal(resp, result)
@@ -94,6 +93,6 @@ func DownloadFile(fileId int, outFile string) {
 	url := fmt.Sprintf("%s/%d/file", filesUrl(), fileId)
 	err := DoGetToFile(url, outFile)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 }

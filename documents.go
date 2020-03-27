@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -15,7 +14,6 @@ func documentsUrl() string {
 //GetStatus returns the result of the /status endpoint
 func GetStatus() *Status {
 	statusStr := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
-	fmt.Println(statusStr)
 	res := Status{}
 	json.Unmarshal([]byte(statusStr), &res)
 	return &res
@@ -49,7 +47,7 @@ func DocumentNew(post *DocumentPost) *DocumentInfo {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 	result := &DocumentInfo{}
 	Unmarshal(resp, result)
@@ -81,7 +79,7 @@ func doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 	result := &DocumentInfo{}
 	Unmarshal(resp, result)

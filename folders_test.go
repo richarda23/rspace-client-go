@@ -2,25 +2,24 @@ package rspace
 
 import (
 	"fmt"
-	"log"
 	"testing"
 )
-
-const ()
 
 func TestNewFolderGetFolder(t *testing.T) {
 	post := FolderPost{}
 	post.Name = "f1"
 	post.IsNotebook = true
 	got, err := FolderNew(&post)
+	Log.Info(Marshal(got))
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 
 	if got.Name != "f1" {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", "f1", got.Name))
 	}
 	folder := FolderById(got.Id)
+	Log.Info(Marshal(got))
 	if folder.IsNotebook == true {
 		fail(t, fmt.Sprintf("expected folder, not notebook"))
 	}

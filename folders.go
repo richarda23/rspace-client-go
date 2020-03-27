@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -64,7 +63,7 @@ func FolderNew(post *FolderPost) (*Folder, error) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		Log.Error(err)
 	}
 	result := &Folder{}
 	Unmarshal(resp, result)
