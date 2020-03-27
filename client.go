@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	APIKEY        = "4FmuGC6OCVlW8QqNNz448PEMCutJtgBL"
-	BASE_URL      = "https://demos.researchspace.com/api/v1"
-	DOCUMENTS_URL = BASE_URL + "/documents"
-	FILES_URL     = BASE_URL + "/files"
-	FOLDERS_URL   = BASE_URL + "/folders"
+	APIKEY_ENV_NAME        = "RSPACE_API_KEY"
+	BASE_URL_ENV_NAME      = "RSPACE_URL"
 )
+
+func getenv(envname string) string {
+	return os.Getenv(envname)
+}
 
 func BasicPost(name string, tags string) *DocumentPost {
 	post := DocumentPost{}
@@ -32,7 +33,7 @@ func Unmarshal(resp *http.Response, result interface{}) {
 	json.Unmarshal(data, result)
 }
 func AddAuthHeader(req *http.Request) {
-	req.Header.Add("apiKey", APIKEY)
+	req.Header.Add("apiKey", os.Getenv(APIKEY_ENV_NAME))
 }
 
 func PrintDocs() {

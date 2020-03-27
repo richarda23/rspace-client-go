@@ -10,9 +10,13 @@ import (
 	"strings"
 )
 
-// Paginated listing of items in folder. If folderId is 0 then Home Folder is lister
+func foldersUrl () string {
+	return getenv (BASE_URL_ENV_NAME) + "/folders"
+}
+
+// FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
 func FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) *FolderList {
-	url := FOLDERS_URL + "/tree"
+	url := foldersUrl() + "/tree"
 	if folderId != 0 {
 		url = url +"/" + strconv.Itoa(folderId)
 	}
@@ -26,15 +30,15 @@ func FolderTree(config RecordListingConfig, folderId int, typesToInclude []strin
 	return &result
 }
 
-//DocumentById retrieves full document content
+//DocumentById retrieves full information about the folder
 func FolderById(folderId int) *Folder {
-	url := fmt.Sprintf("%s/%d", FOLDERS_URL, folderId)
+	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
 	docJson := DoGet(url)
 	var result = Folder{}
 	json.Unmarshal([]byte(docJson), &result)
 	return &result
 }
-//FolderNew creates a new folder or notebook with  the given name.
+// FolderNew creates a new folder or notebook with  the given name.
 // If a parentFolderId is specified then the folder is created in that folder
 func FolderNew(post *FolderPost) (*Folder, error) {
 	var formData []byte
@@ -51,21 +55,18 @@ func FolderNew(post *FolderPost) (*Folder, error) {
 	} else {
 		formData, _ = json.Marshal(post)
 	}
-	fmt.Println(string(formData))
 	hc := http.Client{}
-	req, err := http.NewRequest("POST", FOLDERS_URL, bytes.NewBuffer(formData))
+	req, err := http.NewRequest("POST", foldersUrl(), bytes.NewBuffer(formData))
 	if err != nil {
 		return nil, err
 	}
 	AddAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
-	fmt.Println("about to do request")
 	resp, err := hc.Do(req)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	result := &Folder{}
-	fmt.Println("got request")
 	Unmarshal(resp, result)
 
 	fmt.Println(result)

@@ -13,9 +13,13 @@ import (
 	"strconv"
 )
 
+func filesUrl() string {
+	return getenv (BASE_URL_ENV_NAME) + "/files"
+}
+
 // Paginated listing of Files
 func Files(config RecordListingConfig) *FileList {
-	url := FILES_URL + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := DoGet(url)
 	var result = FileList{}
 	json.Unmarshal([]byte(docJson), &result)
@@ -24,7 +28,7 @@ func Files(config RecordListingConfig) *FileList {
 
 // FileById retrieves file information for a single File
 func FileById(fileId int) *FileInfo {
-	url := fmt.Sprintf("%s/%d", FILES_URL, fileId)
+	url := fmt.Sprintf("%s/%d", filesUrl(), fileId)
 	docJson := DoGet(url)
 	var result = FileInfo{}
 	json.Unmarshal([]byte(docJson), &result)
@@ -69,7 +73,7 @@ func _doUpload(path string, fileToReplaceId int) (*FileInfo, error) {
 	}
 
 	hc := http.Client{}
-	url := FILES_URL
+	url := filesUrl()
 	if fileToReplaceId != 0 {
 		url = fmt.Sprintf("%s/%d/file", url, fileToReplaceId)
 	}
@@ -87,7 +91,7 @@ func _doUpload(path string, fileToReplaceId int) (*FileInfo, error) {
 
 // DownloadFile retrieves the given file from RSpace and downloads to the specified file location on local machine, which must be a writable file.
 func DownloadFile(fileId int, outFile string) {
-	url := fmt.Sprintf("%s/%d/file", FILES_URL, fileId)
+	url := fmt.Sprintf("%s/%d/file", filesUrl(), fileId)
 	err := DoGetToFile(url, outFile)
 	if err != nil {
 		log.Fatalln(err)

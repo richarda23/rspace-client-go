@@ -4,23 +4,26 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 )
 
+func documentsUrl() string {
+    return getenv(BASE_URL_ENV_NAME) + "/documents"
+}
+//GetStatus returns the result of the /status endpoint
 func GetStatus() *Status {
-	statusStr := DoGet(BASE_URL + "/status")
+	statusStr := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	fmt.Println(statusStr)
 	res := Status{}
 	json.Unmarshal([]byte(statusStr), &res)
-	fmt.Println(res)
 	return &res
 }
 
 // Paginated listing of Documents
 func Documents(config RecordListingConfig) *DocumentList {
-	url := DOCUMENTS_URL + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := DoGet(url)
 	var result = DocumentList{}
 	json.Unmarshal([]byte(docJson), &result)
@@ -29,7 +32,7 @@ func Documents(config RecordListingConfig) *DocumentList {
 
 //DocumentById retrieves full document content
 func DocumentById(docId int) *Document {
-	url := fmt.Sprintf("%s/%d", DOCUMENTS_URL, docId)
+	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
 	docJson := DoGet(url)
 	fmt.Println(docJson)
 	var result = Document{}
@@ -37,10 +40,11 @@ func DocumentById(docId int) *Document {
 	return &result
 }
 
+//DocumentNew creates a new RSpace document
 func DocumentNew(post *DocumentPost) *DocumentInfo {
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
-	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
+	req, err := http.NewRequest("POST", documentsUrl(), bytes.NewBuffer(formData))
 	AddAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
@@ -51,6 +55,9 @@ func DocumentNew(post *DocumentPost) *DocumentInfo {
 	Unmarshal(resp, result)
 	return result
 }
+
+// NewBasicDocumentWithContent creates a new BasicDocument document with name, tags(optional) and content in a 
+// single text field.
 func NewBasicDocumentWithContent(name string, tags string, contentHtml string) *DocumentInfo {
 	post := BasicPost(name, tags)
 	content := FieldContent{contentHtml}
@@ -60,6 +67,7 @@ func NewBasicDocumentWithContent(name string, tags string, contentHtml string) *
 	return doPostCreateDocument(post)
 }
 
+// NewEmptyBasicDocument creates a new, empty BasicDocument with no content.
 func NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
 	post := BasicPost(name, tags)
 	return doPostCreateDocument(post)
@@ -68,7 +76,7 @@ func NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
 func doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
 	hc := http.Client{}
 	formData, _ := json.Marshal(postData)
-	req, err := http.NewRequest("POST", DOCUMENTS_URL, bytes.NewBuffer(formData))
+	req, err := http.NewRequest("POST", documentsUrl(), bytes.NewBuffer(formData))
 	AddAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
@@ -80,25 +88,3 @@ func doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
 	return result
 }
 
-func main() {
-	fmt.Println("Starting the application...")
-	response, err := http.Get("https://httpbin.org/ip")
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
-	}
-	jsonData := map[string]string{"firstname": "Nic", "lastname": "Raboy"}
-	jsonValue, _ := json.Marshal(jsonData)
-	response, err = http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
-	}
-	fmt.Println("Terminating the application...")
-	GetStatus()
-	//    Documents()
-}
