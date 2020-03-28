@@ -6,13 +6,19 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+type DocumentService struct {
+  BaseService
+}
 
 func documentsUrl() string {
     return getenv(BASE_URL_ENV_NAME) + "/documents"
 }
 //GetStatus returns the result of the /status endpoint
-func GetStatus() *Status {
+func (ds *DocumentService) GetStatus() *Status {
+	time.Sleep(ds.Delay )
 	statusStr := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
 	res := Status{}
 	json.Unmarshal([]byte(statusStr), &res)
@@ -20,7 +26,8 @@ func GetStatus() *Status {
 }
 
 // Paginated listing of Documents
-func Documents(config RecordListingConfig) *DocumentList {
+func (ds *DocumentService) Documents(config RecordListingConfig) *DocumentList {
+	time.Sleep(ds.Delay )
 	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := DoGet(url)
 	var result = DocumentList{}
@@ -29,7 +36,8 @@ func Documents(config RecordListingConfig) *DocumentList {
 }
 
 //DocumentById retrieves full document content
-func DocumentById(docId int) *Document {
+func (ds *DocumentService) DocumentById(docId int) *Document {
+	time.Sleep(ds.Delay)
 	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
 	docJson := DoGet(url)
 	fmt.Println(docJson)
@@ -39,7 +47,8 @@ func DocumentById(docId int) *Document {
 }
 
 //DocumentNew creates a new RSpace document
-func DocumentNew(post *DocumentPost) *DocumentInfo {
+func (ds *DocumentService) DocumentNew(post *DocumentPost) *DocumentInfo {
+	time.Sleep(ds.Delay)
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", documentsUrl(), bytes.NewBuffer(formData))
@@ -56,7 +65,8 @@ func DocumentNew(post *DocumentPost) *DocumentInfo {
 
 // NewBasicDocumentWithContent creates a new BasicDocument document with name, tags(optional) and content in a 
 // single text field.
-func NewBasicDocumentWithContent(name string, tags string, contentHtml string) *DocumentInfo {
+func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string, contentHtml string) *DocumentInfo {
+	time.Sleep(ds.Delay )
 	post := BasicPost(name, tags)
 	content := FieldContent{contentHtml}
 	fields := make([]FieldContent, 1)
@@ -66,7 +76,8 @@ func NewBasicDocumentWithContent(name string, tags string, contentHtml string) *
 }
 
 // NewEmptyBasicDocument creates a new, empty BasicDocument with no content.
-func NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
+func (ds *DocumentService) NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
+	time.Sleep(ds.Delay )
 	post := BasicPost(name, tags)
 	return doPostCreateDocument(post)
 }

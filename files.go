@@ -10,14 +10,20 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
+type FileService struct {
+	BaseService
+}
+
 
 func filesUrl() string {
 	return getenv (BASE_URL_ENV_NAME) + "/files"
 }
 
 // Paginated listing of Files
-func Files(config RecordListingConfig) *FileList {
+func (fs *FileService) Files(config RecordListingConfig) *FileList {
+	time.Sleep(fs.Delay)
 	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	docJson := DoGet(url)
 	var result = FileList{}
@@ -26,7 +32,8 @@ func Files(config RecordListingConfig) *FileList {
 }
 
 // FileById retrieves file information for a single File
-func FileById(fileId int) *FileInfo {
+func (fs *FileService) FileById(fileId int) *FileInfo {
+	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", filesUrl(), fileId)
 	docJson := DoGet(url)
 	var result = FileInfo{}
@@ -39,13 +46,15 @@ func FileById(fileId int) *FileInfo {
 // appropriate Gallery section
 // Panics if file cannot be read.
 // Returns either a FileInfo of the created file or an error if operation did not succeed.
-func UploadFile(path string) (*FileInfo, error) {
+func(fs *FileService) UploadFile(path string) (*FileInfo, error) {
+	time.Sleep(fs.Delay)
 	return _doUpload(path, 0)
 }
 
 // UploadFileNewVersion replaces the RSpace file of the given ID with the new file.
 // The new version can have a different name but must be same filetype (i.e. have the same suffix)
-func UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
+func (fs *FileService) UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
+	time.Sleep(fs.Delay)
 	return _doUpload(path, fileToReplaceId)
 }
 
@@ -89,7 +98,7 @@ func _doUpload(path string, fileToReplaceId int) (*FileInfo, error) {
 }
 
 // DownloadFile retrieves the given file from RSpace and downloads to the specified file location on local machine, which must be a writable file.
-func DownloadFile(fileId int, outFile string) {
+func (fs *FileService) DownloadFile(fileId int, outFile string) {
 	url := fmt.Sprintf("%s/%d/file", filesUrl(), fileId)
 	err := DoGetToFile(url, outFile)
 	if err != nil {

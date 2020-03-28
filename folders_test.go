@@ -3,13 +3,17 @@ package rspace
 import (
 	"fmt"
 	"testing"
+	"time"
 )
+var folderService *FolderService = &FolderService{
+	BaseService:BaseService{
+		Delay:time.Duration(100) * time.Millisecond}}
 
 func TestNewFolderGetFolder(t *testing.T) {
 	post := FolderPost{}
 	post.Name = "f1"
 	post.IsNotebook = true
-	got, err := FolderNew(&post)
+	got, err := folderService.FolderNew(&post)
 	Log.Info(Marshal(got))
 	if err != nil {
 		Log.Error(err)
@@ -18,7 +22,7 @@ func TestNewFolderGetFolder(t *testing.T) {
 	if got.Name != "f1" {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", "f1", got.Name))
 	}
-	folder := FolderById(got.Id)
+	folder := folderService.FolderById(got.Id)
 	Log.Info(Marshal(got))
 	if folder.IsNotebook == true {
 		fail(t, fmt.Sprintf("expected folder, not notebook"))
@@ -32,7 +36,7 @@ func TestListFolderTree(t *testing.T) {
 	types := make([]string, 1)
 	types[0]="notebook"
 	// to do fix 'types' usage
-	result := FolderTree(cfg, 0, types)
+	result := folderService.FolderTree(cfg, 0, types)
 	for _, v := range result.Records {
 		if v.Type != "NOTEBOOK" {
 			fail (t, fmt.Sprintf("Folder listing should be notebooks only"))

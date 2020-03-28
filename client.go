@@ -6,12 +6,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
 	APIKEY_ENV_NAME        = "RSPACE_API_KEY"
 	BASE_URL_ENV_NAME      = "RSPACE_URL"
 )
+
+type BaseService struct {
+ Delay time.Duration
+}
 
 func getenv(envname string) string {
 	return os.Getenv(envname)
