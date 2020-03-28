@@ -30,7 +30,7 @@ func TestDocumentList(t *testing.T) {
 	got := Documents(cfg)
 	Log.Info(Marshal(got))
 	if got.TotalHits <= 1 {
-		fail(t, fmt.Sprintf("Expected hits > 1 but was %d", got.TotalHits))
+		fail(t, fmt.Sprintf("Expected hits >= 1 but was %d", got.TotalHits))
 	}
 }
 

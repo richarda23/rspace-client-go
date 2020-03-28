@@ -79,9 +79,16 @@ func DoGet(url string) string {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	AddAuthHeader(req)
-	resp, _ := client.Do(req)
+	resp, e := client.Do(req)
+	if e != nil {
+          Log.Error(e)
+	}
 	data, _ := ioutil.ReadAll(resp.Body)
+
 	respStr := string(data)
+	if resp.StatusCode > 400 {
+		Log.Error(resp.Status + " - " +  respStr)
+	}
 	return respStr
 }
 
