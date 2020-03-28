@@ -22,7 +22,10 @@ func TestNewFolderGetFolder(t *testing.T) {
 	if got.Name != "f1" {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", "f1", got.Name))
 	}
-	folder := folderService.FolderById(got.Id)
+	folder,e := folderService.FolderById(got.Id)
+	if e != nil {
+		Log.Error(e)
+	}
 	Log.Info(Marshal(got))
 	if folder.IsNotebook == true {
 		fail(t, fmt.Sprintf("expected folder, not notebook"))
@@ -36,10 +39,23 @@ func TestListFolderTree(t *testing.T) {
 	types := make([]string, 1)
 	types[0]="notebook"
 	// to do fix 'types' usage
-	result := folderService.FolderTree(cfg, 0, types)
+	result,e := folderService.FolderTree(cfg, 0, types)
+	if e != nil {
+		Log.Error(e)
+	}
 	for _, v := range result.Records {
 		if v.Type != "NOTEBOOK" {
 			fail (t, fmt.Sprintf("Folder listing should be notebooks only"))
 		}
 	}
+}
+func TestErrorHandling (t *testing.T) {
+	folder,e := folderService.FolderById(-233)
+	if folder != nil {
+			fail (t, fmt.Sprintf("Should have invoked an error"))
+	}
+	if e == nil {
+			fail (t, fmt.Sprintf("Error object should not be nil"))
+	}
+	Log.Info(e)
 }

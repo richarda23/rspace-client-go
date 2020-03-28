@@ -17,13 +17,16 @@ var filesService *FileService = &FileService{
 
 func TestFileList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got := filesService.Files(cfg)
+	got,err := filesService.Files(cfg)
+	if err != nil {
+		Log.Error(err)
+	}
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits > 1 but was %d", got.TotalHits))
 	}
 	id := got.Files[0].Id
 
-	file := filesService.FileById(id)
+	file, _ := filesService.FileById(id)
 	fmt.Println(file.Id)
 }
 func nameFromPath(path string) string {

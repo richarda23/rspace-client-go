@@ -22,24 +22,30 @@ func filesUrl() string {
 }
 
 // Paginated listing of Files
-func (fs *FileService) Files(config RecordListingConfig) *FileList {
+func (fs *FileService) Files(config RecordListingConfig) (*FileList, error) {
 	time.Sleep(fs.Delay)
 	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
-	docJson := DoGet(url)
+	docJson, err  := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	var result = FileList{}
 	json.Unmarshal([]byte(docJson), &result)
-	return &result
+	return &result, nil
 }
 
 // FileById retrieves file information for a single File
-func (fs *FileService) FileById(fileId int) *FileInfo {
+func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", filesUrl(), fileId)
-	docJson := DoGet(url)
+	docJson, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	var result = FileInfo{}
 	json.Unmarshal([]byte(docJson), &result)
 	fmt.Println(docJson)
-	return &result
+	return &result, nil
 }
 
 // UploadFile uploads the file specified to the 'ApiInbox' subfolder of the

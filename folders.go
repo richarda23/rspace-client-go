@@ -19,7 +19,7 @@ func foldersUrl () string {
 }
 
 // FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
-func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) *FolderList {
+func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
 	time.Sleep(fs.Delay)
 	url := foldersUrl() + "/tree"
 	if folderId != 0 {
@@ -29,20 +29,26 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 	if len(typesToInclude) > 0 {
 		url = url + "&typesToInclude=" + strings.Join(typesToInclude, ",")
 	}
-	docJson := DoGet(url)
+	docJson, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	var result = FolderList{}
 	json.Unmarshal([]byte(docJson), &result)
-	return &result
+	return &result, nil
 }
 
 //DocumentById retrieves full information about the folder
-func (fs *FolderService) FolderById(folderId int) *Folder {
+func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
-	docJson := DoGet(url)
+	docJson, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	var result = Folder{}
 	json.Unmarshal([]byte(docJson), &result)
-	return &result
+	return &result, err
 }
 // FolderNew creates a new folder or notebook with  the given name.
 // If a parentFolderId is specified then the folder is created in that folder

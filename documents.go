@@ -17,33 +17,42 @@ func documentsUrl() string {
     return getenv(BASE_URL_ENV_NAME) + "/documents"
 }
 //GetStatus returns the result of the /status endpoint
-func (ds *DocumentService) GetStatus() *Status {
+func (ds *DocumentService) GetStatus() (*Status, error) {
 	time.Sleep(ds.Delay )
-	statusStr := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	statusStr, err := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	if err != nil {
+		return nil, err
+	}
 	res := Status{}
 	json.Unmarshal([]byte(statusStr), &res)
-	return &res
+	return &res, nil
 }
 
 // Paginated listing of Documents
-func (ds *DocumentService) Documents(config RecordListingConfig) *DocumentList {
+func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList, error) {
 	time.Sleep(ds.Delay )
 	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
-	docJson := DoGet(url)
+	docJson, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	var result = DocumentList{}
 	json.Unmarshal([]byte(docJson), &result)
-	return &result
+	return &result, nil
 }
 
 //DocumentById retrieves full document content
-func (ds *DocumentService) DocumentById(docId int) *Document {
+func (ds *DocumentService) DocumentById(docId int) (*Document, error)  {
 	time.Sleep(ds.Delay)
 	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
-	docJson := DoGet(url)
+	docJson, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	fmt.Println(docJson)
 	var result = Document{}
 	json.Unmarshal([]byte(docJson), &result)
-	return &result
+	return &result, nil
 }
 
 //DocumentNew creates a new RSpace document

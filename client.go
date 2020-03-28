@@ -80,7 +80,7 @@ func Abbreviate(toAbbreviate string, maxLen int) string {
 
 //DoGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
-func DoGet(url string) string {
+func DoGet(url string) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	AddAuthHeader(req)
@@ -91,10 +91,12 @@ func DoGet(url string) string {
 	data, _ := ioutil.ReadAll(resp.Body)
 
 	respStr := string(data)
-	if resp.StatusCode > 400 {
-		Log.Error(resp.Status + " - " +  respStr)
+	if resp.StatusCode >= 400 {
+		rspaceError := &RSpaceError{}
+		json.Unmarshal(data, rspaceError)
+		return "", rspaceError
 	}
-	return respStr
+	return respStr, nil
 }
 
 // DoGetToFile saves the response from an HTTP GET request to the specified file.

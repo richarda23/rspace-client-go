@@ -21,7 +21,10 @@ func fail(t *testing.T, message string) {
 }
 
 func TestStatus(t *testing.T) {
-	got := ds.GetStatus()
+	got, err := ds.GetStatus()
+	if err != nil {
+		Log.Error(err)
+	}
 	Log.Info(Marshal(got))
 	if len(got.RSpaceVersion) == 0 {
 		fail(t, "RSpaceVersion must be non-empty")
@@ -30,7 +33,7 @@ func TestStatus(t *testing.T) {
 
 func TestDocumentList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got := ds.Documents(cfg)
+	got,_ := ds.Documents(cfg)
 	Log.Info(Marshal(got))
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits >= 1 but was %d", got.TotalHits))
@@ -55,7 +58,7 @@ func TestDocumentNew(t *testing.T) {
 	if got3 == nil {
 		fail(t, "Doc3 is nil")
 	}
-	fullDoc := ds.DocumentById(got3.Id)
+	fullDoc,_ := ds.DocumentById(got3.Id)
 	Log.Info(Marshal(fullDoc.Fields))
 
 }

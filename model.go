@@ -2,12 +2,13 @@ package rspace
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Status stores response from /status endpoint
 type Status struct {
-	Message       string `json: "message"`
-	RSpaceVersion string `json: "rspaceVersion"`
+	Message       string `json:"message"`
+	RSpaceVersion string `json:"rspaceVersion"`
 }
 
 // configures pagination and verbosity for listings
@@ -160,3 +161,33 @@ type Link struct {
 	Link string
 	Rel  string
 }
+
+//RSpaceError encapsulates server or client side errors leading to a request being rejected.
+type RSpaceError struct {
+  Status string
+  HttpCode int
+  InternalCode int
+  Message string
+  Errors []string
+  Timestamp string `json:"iso8601Timestamp"`
+}
+
+func (rsError *RSpaceError) Error() string {
+
+	if rsError.HttpCode >=400 && rsError.HttpCode < 500 {
+		return formatErrorMsg(rsError, "Client")
+	} else if rsError.HttpCode >500 {
+		return formatErrorMsg(rsError, "Server")
+	} else {
+		return formatErrorMsg(rsError, "Unknown")
+	}
+}
+
+func formatErrorMsg (rsError *RSpaceError, errType string) string {
+	concatenateErrM := strings.Join(rsError.Errors, "\n")
+	rc := fmt.Sprintf("%s error:httpCode=%d, status=%s, internalCode=%d, timestamp=%s,  message=%s\nErrors: %s",
+		errType, rsError.HttpCode, rsError.Status, rsError.InternalCode, rsError.Timestamp, rsError.Message,concatenateErrM)
+	return rc
+}
+
+
