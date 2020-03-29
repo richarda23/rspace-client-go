@@ -172,8 +172,8 @@ type RSpaceError struct {
   Timestamp string `json:"iso8601Timestamp"`
 }
 
-func (rsError *RSpaceError) Error() string {
-
+// Stringer implementation
+func (rsError *RSpaceError) String() string {
 	if rsError.HttpCode >=400 && rsError.HttpCode < 500 {
 		return formatErrorMsg(rsError, "Client")
 	} else if rsError.HttpCode >500 {
@@ -181,6 +181,10 @@ func (rsError *RSpaceError) Error() string {
 	} else {
 		return formatErrorMsg(rsError, "Unknown")
 	}
+}
+
+func (rsError *RSpaceError) Error() string {
+	return rsError.String()
 }
 
 func formatErrorMsg (rsError *RSpaceError, errType string) string {

@@ -5,10 +5,10 @@ import (
 // Boolean combinator - AND or OR
 type SearchOperator int
 const (
-	AND SearchOperator = iota
-	OR
+	and SearchOperator = iota
+	or
 )
-var searchStrings =[2]string{"AND", "OR"}
+var searchStrings =[2]string{"and", "or"}
 
 //Stringer implementation
 func (op SearchOperator) String () string {
@@ -68,7 +68,7 @@ func (qb *SearchQueryBuilder) addTerm (term string, queryType QueryType) *Search
 	qb.Terms = append(qb.Terms, sterm)
 	return qb
 }
-
+//build generates a SearchQuery object and returns its pointer 
 func (qb *SearchQueryBuilder) build ()  *SearchQuery {
 	rc := SearchQuery{}
 	rc.Operator = qb.Operator.String()
@@ -81,13 +81,13 @@ func (qb *SearchQueryBuilder) build ()  *SearchQuery {
 }
 
 type SearchQuery struct {
-	Operator  string
-	Terms [] STerm 
+	Operator  string `json:"operator"`
+	Terms [] STerm  `json:"terms"`
 }
 
 type STerm struct {
-	Term string
-	QueryType string
+	Term string `json:"query"`
+	QueryType string `json:"queryType"`
 }
 func (q *SearchQuery) String () string {
 	var b strings.Builder

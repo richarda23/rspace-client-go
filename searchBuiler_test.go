@@ -4,28 +4,12 @@ import (
 	"fmt"
 	"testing"
 	"encoding/json"
-	"strings"
 )
 
-func assertIntEquals(t *testing.T, expected int, actual int, message string) {
-	var b strings.Builder
-	var isFail bool = false
-	if actual != expected {
-		isFail = true
-		b.WriteString(fmt.Sprintf("Expected [%d] but was [%d]", expected, actual))
-	}
-	if len(message) > 0 {
-		b.WriteString("\n" +message)
-	}
-	if isFail {
-		fail(t, b.String())
-	}
-}
 
 func TestSearchBuilder(t *testing.T) {
 	builder := &SearchQueryBuilder{}
-	builder.operator(OR).addTerm("tag1", TAG).addTerm("formName", FORM)
-	fmt.Println(builder)
+	builder.operator(or).addTerm("tag1", TAG).addTerm("formName", FORM)
 	query := builder.build()
 	fmt.Println("query is " + query.String())
 	assertIntEquals(t, 2, len(query.Terms),"")

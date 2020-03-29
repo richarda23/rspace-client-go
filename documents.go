@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -16,7 +17,8 @@ type DocumentService struct {
 func documentsUrl() string {
     return getenv(BASE_URL_ENV_NAME) + "/documents"
 }
-//GetStatus returns the result of the /status endpoint
+
+// GetStatus returns the result of the /status endpoint
 func (ds *DocumentService) GetStatus() (*Status, error) {
 	time.Sleep(ds.Delay )
 	statusStr, err := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
@@ -31,7 +33,11 @@ func (ds *DocumentService) GetStatus() (*Status, error) {
 // Paginated listing of Documents
 func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList, error) {
 	time.Sleep(ds.Delay )
-	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	url := ds._generateUrl(config)
+	return ds._doDocList(url)
+}
+
+func (ds *DocumentService) _doDocList (url string) (*DocumentList, error) {
 	docJson, err := DoGet(url)
 	if err != nil {
 		return nil, err
@@ -40,8 +46,37 @@ func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList,
 	json.Unmarshal([]byte(docJson), &result)
 	return &result, nil
 }
+func (ds *DocumentService) _generateUrl (config RecordListingConfig) string  {
+	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	return url
+}
+//SearchDocuments performs basic search of a single search term, performing a global search
+func (ds *DocumentService) SearchDocuments(config RecordListingConfig, searchTerm string) (*DocumentList, error) {
+	time.Sleep(ds.Delay )
+	url := ds._generateUrl(config)
+	if len(searchTerm) > 0 {
+		url = url + "&query="+searchTerm
+	}
+	return ds._doDocList(url)
+}
 
-//DocumentById retrieves full document content
+func (ds *DocumentService) AdvancedSearchDocuments(config RecordListingConfig, searchQuery *SearchQuery) (*DocumentList, error) {
+	time.Sleep(ds.Delay )
+	urlStr := ds._generateUrl(config)
+
+	if searchQuery!=nil {
+		queryJson,_ := json.Marshal(searchQuery)
+		params := url.Values{}
+		params.Add("advancedQuery", string(queryJson))
+	fmt.Println(params.Encode())
+	//	escaped := url.PathEscape(string(queryJson))
+		encoded:= params.Encode()
+	urlStr = urlStr + "&"+encoded
+	}
+	Log.Info(urlStr)
+	return ds._doDocList(urlStr)
+}
+// DocumentById retrieves full document content
 func (ds *DocumentService) DocumentById(docId int) (*Document, error)  {
 	time.Sleep(ds.Delay)
 	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
@@ -49,13 +84,12 @@ func (ds *DocumentService) DocumentById(docId int) (*Document, error)  {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(docJson)
 	var result = Document{}
 	json.Unmarshal([]byte(docJson), &result)
 	return &result, nil
 }
 
-//DocumentNew creates a new RSpace document
+// DocumentNew creates a new RSpace document
 func (ds *DocumentService) DocumentNew(post *DocumentPost) *DocumentInfo {
 	time.Sleep(ds.Delay)
 	formData, _ := json.Marshal(post)

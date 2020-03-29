@@ -40,6 +40,36 @@ func TestDocumentList(t *testing.T) {
 	}
 }
 
+func TestDocumentBasicSearch (t *testing.T) {
+	name := randomAlphanumeric(6)
+	tag := randomAlphanumeric(6)
+	cfg := NewRecordListingConfig()
+	created := ds.NewEmptyBasicDocument(name, tag)
+	results,_ := ds.SearchDocuments(cfg, name)
+	assertIntEquals(t, 1, results.TotalHits, "")
+	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
+}
+func TestDocumentAdvancedSearch (t *testing.T) {
+	// given
+	name := randomAlphanumeric(6)
+	tag := randomAlphanumeric(6)
+	created := ds.NewEmptyBasicDocument(name, tag)
+	builder := &SearchQueryBuilder{}
+	builder.operator(and).addTerm(name, NAME).addTerm(tag, TAG)
+	query := builder.build()
+	cfg := NewRecordListingConfig()
+	//when
+	results,err := ds.AdvancedSearchDocuments(cfg, query)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//then
+	assertIntEquals(t, 1, results.TotalHits, "")
+	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
+
+}
+
+
 func TestDocumentNew(t *testing.T) {
 	//post := DocumentPostNewBasicDocument("go12", "t1,t2,t3")
 	var got = ds.NewEmptyBasicDocument("go12", "tag1,tag2")
