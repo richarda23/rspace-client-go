@@ -24,13 +24,50 @@ func randomAlphanumeric (length int) string {
 	return stringWithCharset(length, alphanumeric)
 }
 
+type Testable interface {
+	IsEqual() bool
+	String() string
+}
+type IntTestResult struct {
+ Expected int
+ Actual int
+}
+
+func (r IntTestResult) String () string {
+	return fmt.Sprintf("Expected [%d] but was [%d]", r.Expected, r.Actual)
+}
+func (r IntTestResult) IsEqual () bool {
+	return r.Expected==r.Actual
+}
+
+
+type StringTestResult struct {
+ Expected string
+ Actual string
+}
+func (r StringTestResult) String () string {
+	return fmt.Sprintf("Expected [%s] but was [%s]", r.Expected, r.Actual)
+}
+func (r StringTestResult) IsEqual () bool {
+	return r.Expected==r.Actual
+}
+
 
 func assertIntEquals(t *testing.T, expected int, actual int, message string) {
+	result := IntTestResult{expected, actual}
+	_assertEquals(t, result, message)
+}
+func assertStringEquals(t *testing.T, expected string, actual string, message string) {
+	result := StringTestResult{expected, actual}
+	_assertEquals(t, result, message)
+}
+
+func _assertEquals(t *testing.T, testable Testable, message string) {
 	var b strings.Builder
 	var isFail bool = false
-	if actual != expected {
+	if !testable.IsEqual() {
 		isFail = true
-		b.WriteString(fmt.Sprintf("Expected [%d] but was [%d]", expected, actual))
+		b.WriteString(testable.String())
 	}
 	if len(message) > 0 {
 		b.WriteString("\n" +message)
@@ -39,5 +76,3 @@ func assertIntEquals(t *testing.T, expected int, actual int, message string) {
 		fail(t, b.String())
 	}
 }
-
-

@@ -53,19 +53,31 @@ func TestDocumentAdvancedSearch (t *testing.T) {
 	// given
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
+	tag2 := randomAlphanumeric(6)
 	created := ds.NewEmptyBasicDocument(name, tag)
+	cfg := NewRecordListingConfig()
+
 	builder := &SearchQueryBuilder{}
 	builder.operator(and).addTerm(name, NAME).addTerm(tag, TAG)
 	query := builder.build()
-	cfg := NewRecordListingConfig()
 	//when
-	results,err := ds.AdvancedSearchDocuments(cfg, query)
-	if err != nil {
-		fmt.Println(err)
-	}
+	results,_ := ds.AdvancedSearchDocuments(cfg, query)
 	//then
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
+	assertStringEquals(t, created.Name, results.Documents[0].Name,"")
+	// and doesn't match here
+	builder2 := &SearchQueryBuilder{}
+	builder2.operator(and).addTerm(name, NAME).addTerm(tag2, TAG)
+	query2 := builder2.build()
+	results2,_ := ds.AdvancedSearchDocuments(cfg, query2)
+	assertIntEquals(t, 0, results2.TotalHits, "")
+	// but or does
+	builder3 := &SearchQueryBuilder{}
+	builder3.operator(or).addTerm(name, NAME).addTerm(tag2, TAG)
+	query3 := builder3.build()
+	results3,_ := ds.AdvancedSearchDocuments(cfg, query3)
+	assertIntEquals(t, 1, results3.TotalHits, "")
 
 }
 

@@ -47,7 +47,11 @@ func (ds *DocumentService) _doDocList (url string) (*DocumentList, error) {
 	return &result, nil
 }
 func (ds *DocumentService) _generateUrl (config RecordListingConfig) string  {
-	url := documentsUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	params := url.Values{}
+	params.Add("pageSize", strconv.Itoa(config.PageSize))
+	params.Add("pageNumber", strconv.Itoa(config.PageNumber))
+	encoded:= params.Encode()
+	url := documentsUrl() + "?" + encoded
 	return url
 }
 //SearchDocuments performs basic search of a single search term, performing a global search
@@ -68,12 +72,9 @@ func (ds *DocumentService) AdvancedSearchDocuments(config RecordListingConfig, s
 		queryJson,_ := json.Marshal(searchQuery)
 		params := url.Values{}
 		params.Add("advancedQuery", string(queryJson))
-	fmt.Println(params.Encode())
-	//	escaped := url.PathEscape(string(queryJson))
 		encoded:= params.Encode()
 	urlStr = urlStr + "&"+encoded
 	}
-	Log.Info(urlStr)
 	return ds._doDocList(urlStr)
 }
 // DocumentById retrieves full document content
