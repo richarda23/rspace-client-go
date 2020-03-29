@@ -2,7 +2,7 @@ package rspace
 import (
 	"strings"
 )
-
+// Boolean combinator - AND or OR
 type SearchOperator int
 const (
 	AND SearchOperator = iota
@@ -15,7 +15,7 @@ func (op SearchOperator) String () string {
 	return searchStrings[op]
 }
 
-// QueryType restricts search to a particulr category
+// QueryType restricts search to a particular category
 type QueryType int 
 
 var qTypeStrings =[9]string{"global", "fullText", "tag", "name", "created", "lastModified", "form", "attachment", "owner"}
@@ -34,11 +34,13 @@ const (
 func (op QueryType) String () string {
 	return qTypeStrings[op]
 }
-
+//SearchTerm is used by SearchQueryBuilder to construct a valid search query
 type SearchTerm struct {
 	QueryType QueryType
 	Term	string
 }
+
+//Stringer implementation for SearchTerm
 func (op SearchTerm) String () string {
 	return"term=" + op.Term +", queryType=" + op.QueryType.String() 
 }
@@ -47,10 +49,17 @@ type SearchQueryBuilder struct {
 	Operator  SearchOperator
 	Terms []SearchTerm
 }
+
+//operator sets the boolean type of the search query
 func (qb *SearchQueryBuilder) operator (op SearchOperator) *SearchQueryBuilder {
 	qb.Operator = op
 	return qb
 }
+
+func (qb *SearchQueryBuilder) addGlobalTerm (term string) *SearchQueryBuilder {
+	return qb.addTerm(term, GLOBAL)
+}
+//addTerm appends a search term in the given category
 func (qb *SearchQueryBuilder) addTerm (term string, queryType QueryType) *SearchQueryBuilder {
 	sterm := SearchTerm{queryType, term}
 	if qb.Terms == nil {
