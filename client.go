@@ -71,7 +71,7 @@ func PrintDocs() {
 
 // Abbreviate truncates a string to maximum length `maxLen`, including
 // 3 ellipsis characters.
-func Abbreviate(toAbbreviate string, maxLen int) string {
+func abbreviate(toAbbreviate string, maxLen int) string {
 	if len(toAbbreviate) > maxLen {
 		toAbbreviate = toAbbreviate[0:(maxLen-4)] + "..."
 	}

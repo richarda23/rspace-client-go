@@ -213,8 +213,8 @@ type UserPost struct {
 	LastName    string `json:"lastName"`
 	Password    string `json:"password"`
 	Role        string `json:"role"`
-	Affiliation string `json:"affiliation"`
-	ApiKey      string `json:"apiKey"`
+	Affiliation string `json:"affiliation,omitempty"`
+	ApiKey      string `json:"apiKey,omitempty"`
 }
 
 func (upost *UserPost) String() string {
