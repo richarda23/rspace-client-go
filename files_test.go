@@ -11,13 +11,14 @@ const (
 	TESTFILEUPLOAD = "testdata/ServerSetupCentOS.md"
 	TESTFILEUPDATE = "testdata/RSpaceConfiguration.md"
 )
+
 var filesService *FileService = &FileService{
-	BaseService:BaseService{
-		Delay:time.Duration(100) * time.Millisecond}}
+	BaseService: BaseService{
+		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestFileList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got,err := filesService.Files(cfg)
+	got, err := filesService.Files(cfg)
 	if err != nil {
 		Log.Error(err)
 	}

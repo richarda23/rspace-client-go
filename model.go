@@ -95,10 +95,10 @@ type Folder struct {
 
 type FolderTreeItem struct {
 	*IndentifiableNamable
-	Created        string
-	LastModified   string
-	IsNotebook     bool `json :"notebook"`
-	Type string
+	Created      string
+	LastModified string
+	IsNotebook   bool `json :"notebook"`
+	Type         string
 }
 type FolderList struct {
 	Records    []FolderTreeItem
@@ -164,19 +164,18 @@ type Link struct {
 
 //RSpaceError encapsulates server or client side errors leading to a request being rejected.
 type RSpaceError struct {
-  Status string
-  HttpCode int
-  InternalCode int
-  Message string
-  Errors []string
-  Timestamp string `json:"iso8601Timestamp"`
+	Status       string
+	HttpCode     int
+	InternalCode int
+	Message      string
+	Errors       []string
+	Timestamp    string `json:"iso8601Timestamp"`
 }
 
-// Stringer implementation
 func (rsError *RSpaceError) String() string {
-	if rsError.HttpCode >=400 && rsError.HttpCode < 500 {
+	if rsError.HttpCode >= 400 && rsError.HttpCode < 500 {
 		return formatErrorMsg(rsError, "Client")
-	} else if rsError.HttpCode >500 {
+	} else if rsError.HttpCode > 500 {
 		return formatErrorMsg(rsError, "Server")
 	} else {
 		return formatErrorMsg(rsError, "Unknown")
@@ -187,11 +186,101 @@ func (rsError *RSpaceError) Error() string {
 	return rsError.String()
 }
 
-func formatErrorMsg (rsError *RSpaceError, errType string) string {
+func formatErrorMsg(rsError *RSpaceError, errType string) string {
 	concatenateErrM := strings.Join(rsError.Errors, "\n")
 	rc := fmt.Sprintf("%s error:httpCode=%d, status=%s, internalCode=%d, timestamp=%s,  message=%s\nErrors: %s",
-		errType, rsError.HttpCode, rsError.Status, rsError.InternalCode, rsError.Timestamp, rsError.Message,concatenateErrM)
+		errType, rsError.HttpCode, rsError.Status, rsError.InternalCode, rsError.Timestamp, rsError.Message, concatenateErrM)
 	return rc
 }
 
+type Email string
+type UserRoleType int
 
+const (
+	user UserRoleType = iota
+	pi
+	admin
+	sysadmin
+)
+
+var userRoles = [4]string{"ROLE_USER", "ROLE_PI", "ROLE_ADMIN", "ROLE_SYSADMIN"}
+
+//
+type UserPost struct {
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Password    string `json:"password"`
+	Role        string `json:"role"`
+	Affiliation string `json:"affiliation"`
+	ApiKey      string `json:"apiKey"`
+}
+
+func (upost *UserPost) String() string {
+	pwordToPrint:="not set..."
+	if len(upost.Password) > 0 {
+		pwordToPrint="..."
+	}
+	return fmt.Sprintf("username=%s,email=%s,firstName=%s,lastName=%s,password=%s,role=%s,affiliation=%s,apiKey=%s",
+	 upost.Username, upost.Email,upost.FirstName, upost.LastName, pwordToPrint, upost.Role, upost.Affiliation, upost.ApiKey)
+}
+// Use this to build a UserPost object to create a new user from.
+type UserPostBuilder struct {
+	Username    string
+	Email       Email
+	FirstName   string
+	LastName    string
+	Password    string
+	Role        UserRoleType
+	Affiliation string
+	ApiKey      string
+}
+
+func (b *UserPostBuilder) username(username string) *UserPostBuilder {
+	b.Username = username
+	return b
+}
+func (b *UserPostBuilder) password(password string) *UserPostBuilder {
+	b.Password = password
+	return b
+}
+func (b *UserPostBuilder) email(emailAddress Email) *UserPostBuilder {
+	b.Email = emailAddress
+	return b
+}
+func (b *UserPostBuilder) firstName(firstName string) *UserPostBuilder {
+	b.FirstName = firstName
+	return b
+}
+func (b *UserPostBuilder) lastName(lastName string) *UserPostBuilder {
+	b.LastName = lastName
+	return b
+}
+func (b *UserPostBuilder) role(role UserRoleType) *UserPostBuilder {
+	b.Role = role
+	return b
+}
+func (b *UserPostBuilder) affiliation(affiliation string) *UserPostBuilder {
+	b.Affiliation = affiliation
+	return b
+}
+func (b *UserPostBuilder) apiKey(apiKey string) *UserPostBuilder {
+	b.ApiKey = apiKey
+	return b
+}
+func (b *UserPostBuilder) build() *UserPost{
+	rc := UserPost{}
+	if(len(b.Username) == 0){
+		return nil
+	}
+	rc.Username=b.Username
+	rc.Password=b.Password
+	rc.FirstName=b.FirstName
+	rc.LastName=b.LastName
+	rc.Email=string(b.Email)
+	rc.Role=userRoles[b.Role]
+	rc.Affiliation=b.Affiliation
+	rc.ApiKey=b.ApiKey
+	return &rc
+}

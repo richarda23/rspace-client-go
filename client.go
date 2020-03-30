@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	APIKEY_ENV_NAME        = "RSPACE_API_KEY"
-	BASE_URL_ENV_NAME      = "RSPACE_URL"
+	APIKEY_ENV_NAME   = "RSPACE_API_KEY"
+	BASE_URL_ENV_NAME = "RSPACE_URL"
 )
 
 type BaseService struct {
- Delay time.Duration
+	Delay time.Duration
 }
 
 func getenv(envname string) string {
@@ -40,8 +40,8 @@ func Unmarshal(resp *http.Response, result interface{}) {
 	}
 }
 
-func Marshal (anything interface{}) string {
-	bytes, _  := json.Marshal(anything)
+func Marshal(anything interface{}) string {
+	bytes, _ := json.Marshal(anything)
 	return string(bytes)
 }
 
@@ -86,7 +86,7 @@ func DoGet(url string) (string, error) {
 	AddAuthHeader(req)
 	resp, e := client.Do(req)
 	if e != nil {
-          Log.Error(e)
+		Log.Error(e)
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
 

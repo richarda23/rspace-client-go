@@ -2,14 +2,15 @@ package rspace
 
 import (
 	"fmt"
+	"github.com/op/go-logging"
+	"os"
 	"testing"
 	"time"
-	"os"
-	"github.com/op/go-logging"
 )
+
 var ds *DocumentService = &DocumentService{
-	BaseService:BaseService{
-		Delay:time.Duration(100) * time.Millisecond}}
+	BaseService: BaseService{
+		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestMain(m *testing.M) {
 	initLogging(logging.INFO)
@@ -33,23 +34,23 @@ func TestStatus(t *testing.T) {
 
 func TestDocumentList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got,_ := ds.Documents(cfg)
+	got, _ := ds.Documents(cfg)
 	Log.Info(Marshal(got))
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits >= 1 but was %d", got.TotalHits))
 	}
 }
 
-func TestDocumentBasicSearch (t *testing.T) {
+func TestDocumentBasicSearch(t *testing.T) {
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
 	cfg := NewRecordListingConfig()
 	created := ds.NewEmptyBasicDocument(name, tag)
-	results,_ := ds.SearchDocuments(cfg, name)
+	results, _ := ds.SearchDocuments(cfg, name)
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
 }
-func TestDocumentAdvancedSearch (t *testing.T) {
+func TestDocumentAdvancedSearch(t *testing.T) {
 	// given
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
@@ -61,26 +62,25 @@ func TestDocumentAdvancedSearch (t *testing.T) {
 	builder.operator(and).addTerm(name, NAME).addTerm(tag, TAG)
 	query := builder.build()
 	//when
-	results,_ := ds.AdvancedSearchDocuments(cfg, query)
+	results, _ := ds.AdvancedSearchDocuments(cfg, query)
 	//then
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
-	assertStringEquals(t, created.Name, results.Documents[0].Name,"")
+	assertStringEquals(t, created.Name, results.Documents[0].Name, "")
 	// and doesn't match here
 	builder2 := &SearchQueryBuilder{}
 	builder2.operator(and).addTerm(name, NAME).addTerm(tag2, TAG)
 	query2 := builder2.build()
-	results2,_ := ds.AdvancedSearchDocuments(cfg, query2)
+	results2, _ := ds.AdvancedSearchDocuments(cfg, query2)
 	assertIntEquals(t, 0, results2.TotalHits, "")
 	// but or does
 	builder3 := &SearchQueryBuilder{}
 	builder3.operator(or).addTerm(name, NAME).addTerm(tag2, TAG)
 	query3 := builder3.build()
-	results3,_ := ds.AdvancedSearchDocuments(cfg, query3)
+	results3, _ := ds.AdvancedSearchDocuments(cfg, query3)
 	assertIntEquals(t, 1, results3.TotalHits, "")
 
 }
-
 
 func TestDocumentNew(t *testing.T) {
 	//post := DocumentPostNewBasicDocument("go12", "t1,t2,t3")
@@ -100,7 +100,7 @@ func TestDocumentNew(t *testing.T) {
 	if got3 == nil {
 		fail(t, "Doc3 is nil")
 	}
-	fullDoc,_ := ds.DocumentById(got3.Id)
+	fullDoc, _ := ds.DocumentById(got3.Id)
 	Log.Info(Marshal(fullDoc.Fields))
 
 }

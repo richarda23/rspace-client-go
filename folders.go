@@ -14,8 +14,8 @@ type FolderService struct {
 	BaseService
 }
 
-func foldersUrl () string {
-	return getenv (BASE_URL_ENV_NAME) + "/folders"
+func foldersUrl() string {
+	return getenv(BASE_URL_ENV_NAME) + "/folders"
 }
 
 // FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
@@ -23,9 +23,9 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 	time.Sleep(fs.Delay)
 	url := foldersUrl() + "/tree"
 	if folderId != 0 {
-		url = url +"/" + strconv.Itoa(folderId)
+		url = url + "/" + strconv.Itoa(folderId)
 	}
-	url = url  + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	url = url + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
 	if len(typesToInclude) > 0 {
 		url = url + "&typesToInclude=" + strings.Join(typesToInclude, ",")
 	}
@@ -50,6 +50,7 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	json.Unmarshal([]byte(docJson), &result)
 	return &result, err
 }
+
 // FolderNew creates a new folder or notebook with  the given name.
 // If a parentFolderId is specified then the folder is created in that folder
 func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {

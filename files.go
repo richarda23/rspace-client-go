@@ -12,20 +12,20 @@ import (
 	"strconv"
 	"time"
 )
+
 type FileService struct {
 	BaseService
 }
 
-
 func filesUrl() string {
-	return getenv (BASE_URL_ENV_NAME) + "/files"
+	return getenv(BASE_URL_ENV_NAME) + "/files"
 }
 
 // Paginated listing of Files
 func (fs *FileService) Files(config RecordListingConfig) (*FileList, error) {
 	time.Sleep(fs.Delay)
 	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
-	docJson, err  := DoGet(url)
+	docJson, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 // appropriate Gallery section
 // Panics if file cannot be read.
 // Returns either a FileInfo of the created file or an error if operation did not succeed.
-func(fs *FileService) UploadFile(path string) (*FileInfo, error) {
+func (fs *FileService) UploadFile(path string) (*FileInfo, error) {
 	time.Sleep(fs.Delay)
 	return _doUpload(path, 0)
 }

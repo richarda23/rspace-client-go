@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 )
+
 var folderService *FolderService = &FolderService{
-	BaseService:BaseService{
-		Delay:time.Duration(100) * time.Millisecond}}
+	BaseService: BaseService{
+		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestNewFolderGetFolder(t *testing.T) {
 	post := FolderPost{}
@@ -22,7 +23,7 @@ func TestNewFolderGetFolder(t *testing.T) {
 	if got.Name != "f1" {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", "f1", got.Name))
 	}
-	folder,e := folderService.FolderById(got.Id)
+	folder, e := folderService.FolderById(got.Id)
 	if e != nil {
 		Log.Error(e)
 	}
@@ -37,25 +38,25 @@ func TestNewFolderGetFolder(t *testing.T) {
 func TestListFolderTree(t *testing.T) {
 	cfg := NewRecordListingConfig()
 	types := make([]string, 1)
-	types[0]="notebook"
+	types[0] = "notebook"
 	// to do fix 'types' usage
-	result,e := folderService.FolderTree(cfg, 0, types)
+	result, e := folderService.FolderTree(cfg, 0, types)
 	if e != nil {
 		Log.Error(e)
 	}
 	for _, v := range result.Records {
 		if v.Type != "NOTEBOOK" {
-			fail (t, fmt.Sprintf("Folder listing should be notebooks only"))
+			fail(t, fmt.Sprintf("Folder listing should be notebooks only"))
 		}
 	}
 }
-func TestErrorHandling (t *testing.T) {
-	folder,e := folderService.FolderById(-233)
+func TestErrorHandling(t *testing.T) {
+	folder, e := folderService.FolderById(-233)
 	if folder != nil {
-			fail (t, fmt.Sprintf("Should have invoked an error"))
+		fail(t, fmt.Sprintf("Should have invoked an error"))
 	}
 	if e == nil {
-			fail (t, fmt.Sprintf("Error object should not be nil"))
+		fail(t, fmt.Sprintf("Error object should not be nil"))
 	}
 	Log.Info(e)
 }
