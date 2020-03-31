@@ -20,7 +20,7 @@ func TestUserNew(t *testing.T) {
 	firstName := "Bob"
 	lastName := "Smith"
 	userBuilder := UserPostBuilder{}
-	userPost := userBuilder.affiliation("somwhere").username(uname).password(pwd).email(email).firstName(firstName).lastName(lastName).role(pi).build()
+	userPost,_ := userBuilder.username(uname).password(pwd).email(email).firstName(firstName).lastName(lastName).role(pi).build()
 	Log.Info(userPost)
 	var got = sysads.UserNew(userPost)
 	if got.Id == 0 {

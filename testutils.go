@@ -62,6 +62,19 @@ func assertStringEquals(t *testing.T, expected string, actual string, message st
 	_assertEquals(t, result, message)
 }
 
+func assertNotNil (t *testing.T, toTest interface{}, message string) {
+	if toTest == nil {
+		fail(t, message)
+	}
+}
+
+func assertNil (t *testing.T, toTest interface{}, message string) {
+	if toTest != nil {
+		fail(t, message)
+	}
+}
+
+
 func _assertEquals(t *testing.T, testable Testable, message string) {
 	var b strings.Builder
 	var isFail bool = false

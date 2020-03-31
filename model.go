@@ -3,6 +3,7 @@ package rspace
 import (
 	"fmt"
 	"strings"
+	"errors"
 )
 
 // Status stores response from /status endpoint
@@ -269,18 +270,79 @@ func (b *UserPostBuilder) apiKey(apiKey string) *UserPostBuilder {
 	b.ApiKey = apiKey
 	return b
 }
-func (b *UserPostBuilder) build() *UserPost{
+func (b *UserPostBuilder) build() (*UserPost, error){
 	rc := UserPost{}
-	if(len(b.Username) == 0){
-		return nil
+	if len (b.Username) < 6 {
+		return nil, errors.New("username must be >= 6 characters")
+	}	
+	if len (b.Password) < 6 {
+		return nil, errors.New("Password must be >= 8 characters")
+	}	
+	if len (b.FirstName) ==0  {
+		return nil, errors.New("Please supply first name")
+	}	
+	if len (b.LastName) ==0  {
+		return nil, errors.New("Please supply last name")
 	}
-	rc.Username=b.Username
-	rc.Password=b.Password
+	if len (string(b.Email)) < 3   {
+		return nil, errors.New("Please supply valid email address")
+	}
 	rc.FirstName=b.FirstName
+	rc.Password=b.Password
+	rc.Username=b.Username
 	rc.LastName=b.LastName
 	rc.Email=string(b.Email)
 	rc.Role=userRoles[b.Role]
 	rc.Affiliation=b.Affiliation
 	rc.ApiKey=b.ApiKey
-	return &rc
+	return &rc, nil
+}
+// GroupPost is serialized to JSON. Client code  should use GroupPostNew to create this object.
+type GroupPost struct {
+	Name string `json:"name"`
+	Members []UserGroupPost `json:"members"`
+}
+
+//GroupPostNew performs validated construction of a GroupPost object
+func GroupPostNew (name string, userGroups []UserGroupPost) (*GroupPost, error) {
+	rc := GroupPost {}
+	if len (name) == 0  {
+		return nil, errors.New("Please supply a name for the group")
+	}
+	rc.Name = name
+	if len (userGroups) == 0 {
+		return nil, errors.New("Please supply at least 1 group member")
+	}
+	var piExists bool
+	for _, upost := range userGroups {
+		if  find(userInGroupRoles, upost.RoleInGroup) < 0 {
+			return nil, errors.New("Please supply a valid group role for this user")
+		}
+		if upost.RoleInGroup == "PI" {
+			piExists = true
+		}
+	}
+	if !piExists {
+		return nil, errors.New("There must be exactly 1 PI in the group")
+	}
+
+	rc.Members = userGroups
+	return &rc, nil
+}
+
+var userInGroupRoles = []string {"DEFAULT", "RS_LAB_ADMIN", "PI"}
+
+//UserGroup post defines a single user's membership role within a group.
+type UserGroupPost struct {
+	Username string `json:"username"`
+	RoleInGroup string `json:"roleInGroup"`
+}
+
+func find(slice []string, val string) int {
+    for i, item := range slice {
+        if item == val {
+            return i
+        }
+    }
+    return -1
 }
