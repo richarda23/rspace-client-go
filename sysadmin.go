@@ -1,10 +1,8 @@
 package rspace
 
 import (
-	"bytes"
 	"encoding/json"
 	"time"
-	"net/http"
 )
 
 type SysadminService struct {
@@ -16,24 +14,25 @@ func systemUrl() string {
 }
 
 // DocumentNew creates a new RSpace document
-func (ds *SysadminService) UserNew(post *UserPost) *UserInfo {
+func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 	time.Sleep(ds.Delay)
-	formData, _ := json.Marshal(post)
-	hc := http.Client{}
-	req, err := http.NewRequest("POST",systemUrl()+"/users", bytes.NewBuffer(formData))
-	AddAuthHeader(req)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := hc.Do(req)
+	data, err := doPostJsonBody (post, systemUrl()+"/users")
 	if err != nil {
-		Log.Error(err)
+		return nil, err
 	}
 	result := &UserInfo{}
-	Unmarshal(resp, result)
-	return result
+	json.Unmarshal(data, result)
+	return result,nil
 }
 
 func (ds *SysadminService) GroupNew(post *GroupPost) (*GroupInfo, error) {
- //TODO
- return nil, nil
+	time.Sleep(ds.Delay)
+	data, err := doPostJsonBody (post, systemUrl()+"/groups")
+	if err != nil {
+		return nil, err
+	}
+	result := &GroupInfo{}
+	json.Unmarshal(data, result)
+	return result,nil
 }
 

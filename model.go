@@ -311,7 +311,7 @@ func (b *UserPostBuilder) build() (*UserPost, error){
 }
 // GroupPost is serialized to JSON. Client code  should use GroupPostNew to create this object.
 type GroupPost struct {
-	Name string `json:"name"`
+	DisplayName string `json:"displayName"`
 	Members []UserGroupPost `json:"members"`
 }
 
@@ -321,7 +321,7 @@ func GroupPostNew (name string, userGroups []UserGroupPost) (*GroupPost, error) 
 	if len (name) == 0  {
 		return nil, errors.New("Please supply a name for the group")
 	}
-	rc.Name = name
+	rc.DisplayName = name
 	if len (userGroups) == 0 {
 		return nil, errors.New("Please supply at least 1 group member")
 	}

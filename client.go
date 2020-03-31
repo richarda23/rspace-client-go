@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"bytes"
 )
 
 const (
@@ -78,6 +79,23 @@ func abbreviate(toAbbreviate string, maxLen int) string {
 	return toAbbreviate
 }
 
+func  doPostJsonBody (post interface{}, urlString string) ([]byte, error) {
+	time.Sleep(ds.Delay)
+	formData, _ := json.Marshal(post)
+	hc := http.Client{}
+	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
+	AddAuthHeader(req)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := hc.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err2:=testResponseForError(data, resp); err2 !=  nil {
+		return nil, err2
+	}
+	return data, nil
+}
 //DoGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
 func DoGet(url string) (string, error) {
@@ -89,16 +107,20 @@ func DoGet(url string) (string, error) {
 		Log.Error(e)
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
-
 	respStr := string(data)
-	if resp.StatusCode >= 400 {
-		rspaceError := &RSpaceError{}
-		json.Unmarshal(data, rspaceError)
-		return "", rspaceError
+	if err:=testResponseForError(data, resp); err !=  nil {
+		return "", err
 	}
 	return respStr, nil
 }
-
+func testResponseForError(data []byte, resp *http.Response) *RSpaceError{
+	if resp.StatusCode >= 400 {
+		rspaceError := &RSpaceError{}
+		json.Unmarshal(data, rspaceError)
+		return rspaceError
+	}
+	return nil
+}
 // DoGetToFile saves the response from an HTTP GET request to the specified file.
 // If the response fails or the file cannot be created returns an error.
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
