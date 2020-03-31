@@ -158,6 +158,18 @@ type UserInfo struct {
 	HomeFolderId int
 }
 
+type GroupInfo struct {
+	Id           int
+	Name     string
+	Type        string
+	SharedFolderId    int
+	Members [] struct{
+		Id int
+		Username string
+		Role string
+	 }
+}
+
 type Link struct {
 	Link string
 	Rel  string

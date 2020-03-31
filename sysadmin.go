@@ -32,3 +32,8 @@ func (ds *SysadminService) UserNew(post *UserPost) *UserInfo {
 	return result
 }
 
+func (ds *SysadminService) GroupNew(post *GroupPost) (*GroupInfo, error) {
+ //TODO
+ return nil, nil
+}
+
