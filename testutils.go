@@ -73,6 +73,11 @@ func assertNil (t *testing.T, toTest interface{}, message string) {
 		fail(t, message)
 	}
 }
+func assertTrue (t *testing.T, toTest bool, message string) {
+	if toTest == false {
+		fail(t, message)
+	}
+}
 
 
 func _assertEquals(t *testing.T, testable Testable, message string) {

@@ -25,6 +25,14 @@ func TestUserNew(t *testing.T) {
 	}
 	assertStringEquals(t, userPost.Username, got.Username,"")
 }
+func TestUsers(t *testing.T) {
+	// all users were created before a time in the future
+	userList :=	 sysads.Users( time.Now().AddDate(1,0,0), time.Now().AddDate(1,0,0))
+	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")
+	// no users created 10 years ago
+	userList2 :=	 sysads.Users(time.Time{}, time.Now().AddDate(-10,0,0))
+	assertIntEquals(t, 0, userList2.TotalHits,"")
+}
 
 func TestGroupNew(t *testing.T) {
 	// given a PI user

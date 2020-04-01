@@ -63,6 +63,12 @@ type DocumentList struct {
 	PageNumber int
 	Links      []Link `json: "_links"`
 }
+type UserList struct {
+	Users  []UserInfo
+	TotalHits  int
+	PageNumber int
+	Links      []Link `json: "_links"`
+}
 
 //Summary information about a Document
 type DocumentInfo struct {

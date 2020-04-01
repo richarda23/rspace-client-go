@@ -3,7 +3,11 @@ package rspace
 import (
 	"encoding/json"
 	"time"
+	"fmt"
+	"net/url"
+	"strconv"
 )
+
 
 type SysadminService struct {
 	BaseService
@@ -23,6 +27,26 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 	result := &UserInfo{}
 	json.Unmarshal(data, result)
 	return result,nil
+}
+
+func (ds *SysadminService) Users( lastLoginBefore time.Time, creationDateBefore time.Time) *UserList {
+	time.Sleep(ds.Delay)
+	params := url.Values{}
+	params.Add("tempAccountsOnly", strconv.FormatBool(false))
+	if !lastLoginBefore.IsZero(){
+		params.Add("lastLoginBefore", lastLoginBefore.Format("2006-02-01"))
+	}
+	if !creationDateBefore.IsZero()  {
+		params.Add("createdBefore", creationDateBefore.Format("2006-02-01"))
+	}
+	encoded := params.Encode()
+	url := systemUrl() + "/users?"+encoded
+	fmt.Println(url)
+	respStr,_ := DoGet(url)
+	rc := &UserList{}
+	json.Unmarshal([]byte(respStr), rc)
+	return rc
+
 }
 
 func (ds *SysadminService) GroupNew(post *GroupPost) (*GroupInfo, error) {
