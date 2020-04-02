@@ -29,7 +29,7 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 	return result,nil
 }
 
-func (ds *SysadminService) Users( lastLoginBefore time.Time, creationDateBefore time.Time) *UserList {
+func (ds *SysadminService) Users( lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList,error){
 	time.Sleep(ds.Delay)
 	params := url.Values{}
 	params.Add("tempAccountsOnly", strconv.FormatBool(false))
@@ -42,10 +42,13 @@ func (ds *SysadminService) Users( lastLoginBefore time.Time, creationDateBefore 
 	encoded := params.Encode()
 	url := systemUrl() + "/users?"+encoded
 	fmt.Println(url)
-	respStr,_ := DoGet(url)
+	data, err := DoGet(url)
+	if err != nil {
+		return nil, err
+	}
 	rc := &UserList{}
-	json.Unmarshal([]byte(respStr), rc)
-	return rc
+	json.Unmarshal(data, rc)
+	return  rc, err
 
 }
 

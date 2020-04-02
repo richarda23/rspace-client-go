@@ -25,12 +25,12 @@ func filesUrl() string {
 func (fs *FileService) Files(config RecordListingConfig) (*FileList, error) {
 	time.Sleep(fs.Delay)
 	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = FileList{}
-	json.Unmarshal([]byte(docJson), &result)
+	json.Unmarshal(data, &result)
 	return &result, nil
 }
 
@@ -38,13 +38,12 @@ func (fs *FileService) Files(config RecordListingConfig) (*FileList, error) {
 func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", filesUrl(), fileId)
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = FileInfo{}
-	json.Unmarshal([]byte(docJson), &result)
-	fmt.Println(docJson)
+	json.Unmarshal(data, &result)
 	return &result, nil
 }
 

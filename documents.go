@@ -21,12 +21,12 @@ func documentsUrl() string {
 // GetStatus returns the result of the /status endpoint
 func (ds *DocumentService) GetStatus() (*Status, error) {
 	time.Sleep(ds.Delay)
-	statusStr, err := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	status, err := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
 	if err != nil {
 		return nil, err
 	}
 	res := Status{}
-	json.Unmarshal([]byte(statusStr), &res)
+	json.Unmarshal(status, &res)
 	return &res, nil
 }
 
@@ -38,12 +38,12 @@ func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList,
 }
 
 func (ds *DocumentService) _doDocList(url string) (*DocumentList, error) {
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = DocumentList{}
-	json.Unmarshal([]byte(docJson), &result)
+	json.Unmarshal(data, &result)
 	return &result, nil
 }
 func (ds *DocumentService) _generateUrl(config RecordListingConfig) string {
@@ -83,12 +83,12 @@ func (ds *DocumentService) AdvancedSearchDocuments(config RecordListingConfig, s
 func (ds *DocumentService) DocumentById(docId int) (*Document, error) {
 	time.Sleep(ds.Delay)
 	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = Document{}
-	json.Unmarshal([]byte(docJson), &result)
+	json.Unmarshal(data, &result)
 	return &result, nil
 }
 

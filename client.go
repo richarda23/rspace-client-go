@@ -98,7 +98,7 @@ func  doPostJsonBody (post interface{}, urlString string) ([]byte, error) {
 }
 //DoGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
-func DoGet(url string) (string, error) {
+func DoGet(url string) ([]byte, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	AddAuthHeader(req)
@@ -107,11 +107,10 @@ func DoGet(url string) (string, error) {
 		Log.Error(e)
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
-	respStr := string(data)
 	if err:=testResponseForError(data, resp); err !=  nil {
-		return "", err
+		return nil, err
 	}
-	return respStr, nil
+	return data, nil
 }
 func testResponseForError(data []byte, resp *http.Response) *RSpaceError{
 	if resp.StatusCode >= 400 {

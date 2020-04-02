@@ -29,12 +29,12 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 	if len(typesToInclude) > 0 {
 		url = url + "&typesToInclude=" + strings.Join(typesToInclude, ",")
 	}
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = FolderList{}
-	json.Unmarshal([]byte(docJson), &result)
+	json.Unmarshal(data, &result)
 	return &result, nil
 }
 
@@ -42,12 +42,12 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
-	docJson, err := DoGet(url)
+	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
 	}
 	var result = Folder{}
-	json.Unmarshal([]byte(docJson), &result)
+	json.Unmarshal(data, &result)
 	return &result, err
 }
 
@@ -78,11 +78,9 @@ func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {
-		Log.Error(err)
+		return nil, err
 	}
 	result := &Folder{}
 	Unmarshal(resp, result)
-
-	fmt.Println(result)
 	return result, nil
 }
