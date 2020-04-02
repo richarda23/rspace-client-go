@@ -356,6 +356,19 @@ type UserGroupPost struct {
 	RoleInGroup string `json:"roleInGroup"`
 }
 
+type ActivityList struct {
+	Activities []Activity
+	_links [] Link `json:"links"`
+	TotalHits int
+	PageNumber int
+
+}
+type Activity struct {
+ Username, FullName, Domain, Action string
+ Timestamp string
+ Payload interface{}
+}
+
 func find(slice []string, val string) int {
     for i, item := range slice {
         if item == val {
