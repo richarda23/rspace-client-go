@@ -17,9 +17,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func fail(t *testing.T, message string) {
-	t.Errorf(message)
-}
 
 func TestStatus(t *testing.T) {
 	got, err := ds.GetStatus()

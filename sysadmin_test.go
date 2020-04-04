@@ -12,26 +12,25 @@ var sysads *SysadminService = &SysadminService{
 	BaseService: BaseService{
 		Delay: time.Duration(100) * time.Millisecond}}
 
-
 func TestUserNew(t *testing.T) {
 	// given
 	userPost := createRandomUser(pi)
-	got,err := sysads.UserNew(userPost)
-	if (err != nil) {
+	got, err := sysads.UserNew(userPost)
+	if err != nil {
 		Log.Error(err)
 	}
 	if got.Id == 0 {
 		fail(t, "Id was nil but should be set")
 	}
-	assertStringEquals(t, userPost.Username, got.Username,"")
+	assertStringEquals(t, userPost.Username, got.Username, "")
 }
 func TestUsers(t *testing.T) {
 	// all users were created before a time in the future
-	userList , _ :=  sysads.Users( time.Now().AddDate(1,0,0), time.Now().AddDate(1,0,0))
+	userList, _ := sysads.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
 	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")
 	// no users created 10 years ago
-	userList2 ,_ :=	 sysads.Users(time.Time{}, time.Now().AddDate(-10,0,0))
-	assertIntEquals(t, 0, userList2.TotalHits,"")
+	userList2, _ := sysads.Users(time.Time{}, time.Now().AddDate(-10, 0, 0))
+	assertIntEquals(t, 0, userList2.TotalHits, "")
 }
 
 func TestGroupNew(t *testing.T) {
@@ -44,12 +43,12 @@ func TestGroupNew(t *testing.T) {
 		Log.Error(err)
 	}
 	//create a group
-	var userGroupPosts []UserGroupPost = make ([]UserGroupPost,0,5)
+	var userGroupPosts []UserGroupPost = make([]UserGroupPost, 0, 5)
 	userGroupPosts = append(userGroupPosts, UserGroupPost{user.Username, "PI"})
-	groupPost,err := GroupPostNew("groupname", userGroupPosts)
-	var group *GroupInfo;
-	group,err = sysads.GroupNew(groupPost)
-	if (err != nil) {
+	groupPost, err := GroupPostNew("groupname", userGroupPosts)
+	var group *GroupInfo
+	group, err = sysads.GroupNew(groupPost)
+	if err != nil {
 		Log.Error(err)
 	}
 	assertNil(t, err, "")
@@ -65,7 +64,6 @@ func createRandomUser(userRole UserRoleType) *UserPost {
 	firstName := randomAlphanumeric(3)
 	lastName := randomAlphanumeric(8)
 	userBuilder := UserPostBuilder{}
-	userPost,_ := userBuilder.affiliation("somewhere").username(uname).password(pwd).email(email).firstName(firstName).lastName(lastName).role(userRole).build()
+	userPost, _ := userBuilder.affiliation("somewhere").username(uname).password(pwd).email(email).firstName(firstName).lastName(lastName).role(userRole).build()
 	return userPost
 }
-

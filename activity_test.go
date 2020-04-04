@@ -11,7 +11,7 @@ var activityService *ActivityService = &ActivityService{
 		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestActivityGet(t *testing.T) {
-	data,err:= activityService.Activities()
+	data, err := activityService.Activities()
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -27,4 +27,3 @@ func (fs *ActivityService) Activities() (*ActivityList, error) {
 	json.Unmarshal(data, &result)
 	return &result, nil
 }
-

@@ -1,9 +1,11 @@
 package rspace
 
 import (
-	"fmt"
-	"strings"
 	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+	"time"
 )
 
 // Status stores response from /status endpoint
@@ -64,7 +66,7 @@ type DocumentList struct {
 	Links      []Link `json: "_links"`
 }
 type UserList struct {
-	Users  []UserInfo
+	Users      []UserInfo
 	TotalHits  int
 	PageNumber int
 	Links      []Link `json: "_links"`
@@ -165,15 +167,15 @@ type UserInfo struct {
 }
 
 type GroupInfo struct {
-	Id           int
-	Name     string
-	Type        string
-	SharedFolderId    int
-	Members [] struct{
-		Id int
+	Id             int
+	Name           string
+	Type           string
+	SharedFolderId int
+	Members        []struct {
+		Id       int
 		Username string
-		Role string
-	 }
+		Role     string
+	}
 }
 
 type Link struct {
@@ -237,13 +239,14 @@ type UserPost struct {
 }
 
 func (upost *UserPost) String() string {
-	pwordToPrint:="not set..."
+	pwordToPrint := "not set..."
 	if len(upost.Password) > 0 {
-		pwordToPrint="..."
+		pwordToPrint = "..."
 	}
 	return fmt.Sprintf("username=%s,email=%s,firstName=%s,lastName=%s,password=%s,role=%s,affiliation=%s,apiKey=%s",
-	 upost.Username, upost.Email,upost.FirstName, upost.LastName, pwordToPrint, upost.Role, upost.Affiliation, upost.ApiKey)
+		upost.Username, upost.Email, upost.FirstName, upost.LastName, pwordToPrint, upost.Role, upost.Affiliation, upost.ApiKey)
 }
+
 // Use this to build a UserPost object to create a new user from.
 type UserPostBuilder struct {
 	Username    string
@@ -288,52 +291,53 @@ func (b *UserPostBuilder) apiKey(apiKey string) *UserPostBuilder {
 	b.ApiKey = apiKey
 	return b
 }
-func (b *UserPostBuilder) build() (*UserPost, error){
+func (b *UserPostBuilder) build() (*UserPost, error) {
 	rc := UserPost{}
-	if len (b.Username) < 6 {
+	if len(b.Username) < 6 {
 		return nil, errors.New("username must be >= 6 characters")
-	}	
-	if len (b.Password) < 6 {
+	}
+	if len(b.Password) < 6 {
 		return nil, errors.New("Password must be >= 8 characters")
-	}	
-	if len (b.FirstName) ==0  {
+	}
+	if len(b.FirstName) == 0 {
 		return nil, errors.New("Please supply first name")
-	}	
-	if len (b.LastName) ==0  {
+	}
+	if len(b.LastName) == 0 {
 		return nil, errors.New("Please supply last name")
 	}
-	if len (string(b.Email)) < 3   {
+	if len(string(b.Email)) < 3 {
 		return nil, errors.New("Please supply valid email address")
 	}
-	rc.FirstName=b.FirstName
-	rc.Password=b.Password
-	rc.Username=b.Username
-	rc.LastName=b.LastName
-	rc.Email=string(b.Email)
-	rc.Role=userRoles[b.Role]
-	rc.Affiliation=b.Affiliation
-	rc.ApiKey=b.ApiKey
+	rc.FirstName = b.FirstName
+	rc.Password = b.Password
+	rc.Username = b.Username
+	rc.LastName = b.LastName
+	rc.Email = string(b.Email)
+	rc.Role = userRoles[b.Role]
+	rc.Affiliation = b.Affiliation
+	rc.ApiKey = b.ApiKey
 	return &rc, nil
 }
+
 // GroupPost is serialized to JSON. Client code  should use GroupPostNew to create this object.
 type GroupPost struct {
-	DisplayName string `json:"displayName"`
-	Members []UserGroupPost `json:"members"`
+	DisplayName string          `json:"displayName"`
+	Members     []UserGroupPost `json:"members"`
 }
 
 //GroupPostNew performs validated construction of a GroupPost object
-func GroupPostNew (name string, userGroups []UserGroupPost) (*GroupPost, error) {
-	rc := GroupPost {}
-	if len (name) == 0  {
+func GroupPostNew(name string, userGroups []UserGroupPost) (*GroupPost, error) {
+	rc := GroupPost{}
+	if len(name) == 0 {
 		return nil, errors.New("Please supply a name for the group")
 	}
 	rc.DisplayName = name
-	if len (userGroups) == 0 {
+	if len(userGroups) == 0 {
 		return nil, errors.New("Please supply at least 1 group member")
 	}
 	var piExists bool
 	for _, upost := range userGroups {
-		if  find(userInGroupRoles, upost.RoleInGroup) < 0 {
+		if find(userInGroupRoles, upost.RoleInGroup) < 0 {
 			return nil, errors.New("Please supply a valid group role for this user")
 		}
 		if upost.RoleInGroup == "PI" {
@@ -348,32 +352,104 @@ func GroupPostNew (name string, userGroups []UserGroupPost) (*GroupPost, error) 
 	return &rc, nil
 }
 
-var userInGroupRoles = []string {"DEFAULT", "RS_LAB_ADMIN", "PI"}
+var userInGroupRoles = []string{"DEFAULT", "RS_LAB_ADMIN", "PI"}
 
 //UserGroup post defines a single user's membership role within a group.
 type UserGroupPost struct {
-	Username string `json:"username"`
+	Username    string `json:"username"`
 	RoleInGroup string `json:"roleInGroup"`
 }
 
 type ActivityList struct {
 	Activities []Activity
-	_links [] Link `json:"links"`
-	TotalHits int
+	_links     []Link `json:"links"`
+	TotalHits  int
 	PageNumber int
-
 }
 type Activity struct {
- Username, FullName, Domain, Action string
- Timestamp string
- Payload interface{}
+	Username, FullName, Domain, Action string
+	Timestamp                          string
+	Payload                            interface{}
+}
+
+type GlobalId string
+
+type ActivityQuery struct {
+	Domains  []string
+	Actions  []string
+	Oid      string
+	Users    []string
+	DateFrom time.Time
+	DateTo   time.Time
+}
+
+type ActivityQueryBuilder struct {
+	domains  []string
+	actions  []string
+	oid      GlobalId
+	users    []string
+	dateFrom time.Time
+	dateTo   time.Time
+}
+
+func (b *ActivityQueryBuilder) Domain(domain string) *ActivityQueryBuilder {
+	b.domains = makeStringSlice(b.domains, domain)
+	return b
+}
+
+func (b *ActivityQueryBuilder) Action(action string) *ActivityQueryBuilder {
+	b.actions = makeStringSlice(b.actions, action)
+	return b
+}
+
+func (b *ActivityQueryBuilder) User(user string) *ActivityQueryBuilder {
+	b.users = makeStringSlice(b.users, user)
+	return b
+}
+func (b *ActivityQueryBuilder) DateFrom(dateFrom time.Time) *ActivityQueryBuilder {
+	b.dateFrom = dateFrom
+	return b
+}
+func (b *ActivityQueryBuilder) DateTo(dateTo time.Time) *ActivityQueryBuilder {
+	b.dateTo = dateTo
+	return b
+}
+
+func (b *ActivityQueryBuilder) Oid(oid GlobalId) *ActivityQueryBuilder {
+	b.oid = oid
+	return b
+}
+func (b *ActivityQueryBuilder) Build() (*ActivityQuery, error) {
+	rc := ActivityQuery{}
+	rc.Domains = b.domains
+	rc.Actions = b.actions
+	rc.Users = b.users
+	if !b.dateFrom.IsZero() && !b.dateTo.IsZero() && b.dateFrom.After(b.dateTo) {
+		return nil, errors.New(fmt.Sprintf("from Date cannot be before to date"))
+	}
+	rc.DateFrom = b.dateFrom
+	rc.DateTo = b.dateTo
+	if len(b.oid) > 0 {
+		if match, _ := regexp.MatchString("[A-Z]{2}\\d+", string(b.oid)); match == true{
+			rc.Oid = string(b.oid)
+		} else {
+			return nil, errors.New(fmt.Sprintf("'%s' is not a valid global ID", b.oid))
+		}
+	}
+	return &rc, nil
+}
+func makeStringSlice(existingSl []string, toAdd string) []string {
+	if len(existingSl) == 0 {
+		existingSl = make([]string, 0, 0)
+	}
+	return append(existingSl, toAdd)
 }
 
 func find(slice []string, val string) int {
-    for i, item := range slice {
-        if item == val {
-            return i
-        }
-    }
-    return -1
+	for i, item := range slice {
+		if item == val {
+			return i
+		}
+	}
+	return -1
 }

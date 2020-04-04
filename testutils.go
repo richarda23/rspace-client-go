@@ -7,6 +7,9 @@ import (
 	"testing"
 	"time"
 )
+func fail(t *testing.T, message string) {
+	t.Errorf(message)
+}
 
 var seededRand *rand.Rand = rand.New(
 	rand.NewSource(time.Now().UnixNano()))
@@ -62,23 +65,22 @@ func assertStringEquals(t *testing.T, expected string, actual string, message st
 	_assertEquals(t, result, message)
 }
 
-func assertNotNil (t *testing.T, toTest interface{}, message string) {
+func assertNotNil(t *testing.T, toTest interface{}, message string) {
 	if toTest == nil {
 		fail(t, message)
 	}
 }
 
-func assertNil (t *testing.T, toTest interface{}, message string) {
+func assertNil(t *testing.T, toTest interface{}, message string) {
 	if toTest != nil {
 		fail(t, message)
 	}
 }
-func assertTrue (t *testing.T, toTest bool, message string) {
+func assertTrue(t *testing.T, toTest bool, message string) {
 	if toTest == false {
 		fail(t, message)
 	}
 }
-
 
 func _assertEquals(t *testing.T, testable Testable, message string) {
 	var b strings.Builder
