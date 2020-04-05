@@ -50,6 +50,17 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	json.Unmarshal(data, &result)
 	return &result, err
 }
+// DeleteFolder attempts to delete the folder or noteboon with the specified ID
+func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
+	time.Sleep(fs.Delay)
+	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
+	resp, err := DoDelete(url)
+	if resp == false {
+		return false, err
+	} else {
+		return true, nil
+	}
+}
 
 // FolderNew creates a new folder or notebook with  the given name.
 // If a parentFolderId is specified then the folder is created in that folder

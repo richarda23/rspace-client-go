@@ -91,7 +91,7 @@ func TestDocumentNew(t *testing.T) {
 	if got3 == nil {
 		fail(t, "Doc3 is nil")
 	}
-	fullDoc, _ := ds.DocumentById(got3.Id)
-	Log.Info(Marshal(fullDoc.Fields))
-
+	// now delete
+	rs, _ := ds.DeleteDocument(got3.Id)
+	assertTrue(t, rs, "Delete document failed:")
 }

@@ -113,6 +113,28 @@ func DoGet(url string) ([]byte, error) {
 	}
 	return data, nil
 }
+
+// DoDeleteUrl attempts to delete a resource specified by the URL. If successful, returns true, else returns false, with a possible
+// non-null error
+func DoDelete(url string) (bool , error) {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	AddAuthHeader(req)
+	resp, e := client.Do(req)
+	if e != nil {
+		Log.Error(e)
+		return false, e
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err := testResponseForError(data, resp); err != nil {
+		return false, err
+	}
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
 func testResponseForError(data []byte, resp *http.Response) *RSpaceError {
 	if resp.StatusCode >= 400 {
 		rspaceError := &RSpaceError{}

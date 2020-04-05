@@ -23,17 +23,21 @@ func TestNewFolderGetFolder(t *testing.T) {
 	if got.Name != "f1" {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", "f1", got.Name))
 	}
-	folder, e := folderService.FolderById(got.Id)
-	if e != nil {
-		Log.Error(e)
-	}
-	Log.Info(Marshal(got))
+	folder, _ := folderService.FolderById(got.Id)
 	if folder.IsNotebook == true {
 		fail(t, fmt.Sprintf("expected folder, not notebook"))
 	}
 	if folder.Id != got.Id {
 		fail(t, fmt.Sprintf("expected ID = %d, but was %d", got.Id, folder.Id))
 	}
+	// delete
+	deletionResult,_ := folderService.DeleteFolder(folder.Id)
+	assertTrue(t, deletionResult , "deletion of folder did not succeed")
+	// now get by ID  should fail
+	_, e2 := folderService.FolderById(got.Id)
+	rsErr, ok := e2.(*RSpaceError)
+	assertTrue(t, ok, "could not convert to RSpace error")
+	assertIntEquals(t, 401, rsErr.HttpCode, "")
 }
 func TestListFolderTree(t *testing.T) {
 	cfg := NewRecordListingConfig()

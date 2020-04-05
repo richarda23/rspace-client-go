@@ -91,6 +91,12 @@ func (ds *DocumentService) DocumentById(docId int) (*Document, error) {
 	json.Unmarshal(data, &result)
 	return &result, nil
 }
+// DeleteDocument attempts to delete the document with the specified ID
+func (fs *DocumentService) DeleteDocument(documentId int) (bool, error) {
+	time.Sleep(fs.Delay)
+	url := fmt.Sprintf("%s/%d", documentsUrl(), documentId)
+	return DoDelete(url)
+}
 
 // DocumentNew creates a new RSpace document
 func (ds *DocumentService) DocumentNew(post *DocumentPost) *DocumentInfo {
