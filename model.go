@@ -85,6 +85,16 @@ type DocumentInfo struct {
 	FormInfo       FormInfo
 	UserInfo       UserInfo
 }
+func (di *DocumentInfo) CreatedTime()( time.Time, error){
+	return parseTimestamp(di.Created)
+}
+func (di *DocumentInfo) LastModifiedTime()( time.Time, error){
+	return parseTimestamp(di.LastModified)
+}
+
+func parseTimestamp(timestamp string) (time.Time, error) {
+	return time.Parse(time.RFC3339, timestamp)
+}
 
 // FileInfo holds metadata about Files
 type FileInfo struct {
@@ -95,6 +105,9 @@ type FileInfo struct {
 	Created     string
 	Version     int
 }
+func (fi *FileInfo) CreatedTime()( time.Time, error){
+	return parseTimestamp(fi.Created)
+}
 
 type Folder struct {
 	*IndentifiableNamable
@@ -103,6 +116,12 @@ type Folder struct {
 	IsNotebook     bool `json :"notebook"`
 	ParentFolderId int
 }
+func (f *Folder) CreatedTime()( time.Time, error){
+	return parseTimestamp(f.Created)
+}
+func (f *Folder) LastModifiedTime()( time.Time, error){
+	return parseTimestamp(f.LastModified)
+}
 
 type FolderTreeItem struct {
 	*IndentifiableNamable
@@ -110,6 +129,12 @@ type FolderTreeItem struct {
 	LastModified string
 	IsNotebook   bool `json :"notebook"`
 	Type         string
+}
+func (f *FolderTreeItem) CreatedTime()( time.Time, error){
+	return parseTimestamp(f.Created)
+}
+func (f *FolderTreeItem) LastModifiedTime()( time.Time, error){
+	return parseTimestamp(f.LastModified)
 }
 type FolderList struct {
 	Records    []FolderTreeItem
@@ -143,6 +168,9 @@ type Field struct {
 	Content      string
 	LastModified string
 	Files        []FileInfo
+}
+func (f *Field) LastModifiedTime()( time.Time, error){
+	return parseTimestamp(f.LastModified)
 }
 
 //Full document including content
@@ -204,7 +232,6 @@ func (l *Link) UnmarshalJSON(j []byte) error {
 			l.Rel = v
 		}
 	}
-
 	return nil
 }
 
@@ -216,6 +243,9 @@ type RSpaceError struct {
 	Message      string
 	Errors       []string
 	Timestamp    string `json:"iso8601Timestamp"`
+}
+func (f *RSpaceError ) CreatedTime()( time.Time, error){
+	return parseTimestamp(f.Timestamp)
 }
 
 func (rsError *RSpaceError) String() string {
@@ -396,6 +426,10 @@ type Activity struct {
 	Timestamp                          string
 	Payload                            interface{}
 }
+func (a *Activity) TimestampTime()( time.Time, error){
+	return parseTimestamp(a.Timestamp)
+}
+
 
 // GlobalId is  a Unique identifier for an RSpace object, e.g. 'GL1234' or 'SD5678'
 type GlobalId string
