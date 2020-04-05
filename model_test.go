@@ -2,6 +2,7 @@ package rspace
 
 import (
 	"testing"
+	"time"
 	//"errors"
 	"fmt"
 	//"encoding/json"
@@ -65,8 +66,8 @@ func TestGroupPost(t *testing.T) {
 }
 func TestActivityQueryBuilder(t *testing.T) {
 	var err error
-	var q *ActivityQuery 
-	var builder  *ActivityQueryBuilder
+	var q *ActivityQuery
+	var builder *ActivityQueryBuilder
 	builder = &ActivityQueryBuilder{}
 	// valid global id
 	q, err = builder.Oid("GL1234").Build()
@@ -80,15 +81,22 @@ func TestActivityQueryBuilder(t *testing.T) {
 	assertNotNil(t, err, "err should not be  nil")
 
 	domain := "RECORD"
-	action := "READ"
-	action2 := "COPY"
+	readaction := "READ"
+	copyaction := "COPY"
 	user := "bob"
+	from := time.Now().AddDate(0, -1, 0)
+	to := time.Now()
+	// get new builder
 	builder = &ActivityQueryBuilder{}
-	q,err = builder.Domain(domain).Action(action).Action(action2).User(user).Build()
+	q, err = builder.Domain(domain).Action(readaction).Action(copyaction).User(user).DateFrom(from).DateTo(to).Build()
 	assertStringEquals(t, "bob", q.Users[0], "")
 	assertStringEquals(t, "READ", q.Actions[0], "")
 	assertStringEquals(t, "COPY", q.Actions[1], "")
 	assertStringEquals(t, "RECORD", q.Domains[0], "")
-	assertTrue(t, len(q.Oid)==0, "OID should be empty")
-}
+	assertTrue(t, len(q.Oid) == 0, "OID should be empty")
+	// date validation
+	builder = &ActivityQueryBuilder{}
+	q, err = builder.DateFrom(to).DateTo(from).Build()
+	assertNotNil(t, err, "err should not be  nil")
 
+}

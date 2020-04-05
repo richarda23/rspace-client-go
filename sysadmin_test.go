@@ -8,10 +8,6 @@ import (
 	//"errors"
 )
 
-var sysads *SysadminService = &SysadminService{
-	BaseService: BaseService{
-		Delay: time.Duration(100) * time.Millisecond}}
-
 func TestUserNew(t *testing.T) {
 	// given
 	userPost := createRandomUser(pi)

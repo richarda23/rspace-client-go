@@ -5,18 +5,12 @@ import (
 	"github.com/op/go-logging"
 	"os"
 	"testing"
-	"time"
 )
-
-var ds *DocumentService = &DocumentService{
-	BaseService: BaseService{
-		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestMain(m *testing.M) {
 	initLogging(logging.INFO)
 	os.Exit(m.Run())
 }
-
 
 func TestStatus(t *testing.T) {
 	got, err := ds.GetStatus()

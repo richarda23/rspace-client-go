@@ -1,8 +1,10 @@
 package rspace
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -179,8 +181,31 @@ type GroupInfo struct {
 }
 
 type Link struct {
-	Link string
+	Link url.URL
 	Rel  string
+}
+
+func (l *Link) UnmarshalJSON(j []byte) error {
+	var rawStrings map[string]string
+	err := json.Unmarshal(j, &rawStrings)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range rawStrings {
+		if strings.ToLower(k) == "link" {
+			u, err := url.Parse(v)
+			if err != nil {
+				return err
+			}
+			l.Link = *u
+		}
+		if strings.ToLower(k) == "rel" {
+			l.Rel = v
+		}
+	}
+
+	return nil
 }
 
 //RSpaceError encapsulates server or client side errors leading to a request being rejected.
@@ -362,7 +387,7 @@ type UserGroupPost struct {
 
 type ActivityList struct {
 	Activities []Activity
-	_links     []Link `json:"links"`
+	Links      []Link `json:"_links"`
 	TotalHits  int
 	PageNumber int
 }
@@ -372,8 +397,11 @@ type Activity struct {
 	Payload                            interface{}
 }
 
+// GlobalId is  a Unique identifier for an RSpace object, e.g. 'GL1234' or 'SD5678'
 type GlobalId string
 
+// ActivityQuery encapsulates a auery to the /activities endpoint. Either use directly or use the ActivityQueryBuilder, which
+// provides more convenient construction and validation
 type ActivityQuery struct {
 	Domains  []string
 	Actions  []string
@@ -383,6 +411,7 @@ type ActivityQuery struct {
 	DateTo   time.Time
 }
 
+// ActivityQueryBuilder provides convenient methods to construct a query to the /activities endpoint
 type ActivityQueryBuilder struct {
 	domains  []string
 	actions  []string
@@ -406,15 +435,20 @@ func (b *ActivityQueryBuilder) User(user string) *ActivityQueryBuilder {
 	b.users = makeStringSlice(b.users, user)
 	return b
 }
+
+//DateFrom specifies a lower bound on the time stamp of an activity
 func (b *ActivityQueryBuilder) DateFrom(dateFrom time.Time) *ActivityQueryBuilder {
 	b.dateFrom = dateFrom
 	return b
 }
+
+//DateTo specifies an upper bound on the time stamp of an activity.
 func (b *ActivityQueryBuilder) DateTo(dateTo time.Time) *ActivityQueryBuilder {
 	b.dateTo = dateTo
 	return b
 }
 
+//Oid restricts the search to activities involving the specific item.
 func (b *ActivityQueryBuilder) Oid(oid GlobalId) *ActivityQueryBuilder {
 	b.oid = oid
 	return b
@@ -430,7 +464,7 @@ func (b *ActivityQueryBuilder) Build() (*ActivityQuery, error) {
 	rc.DateFrom = b.dateFrom
 	rc.DateTo = b.dateTo
 	if len(b.oid) > 0 {
-		if match, _ := regexp.MatchString("[A-Z]{2}\\d+", string(b.oid)); match == true{
+		if match, _ := regexp.MatchString("[A-Z]{2}\\d+", string(b.oid)); match == true {
 			rc.Oid = string(b.oid)
 		} else {
 			return nil, errors.New(fmt.Sprintf("'%s' is not a valid global ID", b.oid))

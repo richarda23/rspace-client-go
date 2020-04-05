@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 )
+
 func fail(t *testing.T, message string) {
 	t.Errorf(message)
 }

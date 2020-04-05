@@ -6,14 +6,40 @@ import (
 	"time"
 )
 
-var activityService *ActivityService = &ActivityService{
-	BaseService: BaseService{
-		Delay: time.Duration(100) * time.Millisecond}}
-
 func TestActivityGet(t *testing.T) {
-	data, err := activityService.Activities()
+	var builder ActivityQueryBuilder = ActivityQueryBuilder{}
+	var err error
+	var result *ActivityList
+	var q *ActivityQuery
+	builder.Domain("RECORD")
+	q, _ = builder.Build()
+	result, err = activityService.Activities(q)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(data)
+
+	//get non-existent results
+	builder.DateFrom(time.Now().AddDate(1, 0, 0))
+	q, _ = builder.Build()
+	result, err = activityService.Activities(q)
+	assertIntEquals(t, 0, result.TotalHits, "")
+	// too far in the past
+	builder = ActivityQueryBuilder{}
+	builder.DateTo(time.Now().AddDate(-10, 0, 0))
+	q, _ = builder.Build()
+	result, err = activityService.Activities(q)
+	assertIntEquals(t, 0, result.TotalHits, "")
+}
+func TestActivityForDocumentGet(t *testing.T) {
+	name := randomAlphanumeric(6)
+	created := ds.NewEmptyBasicDocument(name, "")
+	builder := ActivityQueryBuilder{}
+	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
+	result, err := activityService.Activities(q)
+	assertNil(t, err, "error should be nil")
+	assertIntEquals(t, 1, result.TotalHits, "")
+	assertStringEquals(t, "CREATE", result.Activities[0].Action, "")
+	assertStringEquals(t, "RECORD", result.Activities[0].Domain, "")
+	assertIntEquals(t, 1, len(result.Links), "")
+	assertStringEquals(t, "api/v1/activity", result.Links[0].Link.Path, "")
 }
