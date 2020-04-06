@@ -7,6 +7,7 @@ import (
 	//"github.com/op/go-logging"
 	//"errors"
 )
+var sysads = webClient.sysadminService()
 
 func TestUserNew(t *testing.T) {
 	// given

@@ -13,6 +13,7 @@ import (
 type FolderService struct {
 	BaseService
 }
+var folderService = webClient.folderService()
 
 func foldersUrl() string {
 	return getenv(BASE_URL_ENV_NAME) + "/folders"
@@ -50,6 +51,7 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	json.Unmarshal(data, &result)
 	return &result, err
 }
+
 // DeleteFolder attempts to delete the folder or noteboon with the specified ID
 func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 	time.Sleep(fs.Delay)

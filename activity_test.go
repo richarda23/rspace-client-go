@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+var activityService = webClient.activityService()
+var ds = webClient.documentService()
+
 func TestActivityGet(t *testing.T) {
 	var builder ActivityQueryBuilder = ActivityQueryBuilder{}
 	var err error
@@ -41,7 +44,7 @@ func TestActivityForDocumentGet(t *testing.T) {
 	assertStringEquals(t, "CREATE", result.Activities[0].Action, "")
 	assertStringEquals(t, "RECORD", result.Activities[0].Domain, "")
 	timestamp, _ := result.Activities[0].TimestampTime()
-	assertTrue(t, timestamp.Before(time.Now()),"timestamp parsing is invalid")
+	assertTrue(t, timestamp.Before(time.Now()), "timestamp parsing is invalid")
 	assertIntEquals(t, 1, len(result.Links), "")
 	assertStringEquals(t, "/api/v1/activity", result.Links[0].Link.Path, "")
 }

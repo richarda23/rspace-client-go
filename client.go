@@ -10,14 +10,7 @@ import (
 	"time"
 )
 
-const (
-	APIKEY_ENV_NAME   = "RSPACE_API_KEY"
-	BASE_URL_ENV_NAME = "RSPACE_URL"
-)
 
-type BaseService struct {
-	Delay time.Duration
-}
 
 func getenv(envname string) string {
 	return os.Getenv(envname)
@@ -47,7 +40,7 @@ func Marshal(anything interface{}) string {
 }
 
 func AddAuthHeader(req *http.Request) {
-	req.Header.Add("apiKey", os.Getenv(APIKEY_ENV_NAME))
+	req.Header.Add("apiKey", getenv(APIKEY_ENV_NAME))
 }
 
 func PrintDocs() {
@@ -80,7 +73,7 @@ func abbreviate(toAbbreviate string, maxLen int) string {
 }
 
 func doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
-	time.Sleep(ds.Delay)
+	time.Sleep(time.Duration(100) * time.Millisecond)
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
@@ -116,7 +109,7 @@ func DoGet(url string) ([]byte, error) {
 
 // DoDeleteUrl attempts to delete a resource specified by the URL. If successful, returns true, else returns false, with a possible
 // non-null error
-func DoDelete(url string) (bool , error) {
+func DoDelete(url string) (bool, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 	AddAuthHeader(req)

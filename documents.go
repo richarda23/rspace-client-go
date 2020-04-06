@@ -91,6 +91,7 @@ func (ds *DocumentService) DocumentById(docId int) (*Document, error) {
 	json.Unmarshal(data, &result)
 	return &result, nil
 }
+
 // DeleteDocument attempts to delete the document with the specified ID
 func (fs *DocumentService) DeleteDocument(documentId int) (bool, error) {
 	time.Sleep(fs.Delay)

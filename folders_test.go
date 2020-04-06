@@ -3,12 +3,7 @@ package rspace
 import (
 	"fmt"
 	"testing"
-	"time"
 )
-
-var folderService *FolderService = &FolderService{
-	BaseService: BaseService{
-		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestNewFolderGetFolder(t *testing.T) {
 	post := FolderPost{}
@@ -31,8 +26,8 @@ func TestNewFolderGetFolder(t *testing.T) {
 		fail(t, fmt.Sprintf("expected ID = %d, but was %d", got.Id, folder.Id))
 	}
 	// delete
-	deletionResult,_ := folderService.DeleteFolder(folder.Id)
-	assertTrue(t, deletionResult , "deletion of folder did not succeed")
+	deletionResult, _ := folderService.DeleteFolder(folder.Id)
+	assertTrue(t, deletionResult, "deletion of folder did not succeed")
 	// now get by ID  should fail
 	_, e2 := folderService.FolderById(got.Id)
 	rsErr, ok := e2.(*RSpaceError)
