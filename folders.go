@@ -13,7 +13,6 @@ import (
 type FolderService struct {
 	BaseService
 }
-var folderService = webClient.folderService()
 
 func foldersUrl() string {
 	return getenv(BASE_URL_ENV_NAME) + "/folders"
@@ -48,6 +47,7 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 		return nil, err
 	}
 	var result = Folder{}
+	fmt.Println(string(data))
 	json.Unmarshal(data, &result)
 	return &result, err
 }
@@ -77,7 +77,6 @@ func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 			post.Name,
 			post.IsNotebook,
 		}
-		fmt.Println(noIdPost)
 		formData, _ = json.Marshal(&noIdPost)
 	} else {
 		formData, _ = json.Marshal(post)

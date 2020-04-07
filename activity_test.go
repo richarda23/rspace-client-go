@@ -6,9 +6,6 @@ import (
 	"time"
 )
 
-var activityService = webClient.activityService()
-var ds = webClient.documentService()
-
 func TestActivityGet(t *testing.T) {
 	var builder ActivityQueryBuilder = ActivityQueryBuilder{}
 	var err error
@@ -16,7 +13,7 @@ func TestActivityGet(t *testing.T) {
 	var q *ActivityQuery
 	builder.Domain("RECORD")
 	q, _ = builder.Build()
-	result, err = activityService.Activities(q)
+	result, err = webClient.ActivityS.Activities(q)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -24,21 +21,21 @@ func TestActivityGet(t *testing.T) {
 	//get non-existent results
 	builder.DateFrom(time.Now().AddDate(1, 0, 0))
 	q, _ = builder.Build()
-	result, err = activityService.Activities(q)
+	result, err = webClient.ActivityS.Activities(q)
 	assertIntEquals(t, 0, result.TotalHits, "")
 	// too far in the past
 	builder = ActivityQueryBuilder{}
 	builder.DateTo(time.Now().AddDate(-10, 0, 0))
 	q, _ = builder.Build()
-	result, err = activityService.Activities(q)
+	result, err = webClient.ActivityS.Activities(q)
 	assertIntEquals(t, 0, result.TotalHits, "")
 }
 func TestActivityForDocumentGet(t *testing.T) {
 	name := randomAlphanumeric(6)
-	created := ds.NewEmptyBasicDocument(name, "")
+	created := webClient.DocumentS.NewEmptyBasicDocument(name, "")
 	builder := ActivityQueryBuilder{}
 	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
-	result, err := activityService.Activities(q)
+	result, err := webClient.ActivityS.Activities(q)
 	assertNil(t, err, "error should be nil")
 	assertIntEquals(t, 1, result.TotalHits, "")
 	assertStringEquals(t, "CREATE", result.Activities[0].Action, "")

@@ -115,7 +115,7 @@ type Folder struct {
 	*IndentifiableNamable
 	Created        string
 	LastModified   string
-	IsNotebook     bool `json :"notebook"`
+	IsNotebook     bool `json:"notebook"`
 	ParentFolderId int
 }
 

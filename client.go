@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-
-
 func getenv(envname string) string {
 	return os.Getenv(envname)
 }

@@ -7,12 +7,11 @@ import (
 	//"github.com/op/go-logging"
 	//"errors"
 )
-var sysads = webClient.sysadminService()
 
 func TestUserNew(t *testing.T) {
 	// given
 	userPost := createRandomUser(pi)
-	got, err := sysads.UserNew(userPost)
+	got, err := webClient.SysadminS.UserNew(userPost)
 	if err != nil {
 		Log.Error(err)
 	}
@@ -23,10 +22,10 @@ func TestUserNew(t *testing.T) {
 }
 func TestUsers(t *testing.T) {
 	// all users were created before a time in the future
-	userList, _ := sysads.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
+	userList, _ := webClient.SysadminS.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
 	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")
 	// no users created 10 years ago
-	userList2, _ := sysads.Users(time.Time{}, time.Now().AddDate(-10, 0, 0))
+	userList2, _ := webClient.SysadminS.Users(time.Time{}, time.Now().AddDate(-10, 0, 0))
 	assertIntEquals(t, 0, userList2.TotalHits, "")
 }
 
@@ -35,7 +34,7 @@ func TestGroupNew(t *testing.T) {
 	userPiPost := createRandomUser(pi)
 	var err error
 	var user *UserInfo
-	user, err = sysads.UserNew(userPiPost)
+	user, err = webClient.SysadminS.UserNew(userPiPost)
 	if err != nil {
 		Log.Error(err)
 	}
@@ -44,7 +43,7 @@ func TestGroupNew(t *testing.T) {
 	userGroupPosts = append(userGroupPosts, UserGroupPost{user.Username, "PI"})
 	groupPost, err := GroupPostNew("groupname", userGroupPosts)
 	var group *GroupInfo
-	group, err = sysads.GroupNew(groupPost)
+	group, err = webClient.SysadminS.GroupNew(groupPost)
 	if err != nil {
 		Log.Error(err)
 	}
