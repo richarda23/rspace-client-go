@@ -149,9 +149,9 @@ type FolderList struct {
 }
 
 type FolderPost struct {
-	Name           string `json:"name"`
-	IsNotebook     bool   `json:"notebook"`
-	ParentFolderId int    `json:"parentFolderId"`
+	Name           string `json:"name,omitempty"`
+	IsNotebook     bool   `json:"notebook,omitempty"`
+	ParentFolderId int    `json:"parentFolderId,omitempty"`
 }
 
 type FileList struct {

@@ -69,18 +69,19 @@ func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 	time.Sleep(fs.Delay)
 	var formData []byte
-	if post.ParentFolderId == 0 {
-		noIdPost := struct {
-			Name     string `json:"name"`
-			Notebook bool   `json:"notebook"`
-		}{
-			post.Name,
-			post.IsNotebook,
-		}
-		formData, _ = json.Marshal(&noIdPost)
-	} else {
+//	if post.ParentFolderId == 0 {
+//		noIdPost := struct {
+//			Name     string `json:"name"`
+//			Notebook bool   `json:"notebook"`
+//		}{
+//			post.Name,
+//			post.IsNotebook,
+//		}
+//		formData, _ = json.Marshal(&noIdPost)
+///	} else {
 		formData, _ = json.Marshal(post)
-	}
+//	}
+	Log.Info(string(formData))
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", foldersUrl(), bytes.NewBuffer(formData))
 	if err != nil {

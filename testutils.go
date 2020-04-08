@@ -82,6 +82,11 @@ func assertTrue(t *testing.T, toTest bool, message string) {
 		fail(t, message)
 	}
 }
+func assertFalse(t *testing.T, toTest bool, message string) {
+	if toTest == true {
+		fail(t, message)
+	}
+}
 
 func _assertEquals(t *testing.T, testable Testable, message string) {
 	var b strings.Builder
