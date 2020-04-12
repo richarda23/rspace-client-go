@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -21,15 +22,23 @@ func foldersUrl() string {
 // FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
 func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
 	time.Sleep(fs.Delay)
-	url := foldersUrl() + "/tree"
+	urlStr := foldersUrl() + "/tree"
 	if folderId != 0 {
-		url = url + "/" + strconv.Itoa(folderId)
+		urlStr = urlStr + "/" + strconv.Itoa(folderId)
 	}
-	url = url + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	params := url.Values{}
+	params.Add("pageSize",  strconv.Itoa(config.PageSize))
+	params.Add("pageNumber",  strconv.Itoa(config.PageNumber))
+	params.Add("orderBy", config.OrderBy + " " + config.SortOrder)
 	if len(typesToInclude) > 0 {
-		url = url + "&typesToInclude=" + strings.Join(typesToInclude, ",")
+		params.Add("typesToInclude", strings.Join(typesToInclude, ","))
 	}
-	data, err := DoGet(url)
+	encoded := params.Encode()
+	if len(encoded) > 0{
+		urlStr = urlStr + "?" + encoded
+	}
+	//fmt.Println(url)
+	data, err := DoGet(urlStr)
 	if err != nil {
 		return nil, err
 	}
