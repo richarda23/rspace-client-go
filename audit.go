@@ -36,10 +36,10 @@ func (fs *ActivityService) Activities(q *ActivityQuery) (*ActivityList, error) {
 			params.Add("oid", q.Oid)
 		}
 		if !q.DateFrom.IsZero() {
-			params.Add("dateFrom", q.DateFrom.Format("2006-02-01"))
+			params.Add("dateFrom", q.DateFrom.Format("2006-01-02"))
 		}
 		if !q.DateTo.IsZero() {
-			params.Add("dateTo", q.DateTo.Format("2006-02-01"))
+			params.Add("dateTo", q.DateTo.Format("2006-01-02"))
 		}
 		encodedParams = params.Encode()
 	}

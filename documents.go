@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
+//	"net/url"
+//	"strconv"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func (ds *DocumentService) GetStatus() (*Status, error) {
 // Paginated listing of Documents
 func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList, error) {
 	time.Sleep(ds.Delay)
-	url := ds._generateUrl(config)
+	url := ds._generateUrl(config,"",false)
 	return ds._doDocList(url)
 }
 
@@ -46,10 +46,15 @@ func (ds *DocumentService) _doDocList(url string) (*DocumentList, error) {
 	json.Unmarshal(data, &result)
 	return &result, nil
 }
-func (ds *DocumentService) _generateUrl(config RecordListingConfig) string {
-	params := url.Values{}
-	params.Add("pageSize", strconv.Itoa(config.PageSize))
-	params.Add("pageNumber", strconv.Itoa(config.PageNumber))
+func (ds *DocumentService) _generateUrl(config RecordListingConfig, searchTerm string, isAdvancedSearch bool) string {
+	params := config.toParams()
+	if len(searchTerm) > 0 {
+		if isAdvancedSearch {
+			params.Add ("advancedQuery", searchTerm)
+		} else {
+			params.Add ("query", searchTerm)
+		}
+	}
 	encoded := params.Encode()
 	url := documentsUrl() + "?" + encoded
 	return url
@@ -58,23 +63,18 @@ func (ds *DocumentService) _generateUrl(config RecordListingConfig) string {
 //SearchDocuments performs basic search of a single search term, performing a global search
 func (ds *DocumentService) SearchDocuments(config RecordListingConfig, searchTerm string) (*DocumentList, error) {
 	time.Sleep(ds.Delay)
-	url := ds._generateUrl(config)
-	if len(searchTerm) > 0 {
-		url = url + "&query=" + searchTerm
-	}
+	url := ds._generateUrl(config, searchTerm, false)
 	return ds._doDocList(url)
 }
 
 func (ds *DocumentService) AdvancedSearchDocuments(config RecordListingConfig, searchQuery *SearchQuery) (*DocumentList, error) {
 	time.Sleep(ds.Delay)
-	urlStr := ds._generateUrl(config)
-
+	urlStr:=""
 	if searchQuery != nil {
 		queryJson, _ := json.Marshal(searchQuery)
-		params := url.Values{}
-		params.Add("advancedQuery", string(queryJson))
-		encoded := params.Encode()
-		urlStr = urlStr + "&" + encoded
+		urlStr = ds._generateUrl(config, string(queryJson), true)
+	}else {
+		urlStr = ds._generateUrl(config, "", false)
 	}
 	return ds._doDocList(urlStr)
 }

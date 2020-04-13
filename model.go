@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"strconv"
 	"time"
 )
 
@@ -34,6 +35,15 @@ func NewRecordListingConfig() RecordListingConfig {
 		SortOrder:  "desc",
 		Quiet:      false,
 	}
+}
+
+//toParams generates a url.Values object containing web params
+func (config *RecordListingConfig) toParams() url.Values {
+	params := url.Values{}
+	params.Add("pageSize",  strconv.Itoa(config.PageSize))
+	params.Add("pageNumber",  strconv.Itoa(config.PageNumber))
+	params.Add("orderBy", config.OrderBy + " " + config.SortOrder)
+	return params
 }
 
 type DocumentPost struct {

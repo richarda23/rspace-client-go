@@ -22,6 +22,9 @@ func TestActivityGet(t *testing.T) {
 	builder.DateFrom(time.Now().AddDate(1, 0, 0))
 	q, _ = builder.Build()
 	result, err = webClient.ActivityS.Activities(q)
+	if err != nil {
+		fmt.Println(err)	
+	}
 	assertIntEquals(t, 0, result.TotalHits, "")
 	// too far in the past
 	builder = ActivityQueryBuilder{}

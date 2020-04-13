@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -26,10 +25,7 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 	if folderId != 0 {
 		urlStr = urlStr + "/" + strconv.Itoa(folderId)
 	}
-	params := url.Values{}
-	params.Add("pageSize",  strconv.Itoa(config.PageSize))
-	params.Add("pageNumber",  strconv.Itoa(config.PageNumber))
-	params.Add("orderBy", config.OrderBy + " " + config.SortOrder)
+	params := config.toParams()
 	if len(typesToInclude) > 0 {
 		params.Add("typesToInclude", strings.Join(typesToInclude, ","))
 	}
