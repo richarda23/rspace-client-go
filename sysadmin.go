@@ -18,6 +18,7 @@ func systemUrl() string {
 
 // DocumentNew creates a new RSpace document
 func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
+	fmt.Println(ds.Delay)
 	time.Sleep(ds.Delay)
 	data, err := doPostJsonBody(post, systemUrl()+"/users")
 	if err != nil {
@@ -33,10 +34,10 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 	params := url.Values{}
 	params.Add("tempAccountsOnly", strconv.FormatBool(false))
 	if !lastLoginBefore.IsZero() {
-		params.Add("lastLoginBefore", lastLoginBefore.Format("2006-02-01"))
+		params.Add("lastLoginBefore", lastLoginBefore.Format("2006-01-02"))
 	}
 	if !creationDateBefore.IsZero() {
-		params.Add("createdBefore", creationDateBefore.Format("2006-02-01"))
+		params.Add("createdBefore", creationDateBefore.Format("2006-01-02"))
 	}
 	encoded := params.Encode()
 	url := systemUrl() + "/users?" + encoded

@@ -58,5 +58,6 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.folderS = &FolderService{BaseService: base}
 	wc.FormS = &FormService{BaseService: base}
 	wc.FileS = &FileService{BaseService: base}
+	wc.SysadminS = &SysadminService{BaseService: base}
 	return &wc
 }

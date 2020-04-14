@@ -22,7 +22,10 @@ func TestUserNew(t *testing.T) {
 }
 func TestUsers(t *testing.T) {
 	// all users were created before a time in the future
-	userList, _ := webClient.SysadminS.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
+	userList, e := webClient.SysadminS.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
+	if e != nil {
+		fmt.Println(e)
+	}
 	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")
 	// no users created 10 years ago
 	userList2, _ := webClient.SysadminS.Users(time.Time{}, time.Now().AddDate(-10, 0, 0))
