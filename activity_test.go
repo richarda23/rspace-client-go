@@ -35,7 +35,7 @@ func TestActivityGet(t *testing.T) {
 }
 func TestActivityForDocumentGet(t *testing.T) {
 	name := randomAlphanumeric(6)
-	created := webClient.DocumentS.NewEmptyBasicDocument(name, "")
+	created := webClient.NewEmptyBasicDocument(name, "")
 	builder := ActivityQueryBuilder{}
 	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
 	result, err := webClient.ActivityS.Activities(q)

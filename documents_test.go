@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestStatus(t *testing.T) {
-	got, err := webClient.DocumentS.GetStatus()
+	got, err := webClient.documentS.GetStatus()
 	if err != nil {
 		Log.Error(err)
 	}
@@ -30,7 +30,7 @@ func TestStatus(t *testing.T) {
 
 func TestDocumentList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got, _ := webClient.DocumentS.Documents(cfg)
+	got, _ := webClient.documentS.Documents(cfg)
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits >= 1 but was %d", got.TotalHits))
 	}
@@ -40,8 +40,8 @@ func TestDocumentBasicSearch(t *testing.T) {
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
 	cfg := NewRecordListingConfig()
-	created := webClient.DocumentS.NewEmptyBasicDocument(name, tag)
-	results, _ := webClient.DocumentS.SearchDocuments(cfg, name)
+	created := webClient.documentS.NewEmptyBasicDocument(name, tag)
+	results, _ := webClient.documentS.SearchDocuments(cfg, name)
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
 }
@@ -50,14 +50,14 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
 	tag2 := randomAlphanumeric(6)
-	created := webClient.DocumentS.NewEmptyBasicDocument(name, tag)
+	created := webClient.documentS.NewEmptyBasicDocument(name, tag)
 	cfg := NewRecordListingConfig()
 
 	builder := &SearchQueryBuilder{}
 	builder.operator(and).addTerm(name, NAME).addTerm(tag, TAG)
 	query := builder.build()
 	//when
-	results, _ := webClient.DocumentS.AdvancedSearchDocuments(cfg, query)
+	results, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query)
 	//then
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
@@ -66,20 +66,20 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	builder2 := &SearchQueryBuilder{}
 	builder2.operator(and).addTerm(name, NAME).addTerm(tag2, TAG)
 	query2 := builder2.build()
-	results2, _ := webClient.DocumentS.AdvancedSearchDocuments(cfg, query2)
+	results2, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query2)
 	assertIntEquals(t, 0, results2.TotalHits, "")
 	// but or does
 	builder3 := &SearchQueryBuilder{}
 	builder3.operator(or).addTerm(name, NAME).addTerm(tag2, TAG)
 	query3 := builder3.build()
-	results3, _ := webClient.DocumentS.AdvancedSearchDocuments(cfg, query3)
+	results3, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query3)
 	assertIntEquals(t, 1, results3.TotalHits, "")
 
 }
 
 func TestDocumentNew(t *testing.T) {
 	//post := DocumentPostNewBasicDocument("go12", "t1,t2,t3")
-	var got = webClient.DocumentS.NewEmptyBasicDocument("go12", "tag1,tag2")
+	var got = webClient.documentS.NewEmptyBasicDocument("go12", "tag1,tag2")
 	Log.Info(Marshal(got))
 	if got.Name != "go12" {
 		fail(t, fmt.Sprintf("Expected 'go1' > 1 but was %s", got.Name))
@@ -87,15 +87,15 @@ func TestDocumentNew(t *testing.T) {
 	if got.Tags != "tag1,tag2" {
 		fail(t, fmt.Sprintf("Expected 'tag1,tags' > 1 but was %s", got.Tags))
 	}
-	var got2 = webClient.DocumentS.NewEmptyBasicDocument("nameonly", "")
+	var got2 = webClient.documentS.NewEmptyBasicDocument("nameonly", "")
 	if got2.Tags != "" {
 		fail(t, fmt.Sprintf("Expected '' > 1 but was %s", got2.Tags))
 	}
-	var got3 = webClient.DocumentS.NewBasicDocumentWithContent("n1", "t1", "<p> Some content </p")
+	var got3 = webClient.documentS.NewBasicDocumentWithContent("n1", "t1", "<p> Some content </p")
 	if got3 == nil {
 		fail(t, "Doc3 is nil")
 	}
 	// now delete
-	rs, _ := webClient.DocumentS.DeleteDocument(got3.Id)
+	rs, _ := webClient.documentS.DeleteDocument(got3.Id)
 	assertTrue(t, rs, "Delete document failed:")
 }

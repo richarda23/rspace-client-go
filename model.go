@@ -75,13 +75,13 @@ type DocumentList struct {
 	Documents  []DocumentInfo
 	TotalHits  int
 	PageNumber int
-	Links      []Link `json: "_links"`
+	Links      []Link `json:"_links"`
 }
 type UserList struct {
 	Users      []UserInfo
 	TotalHits  int
 	PageNumber int
-	Links      []Link `json: "_links"`
+	Links      []Link `json:"_links"`
 }
 
 //Summary information about a Document
@@ -140,7 +140,7 @@ type FolderTreeItem struct {
 	*IndentifiableNamable
 	Created      string
 	LastModified string
-	IsNotebook   bool `json :"notebook"`
+	IsNotebook   bool `json:"notebook"`
 	Type         string
 }
 
@@ -155,7 +155,7 @@ type FolderList struct {
 	Records    []FolderTreeItem
 	TotalHits  int
 	PageNumber int
-	Links      []Link `json: "_links"`
+	Links      []Link `json:"_links"`
 }
 
 type FolderPost struct {
@@ -167,7 +167,7 @@ type FolderPost struct {
 type FileList struct {
 	TotalHits  int
 	PageNumber int
-	Links      []Link `json: "_links"`
+	Links      []Link `json:"_links"`
 	Files      []FileInfo
 }
 
