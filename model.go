@@ -92,8 +92,8 @@ type DocumentInfo struct {
 	ParentFolderId int
 	Signed         bool
 	Tags           string
-	FormInfo       FormInfo
-	UserInfo       UserInfo
+	FormInfo       FormInfo `json:"form"`
+	UserInfo       UserInfo `json:"owner"`
 }
 
 func (di *DocumentInfo) CreatedTime() (time.Time, error) {

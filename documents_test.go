@@ -57,7 +57,7 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	builder.Operator(And).AddTerm(name, NAME).AddTerm(tag, TAG)
 	query := builder.Build()
 	//when
-	results, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query)
+	results, _ := webClient.AdvancedSearchDocuments(cfg, query)
 	//then
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")
@@ -66,20 +66,26 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	builder2 := &SearchQueryBuilder{}
 	builder2.Operator(And).AddTerm(name, NAME).AddTerm(tag2, TAG)
 	query2 := builder2.Build()
-	results2, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query2)
+	results2, _ := webClient.AdvancedSearchDocuments(cfg, query2)
 	assertIntEquals(t, 0, results2.TotalHits, "")
 	// but or does
 	builder3 := &SearchQueryBuilder{}
 	builder3.Operator(Or).AddTerm(name, NAME).AddTerm(tag2, TAG)
 	query3 := builder3.Build()
-	results3, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query3)
+	results3, _ := webClient.AdvancedSearchDocuments(cfg, query3)
 	assertIntEquals(t, 1, results3.TotalHits, "")
+
+	builder4 := &SearchQueryBuilder{}
+	q4 := builder4.AddTerm("FM2", FORM).Build()
+	results4, _ := webClient.AdvancedSearchDocuments(cfg, q4)
+	assertIntEquals(t, 1, results4.TotalHits, "")
+	fmt.Println(results4.Documents[0])
 
 }
 
 func TestDocumentNew(t *testing.T) {
 	//post := DocumentPostNewBasicDocument("go12", "t1,t2,t3")
-	var got = webClient.documentS.NewEmptyBasicDocument("go12", "tag1,tag2")
+	var got = webClient.NewEmptyBasicDocument("go12", "tag1,tag2")
 	Log.Info(Marshal(got))
 	if got.Name != "go12" {
 		fail(t, fmt.Sprintf("Expected 'go1' > 1 but was %s", got.Name))

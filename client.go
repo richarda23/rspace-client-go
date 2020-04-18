@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	//"fmt"
 )
 
 func getenv(envname string) string {
@@ -39,6 +40,7 @@ func BasicPost(name string, tags string) *DocumentPost {
 
 func Unmarshal(resp *http.Response, result interface{}) {
 	data, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Println(string(data))
 	if data != nil {
 		json.Unmarshal(data, result)
 	} else {
@@ -55,25 +57,6 @@ func AddAuthHeader(req *http.Request) {
 	req.Header.Add("apiKey", getenv(APIKEY_ENV_NAME))
 }
 
-func PrintDocs() {
-
-	//	docs := result["documents"].([]interface{})
-	//	for _, value := range docs {
-	//		item := value.(map[string]interface{})
-
-	// Each value is an interface{} type, that is type asserted as a string
-	//		id := int(item["id"].(float64))
-	//		name := abbreviate(item["name"].(string), 30)
-	//		t, _ := time.Parse(time.RFC3339Nano, item["lastModified"].(string))
-	//		lm := t.Format(time.RFC3339)
-	//		if config.Quiet {
-	//			fmt.Printf("%-10d\n", id)
-	//		} else {
-	//			fmt.Printf("%-10d%-30s%-20s\n", id, name, lm)
-	//		}
-	//	}
-
-}
 
 // Abbreviate truncates a string to maximum length `maxLen`, including
 // 3 ellipsis characters.
@@ -113,6 +96,7 @@ func DoGet(url string) ([]byte, error) {
 		Log.Error(e)
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Println("resp:" + string(data))
 	if err := testResponseForError(data, resp); err != nil {
 		return nil, err
 	}
