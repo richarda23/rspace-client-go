@@ -8,8 +8,8 @@ import (
 
 func TestSearchBuilder(t *testing.T) {
 	builder := &SearchQueryBuilder{}
-	builder.operator(or).addTerm("tag1", TAG).addTerm("formName", FORM)
-	query := builder.build()
+	builder.Operator(Or).AddTerm("tag1", TAG).AddTerm("formName", FORM)
+	query := builder.Build()
 	fmt.Println("query is " + query.String())
 	assertIntEquals(t, 2, len(query.Terms), "")
 	json, _ := json.Marshal(query)
@@ -17,11 +17,10 @@ func TestSearchBuilder(t *testing.T) {
 }
 func TestGlobalSearchBuilder(t *testing.T) {
 	builder := &SearchQueryBuilder{}
-	builder.addGlobalTerm("anything")
-	query := builder.build()
+	builder.AddGlobalTerm("anything")
+	query := builder.Build()
 	fmt.Println("global query is " + query.String())
 	if query.Terms[0].QueryType != "global" {
 		fail(t, fmt.Sprintf("search  should be global"))
 	}
-
 }

@@ -54,8 +54,8 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	cfg := NewRecordListingConfig()
 
 	builder := &SearchQueryBuilder{}
-	builder.operator(and).addTerm(name, NAME).addTerm(tag, TAG)
-	query := builder.build()
+	builder.Operator(And).AddTerm(name, NAME).AddTerm(tag, TAG)
+	query := builder.Build()
 	//when
 	results, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query)
 	//then
@@ -64,14 +64,14 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	assertStringEquals(t, created.Name, results.Documents[0].Name, "")
 	// and doesn't match here
 	builder2 := &SearchQueryBuilder{}
-	builder2.operator(and).addTerm(name, NAME).addTerm(tag2, TAG)
-	query2 := builder2.build()
+	builder2.Operator(And).AddTerm(name, NAME).AddTerm(tag2, TAG)
+	query2 := builder2.Build()
 	results2, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query2)
 	assertIntEquals(t, 0, results2.TotalHits, "")
 	// but or does
 	builder3 := &SearchQueryBuilder{}
-	builder3.operator(or).addTerm(name, NAME).addTerm(tag2, TAG)
-	query3 := builder3.build()
+	builder3.Operator(Or).AddTerm(name, NAME).AddTerm(tag2, TAG)
+	query3 := builder3.Build()
 	results3, _ := webClient.documentS.AdvancedSearchDocuments(cfg, query3)
 	assertIntEquals(t, 1, results3.TotalHits, "")
 

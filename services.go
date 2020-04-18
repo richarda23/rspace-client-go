@@ -61,9 +61,13 @@ func (fs *RsWebClient) FolderTree(config RecordListingConfig, folderId int, type
 func (fs *RsWebClient) FolderById(folderId int) (*Folder, error) {
 	return fs.folderS.FolderById(folderId)
 }
-
+// Uploads a single file
 func (fs *RsWebClient) UploadFile(path string) (*FileInfo, error) {
 	return fs.fileS.UploadFile(path)
+}
+// Lists Gallery files, optionally filtered by a media type
+func (fs *RsWebClient) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
+	return fs.fileS.Files(config, mediaType)
 }
 func (fs *RsWebClient) DeleteFolder(folderId int) (bool, error) {
 	return fs.folderS.DeleteFolder(folderId)

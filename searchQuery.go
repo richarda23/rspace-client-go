@@ -8,8 +8,8 @@ import (
 type SearchOperator int
 
 const (
-	and SearchOperator = iota
-	or
+	And SearchOperator = iota
+	Or
 )
 
 var searchStrings = [2]string{"and", "or"}
@@ -53,36 +53,40 @@ func (op SearchTerm) String() string {
 }
 
 type SearchQueryBuilder struct {
-	Operator SearchOperator
-	Terms    []SearchTerm
+	operator SearchOperator
+	terms    []SearchTerm
 }
 
 //operator sets the boolean type of the search query
-func (qb *SearchQueryBuilder) operator(op SearchOperator) *SearchQueryBuilder {
-	qb.Operator = op
+func (qb *SearchQueryBuilder) Operator(op SearchOperator) *SearchQueryBuilder {
+	qb.operator = op
 	return qb
 }
 
-func (qb *SearchQueryBuilder) addGlobalTerm(term string) *SearchQueryBuilder {
-	return qb.addTerm(term, GLOBAL)
+func (qb *SearchQueryBuilder) AddGlobalTerm(term string) *SearchQueryBuilder {
+	return qb.AddTerm(term, GLOBAL)
 }
 
-//addTerm appends a search term in the given category
-func (qb *SearchQueryBuilder) addTerm(term string, queryType QueryType) *SearchQueryBuilder {
-	sterm := SearchTerm{queryType, term}
-	if qb.Terms == nil {
-		qb.Terms = make([]SearchTerm, 0)
+// addTerm appends a search term in the given category. If the term is empty or nil
+// the term is not added
+func (qb *SearchQueryBuilder) AddTerm(term string, queryType QueryType) *SearchQueryBuilder {
+	if len(term) == 0 {
+		return qb
 	}
-	qb.Terms = append(qb.Terms, sterm)
+	sterm := SearchTerm{queryType, term}
+	if qb.terms == nil {
+		qb.terms = make([]SearchTerm, 0)
+	}
+	qb.terms = append(qb.terms, sterm)
 	return qb
 }
 
 //build generates a SearchQuery object and returns its pointer
-func (qb *SearchQueryBuilder) build() *SearchQuery {
+func (qb *SearchQueryBuilder) Build() *SearchQuery {
 	rc := SearchQuery{}
-	rc.Operator = qb.Operator.String()
+	rc.Operator = qb.operator.String()
 	rc.Terms = make([]STerm, 0)
-	for _, v := range qb.Terms {
+	for _, v := range qb.terms {
 		t := STerm{v.Term, v.QueryType.String()}
 		rc.Terms = append(rc.Terms, t)
 	}
