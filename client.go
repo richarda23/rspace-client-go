@@ -14,6 +14,20 @@ func getenv(envname string) string {
 	return os.Getenv(envname)
 }
 
+func validateArrayContains(validTerms []string, toTest []string) bool {
+	for _, term := range toTest {
+		seen := false
+		for _, v := range validTerms {
+			if v == term {
+				seen = true
+			}
+		}
+		if !seen {
+			return false
+		}
+	}
+	return true
+}
 func BasicPost(name string, tags string) *DocumentPost {
 	post := DocumentPost{}
 	post.Name = name

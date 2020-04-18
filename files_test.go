@@ -18,13 +18,17 @@ var filesService *FileService = &FileService{
 
 func TestFileList(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got, err := filesService.Files(cfg)
+
+	_, err1 := filesService.Files(cfg, "invalidMediaType");
+	assertNotNil(t, err1, "invalid media type should cause error")	
+	got, err := filesService.Files(cfg, "")
 	if err != nil {
 		Log.Error(err)
 	}
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits > 1 but was %d", got.TotalHits))
 	}
+	fmt.Printf("Got %d hits\n", got.TotalHits )
 	id := got.Files[0].Id
 
 	file, _ := filesService.FileById(id)

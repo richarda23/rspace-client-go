@@ -9,8 +9,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
+	"strings"
+	"errors"
 )
 
 type FileService struct {
@@ -21,10 +22,22 @@ func filesUrl() string {
 	return getenv(BASE_URL_ENV_NAME) + "/files"
 }
 
-// Paginated listing of Files
-func (fs *FileService) Files(config RecordListingConfig) (*FileList, error) {
+
+// Paginated listing of Files. Optionally the listing can be filtered by a media type
+// of 'document', image', or 'av'
+func (fs *FileService) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
 	time.Sleep(fs.Delay)
-	url := filesUrl() + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	var validMediaTypes  = []string{"document", "av", "image"}
+	params := config.toParams()
+	if len(mediaType) > 0 {
+		if ok := validateArrayContains(validMediaTypes, []string{mediaType}); !ok {
+			return nil, errors.New("Invalid media type: Must be one of " + strings.Join(validMediaTypes,","))
+		}
+		params.Add("mediaType", mediaType)
+	}
+	
+	encoded := params.Encode()
+	url := filesUrl() + "?" + encoded
 	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
