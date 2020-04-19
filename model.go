@@ -183,15 +183,15 @@ type IndentifiableNamable struct {
 	Name     string
 }
 
-func (item *IndentifiableNamable) GetId() int {
+func (item IndentifiableNamable) GetId() int {
 	return item.Id;
 }
 
-func (item *IndentifiableNamable) GetGlobalId() string {
+func (item IndentifiableNamable) GetGlobalId() string {
 	return item.GlobalId;
 }
 
-func (item *IndentifiableNamable) GetName() string {
+func (item IndentifiableNamable) GetName() string {
 	return item.Name;
 }
 
