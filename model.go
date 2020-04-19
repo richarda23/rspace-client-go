@@ -86,7 +86,7 @@ type UserList struct {
 
 //Summary information about a Document
 type DocumentInfo struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	Created        string
 	LastModified   string
 	ParentFolderId int
@@ -109,7 +109,7 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 
 // FileInfo holds metadata about Files
 type FileInfo struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	ContentType string
 	Size        int
 	Caption     string
@@ -122,7 +122,7 @@ func (fi *FileInfo) CreatedTime() (time.Time, error) {
 }
 
 type Folder struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	Created        string
 	LastModified   string
 	IsNotebook     bool `json:"notebook"`
@@ -137,7 +137,7 @@ func (f *Folder) LastModifiedTime() (time.Time, error) {
 }
 
 type FolderTreeItem struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	Created      string
 	LastModified string
 	IsNotebook   bool `json:"notebook"`
@@ -177,26 +177,26 @@ type BasicInfo interface {
 	GetGlobalId() string
 }
 
-type IndentifiableNamable struct {
+type IdentifiableNamable struct {
 	Id       int
 	GlobalId string
 	Name     string
 }
 
-func (item IndentifiableNamable) GetId() int {
+func (item IdentifiableNamable) GetId() int {
 	return item.Id;
 }
 
-func (item IndentifiableNamable) GetGlobalId() string {
+func (item IdentifiableNamable) GetGlobalId() string {
 	return item.GlobalId;
 }
 
-func (item IndentifiableNamable) GetName() string {
+func (item IdentifiableNamable) GetName() string {
 	return item.Name;
 }
 
 type Field struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	Type         string
 	Content      string
 	LastModified string
@@ -550,7 +550,7 @@ type FormList struct {
 }
 
 type Form struct {
-	*IndentifiableNamable
+	*IdentifiableNamable
 	Version   int
 	FormState string
 	StableId  string
