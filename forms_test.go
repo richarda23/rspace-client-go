@@ -7,8 +7,11 @@ import (
 
 func TestGetForms(t *testing.T) {
 	cfg := NewRecordListingConfig()
-	got, err := webClient.FormS.Forms(cfg)
-	fmt.Println(err)
+	got, err := webClient.Forms(cfg)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(got)
 	assertNotNil(t, got, "forms listing should not be nil")
 	assertTrue(t, len(got.Forms) > 0, "must be at least 1 form")
 	for _, v := range got.Forms {

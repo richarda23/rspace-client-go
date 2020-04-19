@@ -13,7 +13,7 @@ func TestActivityGet(t *testing.T) {
 	var q *ActivityQuery
 	builder.Domain("RECORD")
 	q, _ = builder.Build()
-	result, err = webClient.ActivityS.Activities(q)
+	result, err = webClient.Activities(q)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -21,7 +21,7 @@ func TestActivityGet(t *testing.T) {
 	//get non-existent results
 	builder.DateFrom(time.Now().AddDate(1, 0, 0))
 	q, _ = builder.Build()
-	result, err = webClient.ActivityS.Activities(q)
+	result, err = webClient.Activities(q)
 	if err != nil {
 		fmt.Println(err)	
 	}
@@ -30,7 +30,7 @@ func TestActivityGet(t *testing.T) {
 	builder = ActivityQueryBuilder{}
 	builder.DateTo(time.Now().AddDate(-10, 0, 0))
 	q, _ = builder.Build()
-	result, err = webClient.ActivityS.Activities(q)
+	result, err = webClient.Activities(q)
 	assertIntEquals(t, 0, result.TotalHits, "")
 }
 func TestActivityForDocumentGet(t *testing.T) {
@@ -38,7 +38,7 @@ func TestActivityForDocumentGet(t *testing.T) {
 	created := webClient.NewEmptyBasicDocument(name, "")
 	builder := ActivityQueryBuilder{}
 	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
-	result, err := webClient.ActivityS.Activities(q)
+	result, err := webClient.Activities(q)
 	assertNil(t, err, "error should be nil")
 	assertIntEquals(t, 1, result.TotalHits, "")
 	assertStringEquals(t, "CREATE", result.Activities[0].Action, "")

@@ -170,11 +170,29 @@ type FileList struct {
 	Links      []Link `json:"_links"`
 	Files      []FileInfo
 }
+// BasicInfo provides simple information common to many RSpace resources
+type BasicInfo interface {
+	GetName() string
+	GetId() int
+	GetGlobalId() string
+}
 
 type IndentifiableNamable struct {
 	Id       int
 	GlobalId string
 	Name     string
+}
+
+func (item *IndentifiableNamable) GetId() int {
+	return item.Id;
+}
+
+func (item *IndentifiableNamable) GetGlobalId() string {
+	return item.GlobalId;
+}
+
+func (item *IndentifiableNamable) GetName() string {
+	return item.Name;
 }
 
 type Field struct {

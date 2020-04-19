@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"strconv"
 	"time"
 )
 
@@ -14,11 +13,13 @@ func formsUrl() string {
 	return getenv(BASE_URL_ENV_NAME) + "/forms"
 }
 
-// FormTree produces paginated listing of items in form. If formId is 0 then Home Form is lister
+// FormTree produces paginated listing of items in form
 func (fs *FormService) Forms(config RecordListingConfig) (*FormList, error) {
 	time.Sleep(fs.Delay)
 	url := formsUrl()
-	url = url + "?pageSize=" + strconv.Itoa(config.PageSize) + "&pageNumber=" + strconv.Itoa(config.PageNumber)
+	if paramStr := config.toParams().Encode(); len(paramStr) > 0 {
+		url = url + "?" + paramStr
+	}
 	data, err := DoGet(url)
 	if err != nil {
 		return nil, err
