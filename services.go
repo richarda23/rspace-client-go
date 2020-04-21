@@ -59,8 +59,8 @@ func (ds *RsWebClient) Documents (config RecordListingConfig) (*DocumentList, er
 }
 
 // Activities queries the audit trail and returns a list of events.
-func (ds *RsWebClient) Activities (query *ActivityQuery) (*ActivityList, error){
-	return ds.activityS.Activities(query)
+func (ds *RsWebClient) Activities (query *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error){
+	return ds.activityS.Activities(query, pgCrit)
 }
 
 // SearchDocuments performs a global search for 'searchTerm' across all  searchable fields

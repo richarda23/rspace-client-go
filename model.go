@@ -308,10 +308,10 @@ type Email string
 type UserRoleType int
 
 const (
-	user UserRoleType = iota
-	pi
-	admin
-	sysadmin
+	User UserRoleType = iota
+	Pi
+	Admin
+	Sysadmin
 )
 
 var userRoles = [4]string{"ROLE_USER", "ROLE_PI", "ROLE_ADMIN", "ROLE_SYSADMIN"}
@@ -339,73 +339,73 @@ func (upost *UserPost) String() string {
 
 // Use this to build a UserPost object to create a new user from.
 type UserPostBuilder struct {
-	Username    string
-	Email       Email
-	FirstName   string
-	LastName    string
-	Password    string
-	Role        UserRoleType
-	Affiliation string
-	ApiKey      string
+	username    string
+	email       Email
+	firstName   string
+	lastName    string
+	password    string
+	role        UserRoleType
+	affiliation string
+	apiKey      string
 }
 
-func (b *UserPostBuilder) username(username string) *UserPostBuilder {
-	b.Username = username
+func (b *UserPostBuilder) Username(username string) *UserPostBuilder {
+	b.username = username
 	return b
 }
-func (b *UserPostBuilder) password(password string) *UserPostBuilder {
-	b.Password = password
+func (b *UserPostBuilder) Password(password string) *UserPostBuilder {
+	b.password = password
 	return b
 }
-func (b *UserPostBuilder) email(emailAddress Email) *UserPostBuilder {
-	b.Email = emailAddress
+func (b *UserPostBuilder) Email(emailAddress Email) *UserPostBuilder {
+	b.email = emailAddress
 	return b
 }
-func (b *UserPostBuilder) firstName(firstName string) *UserPostBuilder {
-	b.FirstName = firstName
+func (b *UserPostBuilder) FirstName(firstName string) *UserPostBuilder {
+	b.firstName = firstName
 	return b
 }
-func (b *UserPostBuilder) lastName(lastName string) *UserPostBuilder {
-	b.LastName = lastName
+func (b *UserPostBuilder) LastName(lastName string) *UserPostBuilder {
+	b.lastName = lastName
 	return b
 }
-func (b *UserPostBuilder) role(role UserRoleType) *UserPostBuilder {
-	b.Role = role
+func (b *UserPostBuilder) Role(role UserRoleType) *UserPostBuilder {
+	b.role = role
 	return b
 }
-func (b *UserPostBuilder) affiliation(affiliation string) *UserPostBuilder {
-	b.Affiliation = affiliation
+func (b *UserPostBuilder) Affiliation(affiliation string) *UserPostBuilder {
+	b.affiliation = affiliation
 	return b
 }
-func (b *UserPostBuilder) apiKey(apiKey string) *UserPostBuilder {
-	b.ApiKey = apiKey
+func (b *UserPostBuilder) ApiKey(apiKey string) *UserPostBuilder {
+	b.apiKey = apiKey
 	return b
 }
-func (b *UserPostBuilder) build() (*UserPost, error) {
+func (b *UserPostBuilder) Build() (*UserPost, error) {
 	rc := UserPost{}
-	if len(b.Username) < 6 {
+	if len(b.username) < 6 {
 		return nil, errors.New("username must be >= 6 characters")
 	}
-	if len(b.Password) < 6 {
+	if len(b.password) < 6 {
 		return nil, errors.New("Password must be >= 8 characters")
 	}
-	if len(b.FirstName) == 0 {
+	if len(b.firstName) == 0 {
 		return nil, errors.New("Please supply first name")
 	}
-	if len(b.LastName) == 0 {
+	if len(b.lastName) == 0 {
 		return nil, errors.New("Please supply last name")
 	}
-	if len(string(b.Email)) < 3 {
+	if len(string(b.email)) < 3 {
 		return nil, errors.New("Please supply valid email address")
 	}
-	rc.FirstName = b.FirstName
-	rc.Password = b.Password
-	rc.Username = b.Username
-	rc.LastName = b.LastName
-	rc.Email = string(b.Email)
-	rc.Role = userRoles[b.Role]
-	rc.Affiliation = b.Affiliation
-	rc.ApiKey = b.ApiKey
+	rc.FirstName = b.firstName
+	rc.Password = strings.TrimSpace(b.password)
+	rc.Username = b.username
+	rc.LastName = b.lastName
+	rc.Email = string(b.email)
+	rc.Role = userRoles[b.role]
+	rc.Affiliation = b.affiliation
+	rc.ApiKey = b.apiKey
 	return &rc, nil
 }
 

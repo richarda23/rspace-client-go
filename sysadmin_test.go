@@ -10,7 +10,7 @@ import (
 
 func TestUserNew(t *testing.T) {
 	// given
-	userPost := createRandomUser(pi)
+	userPost := createRandomUser(Pi)
 	got, err := webClient.UserNew(userPost)
 	if err != nil {
 		Log.Error(err)
@@ -34,7 +34,7 @@ func TestUsers(t *testing.T) {
 
 func TestGroupNew(t *testing.T) {
 	// given a PI user
-	userPiPost := createRandomUser(pi)
+	userPiPost := createRandomUser(Pi)
 	var err error
 	var user *UserInfo
 	user, err = webClient.UserNew(userPiPost)
@@ -63,6 +63,6 @@ func createRandomUser(userRole UserRoleType) *UserPost {
 	firstName := randomAlphanumeric(3)
 	lastName := randomAlphanumeric(8)
 	userBuilder := UserPostBuilder{}
-	userPost, _ := userBuilder.affiliation("somewhere").username(uname).password(pwd).email(email).firstName(firstName).lastName(lastName).role(userRole).build()
+	userPost, _ := userBuilder.Affiliation("somewhere").Username(uname).Password(pwd).Email(email).FirstName(firstName).LastName(lastName).Role(userRole).Build()
 	return userPost
 }

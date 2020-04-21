@@ -17,20 +17,21 @@ func auditUrl() string {
 }
 
 // Activities queries the audit trail for activities, by user, date or activity type
-func (fs *ActivityService) Activities(q *ActivityQuery) (*ActivityList, error) {
+func (fs *ActivityService) Activities(q *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error) {
 	time.Sleep(fs.Delay)
 	urlStr := auditUrl()
 	var encodedParams string
+	pgCrit.OrderBy="date"
+	var params url.Values = pgCrit.toParams()
 	if q != nil {
-		params := url.Values{}
 		if len(q.Users) > 0 {
-			params.Add("users", strings.Join(q.Users, ","))
+			params.Add("usernames", strings.Join(q.Users, ","))
 		}
 		if len(q.Domains) > 0 {
-			params.Add("domains", strings.Join(q.Domains, ","))
+			params.Add("domains", strings.ToUpper(strings.Join(q.Domains, ",")))
 		}
 		if len(q.Actions) > 0 {
-			params.Add("actions", strings.Join(q.Actions, ","))
+			params.Add("actions", strings.ToUpper(strings.Join(q.Actions, ",")))
 		}
 		if len(q.Oid) > 0 {
 			params.Add("oid", q.Oid)

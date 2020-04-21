@@ -13,30 +13,30 @@ func TestUserPost(t *testing.T) {
 	var builder = &UserPostBuilder{}
 	var err error = nil
 	var userpost *UserPost = nil
-	userpost, err = builder.username("user1234").password("secret23").firstName("first").lastName("last").email("a@b.com").role(user).affiliation("u-somewhere").apiKey("abcdefg").build()
+	userpost, err = builder.Username("user1234").Password("secret23").FirstName("first").LastName("last").Email("a@b.com").Role(User).Affiliation("u-somewhere").ApiKey("abcdefg").Build()
 	assertNotNil(t, userpost, "UserPost was nil")
 
-	// key, affiliation are optional
+	// key, Affiliation are optional
 	builder = &UserPostBuilder{}
-	userpost, err = builder.username("user1234").password("secret23").firstName("first").lastName("last").email("a@b.com").role(user).build()
+	userpost, err = builder.Username("user1234").Password("secret23").FirstName("first").LastName("last").Email("a@b.com").Role(User).Build()
 	assertNotNil(t, userpost, "UserPost was nil")
 
 	builder = &UserPostBuilder{}
-	userpost, err = builder.build()
+	userpost, err = builder.Build()
 	assertNotNil(t, err, "error was nil")
 
 	builder = &UserPostBuilder{}
-	userpost, err = builder.username("abc").password("secret23").firstName("first").lastName("last").email("a@b.com").role(user).affiliation("u-somewhere").apiKey("abcdefg").build()
+	userpost, err = builder.Username("abc").Password("secret23").FirstName("first").LastName("last").Email("a@b.com").Role(User).Affiliation("u-somewhere").ApiKey("abcdefg").Build()
 	assertNotNil(t, err, "error was nil")
 
 	builder = &UserPostBuilder{}
 	tooShortPwd := "secret2"
-	userpost, err = builder.username("user1234").password(tooShortPwd).firstName("first").lastName("last").email("a@b.com").role(user).affiliation("u-somewhere").apiKey("abcdefg").build()
+	userpost, err = builder.Username("user1234").Password(tooShortPwd).FirstName("first").LastName("last").Email("a@b.com").Role(User).Affiliation("u-somewhere").ApiKey("abcdefg").Build()
 	assertNotNil(t, userpost, "error was nil")
 
 	builder = &UserPostBuilder{}
 	tooShortEmail := Email("@")
-	userpost, err = builder.username("user1234").password(tooShortPwd).firstName("first").lastName("last").email(tooShortEmail).role(user).affiliation("u-somewhere").apiKey("abcdefg").build()
+	userpost, err = builder.Username("user1234").Password(tooShortPwd).FirstName("first").LastName("last").Email(tooShortEmail).Role(User).Affiliation("u-somewhere").ApiKey("abcdefg").Build()
 	assertNotNil(t, userpost, "error was nil")
 
 }
