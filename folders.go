@@ -52,7 +52,6 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 		return nil, err
 	}
 	var result = Folder{}
-	fmt.Println(string(data))
 	json.Unmarshal(data, &result)
 	return &result, err
 }
@@ -86,7 +85,6 @@ func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 ///	} else {
 		formData, _ = json.Marshal(post)
 //	}
-	Log.Info(string(formData))
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", foldersUrl(), bytes.NewBuffer(formData))
 	if err != nil {

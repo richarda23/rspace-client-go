@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/url"
 	"strconv"
 	"time"
@@ -18,7 +17,6 @@ func systemUrl() string {
 
 // DocumentNew creates a new RSpace document
 func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
-	fmt.Println(ds.Delay)
 	time.Sleep(ds.Delay)
 	data, err := doPostJsonBody(post, systemUrl()+"/users")
 	if err != nil {
@@ -41,7 +39,6 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 	}
 	encoded := params.Encode()
 	url := systemUrl() + "/users?" + encoded
-	fmt.Println(url)
 	data, err := DoGet(url)
 	if err != nil {
 		return nil, err

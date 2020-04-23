@@ -1,7 +1,6 @@
 package rspace
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -63,10 +62,6 @@ type FormId struct {
 func DocumentPostNew(name string, tags string, formId int, content []string) *DocumentPost {
 	id := FormId{formId}
 	c := make([]FieldContent, 10)
-	for _, v := range content {
-		fmt.Println(v)
-		//append(c, FieldContent{v})
-	}
 	post := DocumentPost{name, tags, id, c}
 	return &post
 }
@@ -243,31 +238,31 @@ type GroupInfo struct {
 }
 
 type Link struct {
-	Link url.URL
+	Link string
 	Rel  string
 }
 
-func (l *Link) UnmarshalJSON(j []byte) error {
-	var rawStrings map[string]string
-	err := json.Unmarshal(j, &rawStrings)
-	if err != nil {
-		return err
-	}
+// func (l *Link) UnmarshalJSON(j []byte) error {
+// 	var rawStrings map[string]string
+// 	err := json.Unmarshal(j, &rawStrings)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for k, v := range rawStrings {
-		if strings.ToLower(k) == "link" {
-			u, err := url.Parse(v)
-			if err != nil {
-				return err
-			}
-			l.Link = *u
-		}
-		if strings.ToLower(k) == "rel" {
-			l.Rel = v
-		}
-	}
-	return nil
-}
+// 	for k, v := range rawStrings {
+// 		if strings.ToLower(k) == "link" {
+// 			u, err := url.Parse(v)
+// 			if err != nil {
+// 				return err
+// 			}
+// 			l.Link = v
+// 		}
+// 		if strings.ToLower(k) == "rel" {
+// 			l.Rel = v
+// 		}
+// 	// }
+// 	return nil
+// }
 
 //RSpaceError encapsulates server or client side errors leading to a request being rejected.
 type RSpaceError struct {

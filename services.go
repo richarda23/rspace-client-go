@@ -79,10 +79,12 @@ func (ds *RsWebClient) Status () (*Status, error){
 }
 
 // NewEmptyBasicDocument creates a Basic (single text field) document with no content
-func (ds *RsWebClient) NewEmptyBasicDocument (name string, tags string) *DocumentInfo{
+func (ds *RsWebClient) NewEmptyBasicDocument (name, tags string) *DocumentInfo{
 	return ds.documentS.NewEmptyBasicDocument(name, tags)
 }
-
+func (ds *RsWebClient) NewBasicDocumentWithContent (name, tags, content string) *DocumentInfo{
+	return ds.documentS.NewBasicDocumentWithContent(name, tags, content)
+}
 // FolderTree returns a list of items in the specified folder
 func (fs *RsWebClient) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
 	return fs.folderS.FolderTree(config , folderId , typesToInclude ) 
