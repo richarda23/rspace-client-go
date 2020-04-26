@@ -14,14 +14,14 @@ type FolderService struct {
 	BaseService
 }
 
-func foldersUrl() string {
-	return getenv(BASE_URL_ENV_NAME) + "/folders"
+func (fs *FolderService) foldersUrl() string {
+	return fs.BaseUrl.String() + "/folders"
 }
 
 // FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
 func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
 	time.Sleep(fs.Delay)
-	urlStr := foldersUrl() + "/tree"
+	urlStr := fs.foldersUrl() + "/tree"
 	if folderId != 0 {
 		urlStr = urlStr + "/" + strconv.Itoa(folderId)
 	}
@@ -34,7 +34,7 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 		urlStr = urlStr + "?" + encoded
 	}
 	//fmt.Println(url)
-	data, err := DoGet(urlStr)
+	data, err := fs.doGet(urlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +46,8 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 //DocumentById retrieves full information about the folder
 func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	time.Sleep(fs.Delay)
-	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
-	data, err := DoGet(url)
+	url := fmt.Sprintf("%s/%d", fs.foldersUrl(), folderId)
+	data, err := fs.doGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 // DeleteFolder attempts to delete the folder or noteboon with the specified ID
 func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 	time.Sleep(fs.Delay)
-	url := fmt.Sprintf("%s/%d", foldersUrl(), folderId)
-	resp, err := DoDelete(url)
+	url := fmt.Sprintf("%s/%d", fs.foldersUrl(), folderId)
+	resp, err := fs.doDelete(url)
 	if resp == false {
 		return false, err
 	} else {
@@ -73,24 +73,14 @@ func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 	time.Sleep(fs.Delay)
 	var formData []byte
-//	if post.ParentFolderId == 0 {
-//		noIdPost := struct {
-//			Name     string `json:"name"`
-//			Notebook bool   `json:"notebook"`
-//		}{
-//			post.Name,
-//			post.IsNotebook,
-//		}
-//		formData, _ = json.Marshal(&noIdPost)
-///	} else {
 		formData, _ = json.Marshal(post)
-//	}
+
 	hc := http.Client{}
-	req, err := http.NewRequest("POST", foldersUrl(), bytes.NewBuffer(formData))
+	req, err := http.NewRequest("POST", fs.foldersUrl(), bytes.NewBuffer(formData))
 	if err != nil {
 		return nil, err
 	}
-	AddAuthHeader(req)
+	fs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {

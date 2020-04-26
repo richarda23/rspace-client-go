@@ -14,14 +14,14 @@ type DocumentService struct {
 	BaseService
 }
 
-func documentsUrl() string {
-	return getenv(BASE_URL_ENV_NAME) + "/documents"
+func (ds *DocumentService) documentsUrl() string {
+	return ds.BaseUrl.String() + "/documents"
 }
 
 // GetStatus returns the result of the /status endpoint
 func (ds *DocumentService) GetStatus() (*Status, error) {
 	time.Sleep(ds.Delay)
-	status, err := DoGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	status, err := ds.doGet(getenv(BASE_URL_ENV_NAME) + "/status")
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList,
 }
 
 func (ds *DocumentService) _doDocList(url string) (*DocumentList, error) {
-	data, err := DoGet(url)
+	data, err := ds.doGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (ds *DocumentService) _generateUrl(config RecordListingConfig, searchTerm s
 		}
 	}
 	encoded := params.Encode()
-	url := documentsUrl() + "?" + encoded
+	url := ds.documentsUrl() + "?" + encoded
 	return url
 }
 
@@ -82,8 +82,8 @@ func (ds *DocumentService) AdvancedSearchDocuments(config RecordListingConfig, s
 // DocumentById retrieves full document content
 func (ds *DocumentService) DocumentById(docId int) (*Document, error) {
 	time.Sleep(ds.Delay)
-	url := fmt.Sprintf("%s/%d", documentsUrl(), docId)
-	data, err := DoGet(url)
+	url := fmt.Sprintf("%s/%d", ds.documentsUrl(), docId)
+	data, err := ds.doGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +93,10 @@ func (ds *DocumentService) DocumentById(docId int) (*Document, error) {
 }
 
 // DeleteDocument attempts to delete the document with the specified ID
-func (fs *DocumentService) DeleteDocument(documentId int) (bool, error) {
-	time.Sleep(fs.Delay)
-	url := fmt.Sprintf("%s/%d", documentsUrl(), documentId)
-	return DoDelete(url)
+func (ds *DocumentService) DeleteDocument(documentId int) (bool, error) {
+	time.Sleep(ds.Delay)
+	url := fmt.Sprintf("%s/%d", ds.documentsUrl(), documentId)
+	return ds.doDelete(url)
 }
 
 // DocumentNew creates a new RSpace document
@@ -104,8 +104,8 @@ func (ds *DocumentService) DocumentNew(post *DocumentPost) *DocumentInfo {
 	time.Sleep(ds.Delay)
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
-	req, err := http.NewRequest("POST", documentsUrl(), bytes.NewBuffer(formData))
-	AddAuthHeader(req)
+	req, err := http.NewRequest("POST", ds.documentsUrl(), bytes.NewBuffer(formData))
+	ds.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {
@@ -125,21 +125,21 @@ func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string,
 	fields := make([]FieldContent, 1)
 	fields[0] = content
 	post.Fields = fields
-	return doPostCreateDocument(post)
+	return ds.doPostCreateDocument(post)
 }
 
 // NewEmptyBasicDocument creates a new, empty BasicDocument with no content.
 func (ds *DocumentService) NewEmptyBasicDocument(name string, tags string) *DocumentInfo {
 	time.Sleep(ds.Delay)
 	post := BasicPost(name, tags)
-	return doPostCreateDocument(post)
+	return ds.doPostCreateDocument(post)
 }
 
-func doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
+func (ds *DocumentService) doPostCreateDocument(postData *DocumentPost) *DocumentInfo {
 	hc := http.Client{}
 	formData, _ := json.Marshal(postData)
-	req, err := http.NewRequest("POST", documentsUrl(), bytes.NewBuffer(formData))
-	AddAuthHeader(req)
+	req, err := http.NewRequest("POST", ds.documentsUrl(), bytes.NewBuffer(formData))
+	ds.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := hc.Do(req)
 	if err != nil {

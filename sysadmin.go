@@ -5,20 +5,21 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+//	"fmt"
 )
 
 type SysadminService struct {
 	BaseService
 }
 
-func systemUrl() string {
-	return getenv(BASE_URL_ENV_NAME) + "/sysadmin"
+func (sysSvc *SysadminService) systemUrl() string {
+	return sysSvc.BaseUrl.String() + "/sysadmin"
 }
 
-// DocumentNew creates a new RSpace document
+// UserNew creates a new user account.
 func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 	time.Sleep(ds.Delay)
-	data, err := doPostJsonBody(post, systemUrl()+"/users")
+	data, err := ds.doPostJsonBody(post, ds.systemUrl()+"/users")
 	if err != nil {
 		return nil, err
 	}
@@ -27,6 +28,7 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 	return result, nil
 }
 
+//Users lists users' biographical information
 func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
 	time.Sleep(ds.Delay)
 	params := url.Values{}
@@ -38,8 +40,11 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 		params.Add("createdBefore", creationDateBefore.Format("2006-01-02"))
 	}
 	encoded := params.Encode()
-	url := systemUrl() + "/users?" + encoded
-	data, err := DoGet(url)
+	url := ds.BaseUrl.String() + "/sysadmin/users"
+	if len(encoded) > 0 {
+		url = url + "?" + encoded
+	}
+	data, err := ds.doGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -49,9 +54,10 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 
 }
 
+//GroupNew creates a new group from existing users
 func (ds *SysadminService) GroupNew(post *GroupPost) (*GroupInfo, error) {
 	time.Sleep(ds.Delay)
-	data, err := doPostJsonBody(post, systemUrl()+"/groups")
+	data, err := ds.doPostJsonBody(post, ds.systemUrl()+"/groups")
 	if err != nil {
 		return nil, err
 	}

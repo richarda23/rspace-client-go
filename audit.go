@@ -12,14 +12,14 @@ type ActivityService struct {
 	BaseService
 }
 
-func auditUrl() string {
-	return getenv(BASE_URL_ENV_NAME) + "/activity"
+func (as *ActivityService) auditUrl() string {
+	return as.BaseUrl.String()+ "/activity"
 }
 
 // Activities queries the audit trail for activities, by user, date or activity type
-func (fs *ActivityService) Activities(q *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error) {
-	time.Sleep(fs.Delay)
-	urlStr := auditUrl()
+func (as *ActivityService) Activities(q *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error) {
+	time.Sleep(as.Delay)
+	urlStr := as.auditUrl()
 	var encodedParams string
 	pgCrit.OrderBy="date"
 	var params url.Values = pgCrit.toParams()
@@ -47,7 +47,7 @@ func (fs *ActivityService) Activities(q *ActivityQuery, pgCrit RecordListingConf
 	if len(encodedParams) > 0 {
 		urlStr = urlStr + "?" + encodedParams
 	}
-	data, err := DoGet(urlStr)
+	data, err := as.doGet(urlStr)
 	if err != nil {
 		return nil, err
 	}

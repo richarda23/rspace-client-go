@@ -77,9 +77,13 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 
 	builder4 := &SearchQueryBuilder{}
 	q4 := builder4.AddTerm("FM2", FORM).Build()
-	results4, _ := webClient.AdvancedSearchDocuments(cfg, q4)
+	results4, err3 := webClient.AdvancedSearchDocuments(cfg, q4)
+	if err3 != nil {
+		fmt.Println(err3)
+	} else {
 	assertIntEquals(t, 1, results4.TotalHits, "")
 	fmt.Println(results4.Documents[0])
+	}
 
 }
 

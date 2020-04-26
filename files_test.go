@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 )
 
 const (
@@ -12,16 +11,16 @@ const (
 	TESTFILEUPDATE = "testdata/RSpaceConfiguration.md"
 )
 
-var filesService *FileService = &FileService{
-	BaseService: BaseService{
-		Delay: time.Duration(100) * time.Millisecond}}
+// var filesService *FileService = &FileService{
+// 	BaseService: BaseService{
+// 		Delay: time.Duration(100) * time.Millisecond}}
 
 func TestFileList(t *testing.T) {
 	cfg := NewRecordListingConfig()
 
-	_, err1 := filesService.Files(cfg, "invalidMediaType");
+	_, err1 := webClient.Files(cfg, "invalidMediaType");
 	assertNotNil(t, err1, "invalid media type should cause error")	
-	got, err := filesService.Files(cfg, "")
+	got, err := webClient.Files(cfg, "")
 	if err != nil {
 		Log.Error(err)
 	}
@@ -31,17 +30,17 @@ func TestFileList(t *testing.T) {
 	fmt.Printf("Got %d hits\n", got.TotalHits )
 	id := got.Files[0].Id
 
-	file, _ := filesService.FileById(id)
+	file, _ := webClient.FileById(id)
 	fmt.Println(file.Id)
 }
 func nameFromPath(path string) string {
 	return strings.Split(path, "/")[1]
 }
 func TestFileReplace(t *testing.T) {
-	got, err := filesService.UploadFile(TESTFILEUPLOAD)
+	got, err := webClient.UploadFile(TESTFILEUPLOAD)
 	fmt.Println(got)
 	fmt.Printf("uploaded id of file to replace is is %d", got.Id)
-	got, err = filesService.UploadFileNewVersion(TESTFILEUPDATE, got.Id)
+	got, err = webClient.UploadFileNewVersion(TESTFILEUPDATE, got.Id)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -50,7 +49,7 @@ func TestFileReplace(t *testing.T) {
 	}
 }
 func TestFileUpload(t *testing.T) {
-	got, err := filesService.UploadFile(TESTFILEUPLOAD)
+	got, err := webClient.UploadFile(TESTFILEUPLOAD)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -60,5 +59,5 @@ func TestFileUpload(t *testing.T) {
 		fail(t, fmt.Sprintf("expected name %s  but was %s", nameFromPath(TESTFILEUPLOAD), got.Name))
 	}
 	outfile := fmt.Sprintf("/tmp/%s", got.Name)
-	filesService.DownloadFile(got.Id, outfile)
+	webClient.Download(got.Id, outfile)
 }

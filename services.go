@@ -3,6 +3,12 @@ package rspace
 import (
 	"net/url"
 	"time"
+	"net/http"
+	"io/ioutil"
+	"io"
+	"os"
+	"encoding/json"
+	"bytes"
 )
 
 var (
@@ -18,6 +24,88 @@ type BaseService struct {
 	Delay   time.Duration
 	ApiKey  string
 	BaseUrl *url.URL
+}
+
+func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	formData, _ := json.Marshal(post)
+	hc := http.Client{}
+	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
+	bs.addAuthHeader(req)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := hc.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err2 := testResponseForError(data, resp); err2 != nil {
+		return nil, err2
+	}
+	return data, nil
+}
+
+// doDelete  attempts to delete a resource specified by the URL. If successful, returns true, else returns false, with a possible
+// non-null error
+func (bs *BaseService) doDelete(url string) (bool, error) {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	bs.addAuthHeader(req)
+	resp, e := client.Do(req)
+	if e != nil {
+		Log.Error(e)
+		return false, e
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err := testResponseForError(data, resp); err != nil {
+		return false, err
+	}
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// DoGetToFile saves the response from an HTTP GET request to the specified file.
+// If the response fails or the file cannot be created returns an error.
+// 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
+func (bs *BaseService) doGetToFile(url string, filepath string) error {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	bs.addAuthHeader(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, resp.Body)
+	return err
+}
+
+// doGet makes an authenticated API request to a URL expecting a string
+// response (typically JSON)
+func (bs *BaseService) doGet(url string) ([]byte, error) {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	bs.addAuthHeader(req)
+	resp, e := client.Do(req)
+	if e != nil {
+		Log.Error(e)
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Println("resp:" + string(data))
+	if err := testResponseForError(data, resp); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (bs *BaseService) addAuthHeader(req *http.Request) {
+	req.Header.Add("apiKey", bs.ApiKey)
 }
 
 func baseService() BaseService {
@@ -102,6 +190,22 @@ func (fs *RsWebClient) UploadFile(path string) (*FileInfo, error) {
 func (fs *RsWebClient) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
 	return fs.fileS.Files(config, mediaType)
 }
+
+// Lists Gallery files, optionally filtered by a media type
+func (fs *RsWebClient) FileById(id int) (*FileInfo, error) {
+	return fs.fileS.FileById(id)
+}
+
+func (fs *RsWebClient) UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
+	return fs.fileS.UploadFileNewVersion(path, fileToReplaceId)
+}	
+
+//Download downloads a file attachment with the given ID to the location set by the path.
+func (fs *RsWebClient) Download(id int, path string) (*FileInfo, error) {
+	return fs.fileS.DownloadFile(id, path)
+}
+
+
 // DeleteFolder deletes the given folder
 func (fs *RsWebClient) DeleteFolder(folderId int) (bool, error) {
 	return fs.folderS.DeleteFolder(folderId)
