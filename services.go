@@ -120,6 +120,7 @@ type RsWebClient struct {
 	formS     *FormService
 	fileS     *FileService
 	sysadminS *SysadminService
+	importS   *ImportService
 }
 
 func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
@@ -216,6 +217,10 @@ func (fs *RsWebClient) FolderNew(post *FolderPost) (*Folder, error) {
 	return fs.folderS.FolderNew(post)
 }
 
+func (fs *RsWebClient) ImportWord(path string, folderId int, imageFolderId int) (*DocumentInfo, error) {
+	return fs.importS.ImportWord(path, folderId, imageFolderId)
+}
+
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	base := baseService()
 	base.ApiKey = apiKey
@@ -227,5 +232,6 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.formS = &FormService{BaseService: base}
 	wc.fileS = &FileService{BaseService: base}
 	wc.sysadminS = &SysadminService{BaseService: base}
+	wc.importS = &ImportService{BaseService: base}
 	return &wc
 }

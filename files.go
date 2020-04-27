@@ -62,7 +62,6 @@ func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 
 // UploadFile uploads the file specified to the 'ApiInbox' subfolder of the
 // appropriate Gallery section
-// Panics if file cannot be read.
 // Returns either a FileInfo of the created file or an error if operation did not succeed.
 func (fs *FileService) UploadFile(path string) (*FileInfo, error) {
 	time.Sleep(fs.Delay)
@@ -80,14 +79,29 @@ func (fs *FileService) _doUpload(path string, fileToReplaceId int) (*FileInfo, e
 	if fileToReplaceId < 0 {
 		return nil, fmt.Errorf("fileToReplaceId should be 0 or a real ID, not %d", fileToReplaceId)
 	}
+	url := fs.filesUrl()
+	if fileToReplaceId != 0 {
+		url = fmt.Sprintf("%s/%d/file", url, fileToReplaceId)
+	}
+	resp, err := fs.doMultipart(path, url)
+	if err != nil {
+	 return nil, err
+	}
+	result := &FileInfo{}
+	Unmarshal(resp, result)
+	return result, nil
+}
+
+func (bs *BaseService) doMultipart (path string, url string) (*http.Response, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer file.Close()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("file", filepath.Base(path))
+	
 	if err != nil {
 		return nil, err
 	}
@@ -99,20 +113,15 @@ func (fs *FileService) _doUpload(path string, fileToReplaceId int) (*FileInfo, e
 	}
 
 	hc := http.Client{}
-	url := fs.filesUrl()
-	if fileToReplaceId != 0 {
-		url = fmt.Sprintf("%s/%d/file", url, fileToReplaceId)
-	}
 	req, err := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	fs.addAuthHeader(req)
+	bs.addAuthHeader(req)
 	resp, err := hc.Do(req)
 	if err != nil {
 		Log.Error(err)
+		return nil,err
 	}
-	result := &FileInfo{}
-	Unmarshal(resp, result)
-	return result, nil
+	return resp, nil
 }
 
 // DownloadFile retrieves the given file from RSpace and downloads to the specified directory  on local machine, which must be a writable file.
@@ -120,10 +129,10 @@ func (fs *FileService) _doUpload(path string, fileToReplaceId int) (*FileInfo, e
 func (fs *FileService) DownloadFile(fileId int, outDir string) (*FileInfo, error) {
 	downloadUrl := fmt.Sprintf("%s/%d/file", fs.filesUrl(), fileId)
 	info,err:=fs.FileById(fileId)
-	path := filepath.Join(outDir, info.GetName())
 	if err != nil {
 		return nil, err
 	}
+	path := filepath.Join(outDir, info.GetName())
 	err = fs.doGetToFile(downloadUrl, path)
 	if err != nil {
 		return nil, err
