@@ -206,7 +206,6 @@ func (fs *RsWebClient) Download(id int, path string) (*FileInfo, error) {
 	return fs.fileS.DownloadFile(id, path)
 }
 
-
 // DeleteFolder deletes the given folder
 func (fs *RsWebClient) DeleteFolder(folderId int) (bool, error) {
 	return fs.folderS.DeleteFolder(folderId)

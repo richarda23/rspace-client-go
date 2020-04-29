@@ -445,18 +445,23 @@ type UserGroupPost struct {
 	RoleInGroup string `json:"roleInGroup"`
 }
 
+// ActivityList encapsulates search results for audit events
 type ActivityList struct {
 	Activities []Activity
 	Links      []Link `json:"_links"`
 	TotalHits  int
 	PageNumber int
 }
+
+// Activity holds information abuot a particular audit event.
+// The Payload field holds arbitrary data that is specific for each event type.
 type Activity struct {
 	Username, FullName, Domain, Action string
 	Timestamp                          string
 	Payload                            interface{}
 }
 
+// TimestampTime offers the timestamp of the audit event.
 func (a *Activity) TimestampTime() (time.Time, error) {
 	return parseTimestamp(a.Timestamp)
 }
@@ -464,7 +469,7 @@ func (a *Activity) TimestampTime() (time.Time, error) {
 // GlobalId is  a Unique identifier for an RSpace object, e.g. 'GL1234' or 'SD5678'
 type GlobalId string
 
-// ActivityQuery encapsulates a auery to the /activities endpoint. Either use directly or use the ActivityQueryBuilder, which
+// ActivityQuery encapsulates a query to the /activities endpoint. Either use directly or use the ActivityQueryBuilder, which
 // provides more convenient construction and validation
 type ActivityQuery struct {
 	Domains  []string
@@ -517,6 +522,9 @@ func (b *ActivityQueryBuilder) Oid(oid GlobalId) *ActivityQueryBuilder {
 	b.oid = oid
 	return b
 }
+
+// Build generates an ActivityQuery from the builder, that is validated and ready to
+// send.
 func (b *ActivityQueryBuilder) Build() (*ActivityQuery, error) {
 	rc := ActivityQuery{}
 	rc.Domains = b.domains
@@ -537,6 +545,7 @@ func (b *ActivityQueryBuilder) Build() (*ActivityQuery, error) {
 	return &rc, nil
 }
 
+// FormList holds the results of listing Forms
 type FormList struct {
 	TotalHits  int
 	PageNumber int
@@ -544,6 +553,7 @@ type FormList struct {
 	Links      []Link `json:"_links"`
 }
 
+// Form holds basic information about a Form
 type Form struct {
 	*IdentifiableNamable
 	Version   int
