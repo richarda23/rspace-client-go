@@ -1,6 +1,6 @@
 /*
 Package rspace is an API client for interacting with the
-RSpace Electronic Lab Notebook (ELN - see http://www.researchspace.com).
+RSpace Electronic Lab Notebook (ELN - see https://www.researchspace.com).
 
 It simplifies making API requests to RSpace from a program written in Go by:
 
@@ -18,8 +18,19 @@ In order to make requests the RsWebClient needs to be instantiated with 2 argume
 
 - an API token
 
- webClient RsWebClient = rspace.NewWebClient(url, apikey)
- fmt.Println(webClient.Status())
+
+ import (
+	"fmt"
+	"net/url"
+  )
+
+  // Main entry point into testing, sets in env variables and creates web client
+  func main() {
+ 	url, _ := url.Parse("https://community.researchspace.com/api/v1")
+	apiKey := "myapikey"
+	webClient = rspace.NewWebClient(url, apiKey)
+	fmt.Println(webClient.Status())
+  }
 
 All calls can return an error if the call fails. If the error is a  400 or 500 error
 from the RSpace server, the error will be of type RSpaceError with more detailed information.

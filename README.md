@@ -4,6 +4,7 @@ rspace-client-go is an client for the RSpace API written in Go.
 
 It is built and tested against RSpace version 1.69 - this is the minimum required version.
 
+
 ## Getting started
 
 Set the following environment variables in your shell in order to be able to run tests:
@@ -13,6 +14,8 @@ Set the following environment variables in your shell in order to be able to run
 e.g.
 
     export RSPACE_API_KEY=abcdefg RSPACE_URL=https://community.researchspace.com/api/v1
+
+See [rspace.go](rspace/rspace.go) for package information
 
 ## Running tests
 
