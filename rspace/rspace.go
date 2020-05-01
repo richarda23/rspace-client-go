@@ -18,16 +18,20 @@ In order to make requests the RsWebClient needs to be instantiated with 2 argume
 
 - an API token
 
-
+ package main
  import (
 	"fmt"
 	"net/url"
   )
-
-  // Main entry point into testing, sets in env variables and creates web client
+  
   func main() {
- 	url, _ := url.Parse("https://community.researchspace.com/api/v1")
+	// url should end in 'api/v1'
+	url, _ := url.Parse("https://community.researchspace.com/api/v1")
+
+	// don't put your API key in code! use environment variable or a  config file
 	apiKey := "myapikey"
+
+	// this is facade to access API services
 	webClient = rspace.NewWebClient(url, apiKey)
 	fmt.Println(webClient.Status())
   }
