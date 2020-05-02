@@ -18,10 +18,14 @@ func (ds *DocumentService) documentsUrl() string {
 	return ds.BaseUrl.String() + "/documents"
 }
 
+func (ds *DocumentService) statusUrl() string {
+	return ds.BaseUrl.String() + "/status"
+}
+
 // GetStatus returns the result of the /status endpoint
 func (ds *DocumentService) GetStatus() (*Status, error) {
 	time.Sleep(ds.Delay)
-	status, err := ds.doGet(getenv(BASE_URL_ENV_NAME) + "/status")
+	status, err := ds.doGet(ds.statusUrl())
 	if err != nil {
 		return nil, err
 	}
