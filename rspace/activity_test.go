@@ -23,19 +23,19 @@ func TestActivityGet(t *testing.T) {
 	q, _ = builder.Build()
 	result, err = webClient.Activities(q, NewRecordListingConfig())
 	if err != nil {
-		fmt.Println(err)	
+		fmt.Println(err)
 	}
 	assertIntEquals(t, 0, result.TotalHits, "")
 	// too far in the past
 	builder = ActivityQueryBuilder{}
 	builder.DateTo(time.Now().AddDate(-10, 0, 0))
 	q, _ = builder.Build()
-	result, err = webClient.Activities(q,NewRecordListingConfig())
+	result, err = webClient.Activities(q, NewRecordListingConfig())
 	assertIntEquals(t, 0, result.TotalHits, "")
 }
 func TestActivityForDocumentGet(t *testing.T) {
 	name := randomAlphanumeric(6)
-	created := webClient.NewEmptyBasicDocument(name, "")
+	created, _ := webClient.NewEmptyBasicDocument(name, "")
 	builder := ActivityQueryBuilder{}
 	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
 	result, err := webClient.Activities(q, NewRecordListingConfig())
@@ -46,5 +46,5 @@ func TestActivityForDocumentGet(t *testing.T) {
 	timestamp, _ := result.Activities[0].TimestampTime()
 	assertTrue(t, timestamp.Before(time.Now()), "timestamp parsing is invalid")
 	assertIntEquals(t, 1, len(result.Links), "")
-//	assertStringEquals(t, "/api/v1/activity", result.Links[0].Link, "")
+	//	assertStringEquals(t, "/api/v1/activity", result.Links[0].Link, "")
 }

@@ -1,14 +1,14 @@
 package rspace
 
 import (
-	"net/url"
-	"time"
-	"net/http"
-	"io/ioutil"
-	"io"
-	"os"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
 )
 
 var (
@@ -128,12 +128,12 @@ func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.
 }
 
 // UserNew creates a new user account. Requires sysadmin role
-func (ws *RsWebClient) UserNew (userPost *UserPost) (*UserInfo, error) {
+func (ws *RsWebClient) UserNew(userPost *UserPost) (*UserInfo, error) {
 	return ws.sysadminS.UserNew(userPost)
 }
 
 // GroupNew creates a new group with the specified users and PI. Requires sysadmin role
-func (ws *RsWebClient) GroupNew (groupPost *GroupPost) (*GroupInfo, error) {
+func (ws *RsWebClient) GroupNew(groupPost *GroupPost) (*GroupInfo, error) {
 	return ws.sysadminS.GroupNew(groupPost)
 }
 
@@ -143,50 +143,53 @@ func (fs *RsWebClient) Forms(config RecordListingConfig) (*FormList, error) {
 }
 
 //  Documents returns a paginated listing of RSpace documents
-func (ds *RsWebClient) Documents (config RecordListingConfig) (*DocumentList, error){
+func (ds *RsWebClient) Documents(config RecordListingConfig) (*DocumentList, error) {
 	return ds.documentS.Documents(config)
 }
 
 // Activities queries the audit trail and returns a list of events.
-func (ds *RsWebClient) Activities (query *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error){
+func (ds *RsWebClient) Activities(query *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error) {
 	return ds.activityS.Activities(query, pgCrit)
 }
 
 // SearchDocuments performs a global search for 'searchTerm' across all  searchable fields
-func (ds *RsWebClient) SearchDocuments (config RecordListingConfig, searchTerm string) (*DocumentList, error){
+func (ds *RsWebClient) SearchDocuments(config RecordListingConfig, searchTerm string) (*DocumentList, error) {
 	return ds.documentS.SearchDocuments(config, searchTerm)
 }
 
 // AdvancedSearchDocuments performs a search for the terms specified in 'searchQuery'
-func (ds *RsWebClient) AdvancedSearchDocuments (config RecordListingConfig, searchQuery *SearchQuery) (*DocumentList, error){
+func (ds *RsWebClient) AdvancedSearchDocuments(config RecordListingConfig, searchQuery *SearchQuery) (*DocumentList, error) {
 	return ds.documentS.AdvancedSearchDocuments(config, searchQuery)
 }
 
 // Status returns simple information about the current server
-func (ds *RsWebClient) Status () (*Status, error){
+func (ds *RsWebClient) Status() (*Status, error) {
 	return ds.documentS.GetStatus()
 }
 
 // NewEmptyBasicDocument creates a Basic (single text field) document with no content
-func (ds *RsWebClient) NewEmptyBasicDocument (name, tags string) *DocumentInfo{
+func (ds *RsWebClient) NewEmptyBasicDocument(name, tags string) (*DocumentInfo, error) {
 	return ds.documentS.NewEmptyBasicDocument(name, tags)
 }
-func (ds *RsWebClient) NewBasicDocumentWithContent (name, tags, content string) *DocumentInfo{
+func (ds *RsWebClient) NewBasicDocumentWithContent(name, tags, content string) (*DocumentInfo, error) {
 	return ds.documentS.NewBasicDocumentWithContent(name, tags, content)
 }
+
 // FolderTree returns a list of items in the specified folder
 func (fs *RsWebClient) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
-	return fs.folderS.FolderTree(config , folderId , typesToInclude ) 
+	return fs.folderS.FolderTree(config, folderId, typesToInclude)
 }
 
 // FolderById returns information about the folder specified by folderId
 func (fs *RsWebClient) FolderById(folderId int) (*Folder, error) {
 	return fs.folderS.FolderById(folderId)
 }
+
 // Uploads a single file
 func (fs *RsWebClient) UploadFile(path string) (*FileInfo, error) {
 	return fs.fileS.UploadFile(path)
 }
+
 // Lists Gallery files, optionally filtered by a media type
 func (fs *RsWebClient) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
 	return fs.fileS.Files(config, mediaType)
@@ -199,7 +202,7 @@ func (fs *RsWebClient) FileById(id int) (*FileInfo, error) {
 
 func (fs *RsWebClient) UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
 	return fs.fileS.UploadFileNewVersion(path, fileToReplaceId)
-}	
+}
 
 //Download downloads a file attachment with the given ID to the location set by the path.
 func (fs *RsWebClient) Download(id int, path string) (*FileInfo, error) {
