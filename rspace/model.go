@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -39,9 +39,9 @@ func NewRecordListingConfig() RecordListingConfig {
 //toParams generates a url.Values object containing web params
 func (config *RecordListingConfig) toParams() url.Values {
 	params := url.Values{}
-	params.Add("pageSize",  strconv.Itoa(config.PageSize))
-	params.Add("pageNumber",  strconv.Itoa(config.PageNumber))
-	params.Add("orderBy", config.OrderBy + " " + config.SortOrder)
+	params.Add("pageSize", strconv.Itoa(config.PageSize))
+	params.Add("pageNumber", strconv.Itoa(config.PageNumber))
+	params.Add("orderBy", config.OrderBy+" "+config.SortOrder)
 	return params
 }
 
@@ -165,6 +165,7 @@ type FileList struct {
 	Links      []Link `json:"_links"`
 	Files      []FileInfo
 }
+
 // BasicInfo provides simple information common to many RSpace resources
 type BasicInfo interface {
 	GetName() string
@@ -179,15 +180,15 @@ type IdentifiableNamable struct {
 }
 
 func (item IdentifiableNamable) GetId() int {
-	return item.Id;
+	return item.Id
 }
 
 func (item IdentifiableNamable) GetGlobalId() string {
-	return item.GlobalId;
+	return item.GlobalId
 }
 
 func (item IdentifiableNamable) GetName() string {
-	return item.Name;
+	return item.Name
 }
 
 type Field struct {
@@ -225,6 +226,10 @@ type UserInfo struct {
 	HomeFolderId int
 }
 
+type GroupList struct {
+	Groups []*GroupInfo
+}
+
 type GroupInfo struct {
 	Id             int
 	Name           string
@@ -241,28 +246,6 @@ type Link struct {
 	Link string
 	Rel  string
 }
-
-// func (l *Link) UnmarshalJSON(j []byte) error {
-// 	var rawStrings map[string]string
-// 	err := json.Unmarshal(j, &rawStrings)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	for k, v := range rawStrings {
-// 		if strings.ToLower(k) == "link" {
-// 			u, err := url.Parse(v)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			l.Link = v
-// 		}
-// 		if strings.ToLower(k) == "rel" {
-// 			l.Rel = v
-// 		}
-// 	// }
-// 	return nil
-// }
 
 //RSpaceError encapsulates server or client side errors leading to a request being rejected.
 type RSpaceError struct {

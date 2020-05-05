@@ -121,8 +121,12 @@ type RsWebClient struct {
 	fileS     *FileService
 	sysadminS *SysadminService
 	importS   *ImportService
+	groupS    *GroupService
 }
 
+func (ws *RsWebClient) Groups() (*GroupList, error) {
+	return ws.groupS.Groups()
+}
 func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
 	return ws.sysadminS.Users(lastLoginBefore, creationDateBefore)
 }
@@ -235,5 +239,7 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.fileS = &FileService{BaseService: base}
 	wc.sysadminS = &SysadminService{BaseService: base}
 	wc.importS = &ImportService{BaseService: base}
+	wc.groupS = &GroupService{BaseService: base}
+
 	return &wc
 }

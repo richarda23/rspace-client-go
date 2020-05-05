@@ -41,19 +41,22 @@ func TestGroupNew(t *testing.T) {
 	if err != nil {
 		Log.Error(err)
 	}
+	groups, _ := webClient.Groups()
+	initialGroupCount := len(groups.Groups)
 	//create a group
 	var userGroupPosts []UserGroupPost = make([]UserGroupPost, 0, 5)
-	userGroupPosts = append(userGroupPosts, UserGroupPost{user.Username, "PI"})
+	userGroupPosts = append(userGroupPosts, UserGroupPost{user.Username, "PI"},
+		UserGroupPost{"sysadmin1", "DEFAULT"})
 	groupPost, err := GroupPostNew("groupname", userGroupPosts)
 	var group *GroupInfo
 	group, err = webClient.GroupNew(groupPost)
-	if err != nil {
-		Log.Error(err)
-	}
 	assertNil(t, err, "")
 	assertNotNil(t, group, "")
 	assertStringEquals(t, "groupname", group.Name, "")
-	assertIntEquals(t, 1, len(group.Members), "")
+	assertIntEquals(t, 2, len(group.Members), "")
+
+	groups, _ = webClient.Groups()
+	assertIntEquals(t, initialGroupCount+1, len(groups.Groups), "")
 }
 
 func createRandomUser(userRole UserRoleType) *UserPost {
