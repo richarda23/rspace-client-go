@@ -3,11 +3,13 @@ package rspace
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -16,8 +18,11 @@ var (
 )
 
 const (
-	APIKEY_ENV_NAME   = "RSPACE_API_KEY"
-	BASE_URL_ENV_NAME = "RSPACE_URL"
+	APIKEY_ENV_NAME          = "RSPACE_API_KEY"
+	BASE_URL_ENV_NAME        = "RSPACE_URL"
+	RATE_LIMIT_HDR           = "X-Rate-Limit-Limit"
+	RATE_LIMIT_REMAINING_HDR = "X-Rate-Limit-Remaining"
+	RATE_LIMIT_MIN_WAIT_HDR  = "X-Rate-Limit-MinWaitIntervalMillis"
 )
 
 type BaseService struct {
@@ -27,7 +32,7 @@ type BaseService struct {
 }
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(bs.Delay)
 	formData, _ := json.Marshal(post)
 	hc := http.Client{}
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
@@ -62,6 +67,7 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return true, nil
 	} else {
+
 		return false, nil
 	}
 }
@@ -84,6 +90,38 @@ func (bs *BaseService) doGetToFile(url string, filepath string) error {
 	}
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+// RateLimitData stores information received in HTTP Response Headers
+// about API usage rates. If this information could not be retrieved from a response then
+// value will be -100
+type RateLimitData struct {
+	RateLimit             int
+	Remaining             int
+	MinWaitIntervalMillis int
+}
+
+// Stringer implementation
+func (rld RateLimitData) String() string {
+	return fmt.Sprintf("RateLimit: %d, Remaining: %d, MinWaitTillNextRequest: %d",
+		rld.RateLimit, rld.Remaining, rld.Remaining)
+}
+
+func NewRateLimitData(resp *http.Response) RateLimitData {
+	errorValue := -100
+	rl, err := strconv.Atoi(resp.Header.Get(RATE_LIMIT_HDR))
+	if err != nil {
+		rl = errorValue
+	}
+	remaining, err := strconv.Atoi(resp.Header.Get(RATE_LIMIT_REMAINING_HDR))
+	if err != nil {
+		remaining = errorValue
+	}
+	minWait, err := strconv.Atoi(resp.Header.Get(RATE_LIMIT_MIN_WAIT_HDR))
+	if err != nil {
+		minWait = errorValue
+	}
+	return RateLimitData{rl, remaining, minWait}
 }
 
 // doGet makes an authenticated API request to a URL expecting a string
