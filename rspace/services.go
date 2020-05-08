@@ -133,7 +133,11 @@ func (bs *BaseService) doGet(url string) ([]byte, error) {
 	resp, e := client.Do(req)
 	if e != nil {
 		Log.Error(e)
+		return nil, e
 	}
+	var rld RateLimitData = NewRateLimitData(resp)
+	Log.Info(rld.String())
+
 	data, _ := ioutil.ReadAll(resp.Body)
 	//fmt.Println("resp:" + string(data))
 	if err := testResponseForError(data, resp); err != nil {
