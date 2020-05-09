@@ -49,7 +49,6 @@ func Marshal(anything interface{}) string {
 	return string(bytes)
 }
 
-
 // Abbreviate truncates a string to maximum length `maxLen`, including
 // 3 ellipsis characters.
 func abbreviate(toAbbreviate string, maxLen int) string {
@@ -57,13 +56,4 @@ func abbreviate(toAbbreviate string, maxLen int) string {
 		toAbbreviate = toAbbreviate[0:(maxLen-4)] + "..."
 	}
 	return toAbbreviate
-}
-
-func testResponseForError(data []byte, resp *http.Response) *RSpaceError {
-	if resp.StatusCode >= 400 {
-		rspaceError := &RSpaceError{}
-		json.Unmarshal(data, rspaceError)
-		return rspaceError
-	}
-	return nil
 }

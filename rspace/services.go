@@ -42,10 +42,10 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	data, _ := ioutil.ReadAll(resp.Body)
-	if err2 := testResponseForError(data, resp); err2 != nil {
+	if err2 := testResponseForError(resp); err2 != nil {
 		return nil, err2
 	}
+	data, _ := ioutil.ReadAll(resp.Body)
 	return data, nil
 }
 
@@ -60,14 +60,12 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 		Log.Error(e)
 		return false, e
 	}
-	data, _ := ioutil.ReadAll(resp.Body)
-	if err := testResponseForError(data, resp); err != nil {
+	if err := testResponseForError(resp); err != nil {
 		return false, err
 	}
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return true, nil
 	} else {
-
 		return false, nil
 	}
 }
@@ -130,19 +128,43 @@ func (bs *BaseService) doGet(url string) ([]byte, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
-	resp, e := client.Do(req)
+	retry, _ := RetryClientExNew(3, client)
+	resp, e := retry.Do(req)
 	if e != nil {
 		Log.Error(e)
 		return nil, e
 	}
-	var rld RateLimitData = NewRateLimitData(resp)
-	Log.Info(rld.String())
+	//	var rld RateLimitData = NewRateLimitData(resp)
+	//	Log.Info(rld.String())
 
-	data, _ := ioutil.ReadAll(resp.Body)
 	//fmt.Println("resp:" + string(data))
-	if err := testResponseForError(data, resp); err != nil {
+	if err := testResponseForError(resp); err != nil {
 		return nil, err
 	}
+	data, _ := ioutil.ReadAll(resp.Body)
+	return data, nil
+}
+
+// doGet makes an authenticated API request to a URL expecting a string
+// response (typically JSON)
+func (bs *BaseService) doGet2(url string) ([]byte, error) {
+	client := &http.Client{}
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	bs.addAuthHeader(req)
+
+	// retry wraps delay
+	delayClient := &DelayClientEx{client}
+	retry, _ := RetryClientExNew(3, delayClient)
+	resp, e := retry.Do(req)
+	if e != nil {
+		Log.Error(e)
+		return nil, e
+	}
+	//fmt.Println("resp:" + string(data))
+	if err := testResponseForError(resp); err != nil {
+		return nil, err
+	}
+	data, _ := ioutil.ReadAll(resp.Body)
 	return data, nil
 }
 

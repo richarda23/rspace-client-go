@@ -2,11 +2,11 @@ package rspace
 
 import (
 	"encoding/json"
-	"time"
+	"io/ioutil"
 	"net/url"
 	"strconv"
-	"io/ioutil"
-//	"io/ioutil"
+	"time"
+	//	"io/ioutil"
 )
 
 type ImportService struct {
@@ -32,17 +32,17 @@ func (fs *ImportService) ImportWord(path string, folderId int, imageFolderId int
 		params.Add("imageFolderId", strconv.Itoa(imageFolderId))
 	}
 	paramStr := params.Encode()
-	if len(paramStr)> 0 {
+	if len(paramStr) > 0 {
 		urlStr = urlStr + "?" + paramStr
 	}
 	resp, err := fs.doMultipart(path, urlStr)
 	if err != nil {
-	 return nil, err
+		return nil, err
 	}
-	data, _ := ioutil.ReadAll(resp.Body)
-	if err2 := testResponseForError(data, resp); err2 != nil {
+	if err2 := testResponseForError(resp); err2 != nil {
 		return nil, err2
 	}
+	data, _ := ioutil.ReadAll(resp.Body)
 	result := &DocumentInfo{}
 	json.Unmarshal(data, result)
 	return result, nil

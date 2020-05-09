@@ -247,41 +247,6 @@ type Link struct {
 	Rel  string
 }
 
-//RSpaceError encapsulates server or client side errors leading to a request being rejected.
-type RSpaceError struct {
-	Status       string
-	HttpCode     int
-	InternalCode int
-	Message      string
-	Errors       []string
-	Timestamp    string `json:"iso8601Timestamp"`
-}
-
-func (f *RSpaceError) CreatedTime() (time.Time, error) {
-	return parseTimestamp(f.Timestamp)
-}
-
-func (rsError *RSpaceError) String() string {
-	if rsError.HttpCode >= 400 && rsError.HttpCode < 500 {
-		return formatErrorMsg(rsError, "Client")
-	} else if rsError.HttpCode > 500 {
-		return formatErrorMsg(rsError, "Server")
-	} else {
-		return formatErrorMsg(rsError, "Unknown")
-	}
-}
-
-func (rsError *RSpaceError) Error() string {
-	return rsError.String()
-}
-
-func formatErrorMsg(rsError *RSpaceError, errType string) string {
-	concatenateErrM := strings.Join(rsError.Errors, "\n")
-	rc := fmt.Sprintf("%s error:httpCode=%d, status=%s, internalCode=%d, timestamp=%s,  message=%s\nErrors: %s",
-		errType, rsError.HttpCode, rsError.Status, rsError.InternalCode, rsError.Timestamp, rsError.Message, concatenateErrM)
-	return rc
-}
-
 type Email string
 type UserRoleType int
 
