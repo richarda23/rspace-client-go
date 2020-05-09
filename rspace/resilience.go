@@ -40,22 +40,28 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 		resp, currErr = ex.cli.Do(req)
 		// e.g. server not available
 		if currErr != nil {
-			return nil, currErr
-		}
-		if x := testResponseForError(resp); x != nil {
-			//is this error worth retrying? Don't retry client error
-			// unless is 429
-			if x.HttpCode == 429 || x.HttpCode > 500 {
-				// we have an error
-				Log.Infof(" Got an error - %s , retrying", x)
+			Log.Info(" got an client error with no response, retrying")
+		} else if resp != nil {
+			if x := testResponseForError(resp); x != nil {
+				Log.Info(x)
+				//is this error worth retrying? Don't retry client error
+				// unless is 429
+				if x.HttpCode == 429 || x.HttpCode >= 500 {
+					// we have an error
+					Log.Infof(" Got an error status %d - retrying", x.HttpCode)
+				} else {
+					return resp, nil
+				}
 			} else {
-				return nil, x
+				return resp, nil
 			}
-		} else {
-			return resp, nil
 		}
 	}
-	return nil, currErr
+	if resp != nil {
+		return resp, nil
+	} else {
+		return nil, currErr
+	}
 }
 
 type DelayClientEx struct {
