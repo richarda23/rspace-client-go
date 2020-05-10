@@ -40,7 +40,7 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 		resp, currErr = ex.cli.Do(req)
 		// e.g. server not available
 		if currErr != nil {
-			Log.Info(" got an client error with no response, retrying")
+			Log.Info(" got an client error with no response, retrying: " + currErr.Error())
 		} else if resp != nil {
 			if x := testResponseForError(resp); x != nil {
 				Log.Info(x)
@@ -92,6 +92,9 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 
 }
 
+// NewResilientClient decorates an httpClient  with retry and 429 too-many-requests handler
+// Will make requests 3 times in total if necessary; for 429 responses will wait for the
+// amount of time specified in the response header.
 func NewResilientClient(toWrap *http.Client) ClientEx {
 	delayClient := &DelayClientEx{toWrap}
 	retry, _ := RetryClientExNew(3, delayClient)

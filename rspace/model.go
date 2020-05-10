@@ -242,12 +242,53 @@ type GroupInfo struct {
 	}
 }
 
+type SharePost struct {
+	ItemsToShare []int        `json:"itemsToShare"`
+	Groups       []GroupShare `json:"groups"`
+	Users        []UserShare  `json:"users"`
+}
+type GroupShare struct {
+	Id             int    `json:"id"`
+	Permission     string `json:"permission"`
+	SharedFolderId int    `json:"sharedFolderId"`
+}
+
+type UserShare struct {
+	Id         int    `json:"id"`
+	Permission string `json:"permission"`
+}
+
+//ShareInfoList represents the results of posting a /share request
+type ShareInfoList struct {
+	ShareInfos   []*ShareResult
+	FailedShares []int
+	lLinks       []string `json:"_links"`
+}
+
+//ShareResult represents a successful share of a single resource
+type ShareResult struct {
+	Id         int
+	ItemId     int    `json:"sharedItemId"`
+	ItemName   string `json:"sharedItemName"`
+	TargetType string `json:"sharedTargetType"`
+	Permission string
+	Links      []string `json:"_links"`
+}
+
 type Link struct {
 	Link string
 	Rel  string
 }
 
 type Email string
+
+type Permission int
+
+const (
+	Read Permission = iota
+	Edit
+)
+
 type UserRoleType int
 
 const (

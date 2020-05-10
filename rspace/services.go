@@ -38,7 +38,7 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
-	retry := NewResilientClient(&hc)
+	retry, _ := RetryClientExNew(3, &hc)
 	resp, err := retry.Do(req)
 	if err != nil {
 		return nil, err
@@ -188,6 +188,7 @@ type RsWebClient struct {
 	sysadminS *SysadminService
 	importS   *ImportService
 	groupS    *GroupService
+	sharingS  *SharingService
 }
 
 func (ws *RsWebClient) Groups() (*GroupList, error) {
@@ -293,6 +294,11 @@ func (fs *RsWebClient) ImportWord(path string, folderId int, imageFolderId int) 
 	return fs.importS.ImportWord(path, folderId, imageFolderId)
 }
 
+// Share shares one or more items with one or more groups and users.
+// Sharer and sharee must have a group in common.
+func (client *RsWebClient) Share(post *SharePost) (*ShareInfoList, error) {
+	return client.sharingS.Share(post)
+}
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	base := baseService()
 	base.ApiKey = apiKey
@@ -306,6 +312,7 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.sysadminS = &SysadminService{BaseService: base}
 	wc.importS = &ImportService{BaseService: base}
 	wc.groupS = &GroupService{BaseService: base}
+	wc.sharingS = &SharingService{BaseService: base}
 
 	return &wc
 }
