@@ -38,7 +38,8 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := hc.Do(req)
+	retry := NewResilientClient(&hc)
+	resp, err := retry.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -53,9 +54,10 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 // non-null error
 func (bs *BaseService) doDelete(url string) (bool, error) {
 	client := &http.Client{}
+	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 	bs.addAuthHeader(req)
-	resp, e := client.Do(req)
+	resp, e := retry.Do(req)
 	if e != nil {
 		Log.Error(e)
 		return false, e
@@ -75,9 +77,10 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
 func (bs *BaseService) doGetToFile(url string, filepath string) error {
 	client := &http.Client{}
+	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
-	resp, err := client.Do(req)
+	resp, err := retry.Do(req)
 	if err != nil {
 		return err
 	}
@@ -128,7 +131,7 @@ func (bs *BaseService) doGet(url string) ([]byte, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
-	retry, _ := RetryClientExNew(3, client)
+	retry := NewResilientClient(client)
 	resp, e := retry.Do(req)
 	if e != nil {
 		Log.Error(e)
@@ -153,8 +156,7 @@ func (bs *BaseService) doGet2(url string) ([]byte, error) {
 	bs.addAuthHeader(req)
 
 	// retry wraps delay
-	delayClient := &DelayClientEx{client}
-	retry, _ := RetryClientExNew(3, delayClient)
+	retry := NewResilientClient(client)
 	resp, e := retry.Do(req)
 	if e != nil {
 		Log.Error(e)

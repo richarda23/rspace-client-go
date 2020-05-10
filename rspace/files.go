@@ -3,15 +3,15 @@ package rspace
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 	"strings"
-	"errors"
+	"time"
 )
 
 type FileService struct {
@@ -19,23 +19,22 @@ type FileService struct {
 }
 
 func (fs *FileService) filesUrl() string {
-	return fs.BaseUrl.String()+ "/files"
+	return fs.BaseUrl.String() + "/files"
 }
-
 
 // Paginated listing of Files. Optionally the listing can be filtered by a media type
 // of 'document', image', or 'av'
 func (fs *FileService) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
 	time.Sleep(fs.Delay)
-	var validMediaTypes  = []string{"document", "av", "image"}
+	var validMediaTypes = []string{"document", "av", "image"}
 	params := config.toParams()
 	if len(mediaType) > 0 {
 		if ok := validateArrayContains(validMediaTypes, []string{mediaType}); !ok {
-			return nil, errors.New("Invalid media type: Must be one of " + strings.Join(validMediaTypes,","))
+			return nil, errors.New("Invalid media type: Must be one of " + strings.Join(validMediaTypes, ","))
 		}
 		params.Add("mediaType", mediaType)
 	}
-	
+
 	encoded := params.Encode()
 	url := fs.filesUrl() + "?" + encoded
 	data, err := fs.doGet(url)
@@ -85,14 +84,14 @@ func (fs *FileService) _doUpload(path string, fileToReplaceId int) (*FileInfo, e
 	}
 	resp, err := fs.doMultipart(path, url)
 	if err != nil {
-	 return nil, err
+		return nil, err
 	}
 	result := &FileInfo{}
 	Unmarshal(resp, result)
 	return result, nil
 }
 
-func (bs *BaseService) doMultipart (path string, url string) (*http.Response, error) {
+func (bs *BaseService) doMultipart(path string, url string) (*http.Response, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -101,7 +100,7 @@ func (bs *BaseService) doMultipart (path string, url string) (*http.Response, er
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("file", filepath.Base(path))
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -113,13 +112,14 @@ func (bs *BaseService) doMultipart (path string, url string) (*http.Response, er
 	}
 
 	hc := http.Client{}
+	retry := NewResilientClient(&hc)
 	req, err := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	bs.addAuthHeader(req)
-	resp, err := hc.Do(req)
+	resp, err := retry.Do(req)
 	if err != nil {
 		Log.Error(err)
-		return nil,err
+		return nil, err
 	}
 	return resp, nil
 }
@@ -128,7 +128,7 @@ func (bs *BaseService) doMultipart (path string, url string) (*http.Response, er
 // Returns the FileInfo metadata for the downloaded file
 func (fs *FileService) DownloadFile(fileId int, outDir string) (*FileInfo, error) {
 	downloadUrl := fmt.Sprintf("%s/%d/file", fs.filesUrl(), fileId)
-	info,err:=fs.FileById(fileId)
+	info, err := fs.FileById(fileId)
 	if err != nil {
 		return nil, err
 	}

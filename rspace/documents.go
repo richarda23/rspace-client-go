@@ -1,10 +1,8 @@
 package rspace
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	//	"net/url"
 	//	"strconv"
@@ -107,17 +105,12 @@ func (ds *DocumentService) DeleteDocument(documentId int) (bool, error) {
 // DocumentNew creates a new RSpace document
 func (ds *DocumentService) DocumentNew(post *DocumentPost) (*DocumentInfo, error) {
 	time.Sleep(ds.Delay)
-	formData, _ := json.Marshal(post)
-	hc := http.Client{}
-	req, err := http.NewRequest("POST", ds.documentsUrl(), bytes.NewBuffer(formData))
-	ds.addAuthHeader(req)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := hc.Do(req)
+	data, err := ds.doPostJsonBody(post, ds.documentsUrl())
 	if err != nil {
 		return nil, err
 	}
 	result := &DocumentInfo{}
-	Unmarshal(resp, result)
+	json.Unmarshal(data, result)
 	return result, nil
 }
 
@@ -141,16 +134,11 @@ func (ds *DocumentService) NewEmptyBasicDocument(name string, tags string) (*Doc
 }
 
 func (ds *DocumentService) doPostCreateDocument(postData *DocumentPost) (*DocumentInfo, error) {
-	hc := http.Client{}
-	formData, _ := json.Marshal(postData)
-	req, err := http.NewRequest("POST", ds.documentsUrl(), bytes.NewBuffer(formData))
-	ds.addAuthHeader(req)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := hc.Do(req)
+	data, err := ds.doPostJsonBody(postData, ds.documentsUrl())
 	if err != nil {
 		return nil, err
 	}
 	result := &DocumentInfo{}
-	Unmarshal(resp, result)
+	json.Unmarshal(data, result)
 	return result, nil
 }

@@ -47,16 +47,19 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 				//is this error worth retrying? Don't retry client error
 				// unless is 429
 				if x.HttpCode == 429 || x.HttpCode >= 500 {
-					// we have an error
+					// we have an error worth retrying
 					Log.Infof(" Got an error status %d - retrying", x.HttpCode)
 				} else {
+					// it's a 4xx client error, so no point retrying
 					return resp, nil
 				}
 			} else {
+				// it's some other error response not generating a
 				return resp, nil
 			}
 		}
 	}
+	// fall through e.g. if retries have failed
 	if resp != nil {
 		return resp, nil
 	} else {
@@ -87,6 +90,12 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 	}
 	return resp, nil
 
+}
+
+func NewResilientClient(toWrap *http.Client) ClientEx {
+	delayClient := &DelayClientEx{toWrap}
+	retry, _ := RetryClientExNew(3, delayClient)
+	return retry
 }
 
 // testResponseForError reads response body and if error code > 400

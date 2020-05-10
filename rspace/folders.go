@@ -1,10 +1,8 @@
 package rspace
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -30,7 +28,7 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 		params.Add("typesToInclude", strings.Join(typesToInclude, ","))
 	}
 	encoded := params.Encode()
-	if len(encoded) > 0{
+	if len(encoded) > 0 {
 		urlStr = urlStr + "?" + encoded
 	}
 	//fmt.Println(url)
@@ -72,21 +70,12 @@ func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 // If a parentFolderId is specified then the folder is created in that folder
 func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
 	time.Sleep(fs.Delay)
-	var formData []byte
-		formData, _ = json.Marshal(post)
+	data, err := fs.doPostJsonBody(post, fs.foldersUrl())
 
-	hc := http.Client{}
-	req, err := http.NewRequest("POST", fs.foldersUrl(), bytes.NewBuffer(formData))
-	if err != nil {
-		return nil, err
-	}
-	fs.addAuthHeader(req)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := hc.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	result := &Folder{}
-	Unmarshal(resp, result)
+	json.Unmarshal(data, result)
 	return result, nil
 }
