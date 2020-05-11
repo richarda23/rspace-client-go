@@ -22,7 +22,6 @@ type RecordListingConfig struct {
 	PageSize   int
 	PageNumber int
 	OrderBy    string
-	Quiet      bool
 }
 
 // factory method to return a RecordListingConfig with default values
@@ -32,7 +31,6 @@ func NewRecordListingConfig() RecordListingConfig {
 		OrderBy:    "lastModified",
 		PageNumber: 0,
 		SortOrder:  "desc",
-		Quiet:      false,
 	}
 }
 
@@ -72,6 +70,7 @@ type DocumentList struct {
 	PageNumber int
 	Links      []Link `json:"_links"`
 }
+
 type UserList struct {
 	Users      []UserInfo
 	TotalHits  int
@@ -262,7 +261,14 @@ type UserShare struct {
 type ShareInfoList struct {
 	ShareInfos   []*ShareResult
 	FailedShares []int
-	lLinks       []string `json:"_links"`
+	Links        []string `json:"_links"`
+}
+
+type SharedItemList struct {
+	Shares     []*ShareResult
+	TotalHits  int
+	PageNumber int
+	Links      []string `json:"_links"`
 }
 
 //ShareResult represents a successful share of a single resource

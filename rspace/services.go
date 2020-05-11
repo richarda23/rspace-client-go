@@ -281,6 +281,11 @@ func (client *RsWebClient) Share(post *SharePost) (*ShareInfoList, error) {
 func (client *RsWebClient) Unshare(shareId int) (bool, error) {
 	return client.sharingS.Unshare(shareId)
 }
+
+func (client *RsWebClient) ShareList(query string, cfg RecordListingConfig) (*SharedItemList, error) {
+	return client.sharingS.SharedItemList(query, cfg)
+}
+
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	base := baseService()
 	base.ApiKey = apiKey

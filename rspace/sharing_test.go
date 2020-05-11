@@ -25,6 +25,8 @@ func TestSharingNew(t *testing.T) {
 	assertNotNil(t, group, "")
 
 	doc, _ := webClient.NewEmptyBasicDocument("toShare", "")
+	list, _ := webClient.ShareList(doc.Name, NewRecordListingConfig())
+	initialCount := list.TotalHits
 	grpShare := GroupShare{Id: group.Id, Permission: "edit", SharedFolderId: group.SharedFolderId}
 	idsToShare := make([]int, 0)
 	idsToShare = append(idsToShare, doc.Id)
@@ -39,8 +41,17 @@ func TestSharingNew(t *testing.T) {
 	assertIntEquals(t, doc.Id, shared.ShareInfos[0].ItemId, "")
 	assertStringEquals(t, doc.Name, shared.ShareInfos[0].ItemName, "")
 
+	// now list, should
+	list, _ = webClient.ShareList(doc.Name, NewRecordListingConfig())
+	assertIntEquals(t, initialCount+1, list.TotalHits, "")
+	assertIntEquals(t, initialCount+1, len(list.Shares), "")
+
 	// now unshare
 	deleted, err := webClient.Unshare(shared.ShareInfos[0].Id)
 	assertTrue(t, deleted, "should have been unshared")
+	// original number of shared items
+	list, _ = webClient.ShareList(doc.Name, NewRecordListingConfig())
+	assertIntEquals(t, initialCount, list.TotalHits, "")
+	assertIntEquals(t, initialCount, len(list.Shares), "")
 
 }
