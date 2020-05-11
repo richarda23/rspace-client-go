@@ -32,8 +32,15 @@ func TestSharingNew(t *testing.T) {
 	grps = append(grps, grpShare)
 	sharePost := SharePost{Groups: grps, ItemsToShare: idsToShare, Users: []UserShare{}}
 	shared, err := webClient.Share(&sharePost)
+	fmt.Println(shared)
 	if err != nil {
 		Log.Warning(err.Error())
 	}
-	fmt.Println(shared.ShareInfos[0])
+	assertIntEquals(t, doc.Id, shared.ShareInfos[0].ItemId, "")
+	assertStringEquals(t, doc.Name, shared.ShareInfos[0].ItemName, "")
+
+	// now unshare
+	deleted, err := webClient.Unshare(shared.ShareInfos[0].Id)
+	assertTrue(t, deleted, "should have been unshared")
+
 }

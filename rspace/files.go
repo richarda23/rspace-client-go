@@ -111,8 +111,8 @@ func (bs *BaseService) doMultipart(path string, url string) (*http.Response, err
 		return nil, err
 	}
 
-	hc := http.Client{}
-	retry := NewResilientClient(&hc)
+	hc := HttpClientNew(10)
+	retry := NewResilientClient(hc)
 	req, err := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	bs.addAuthHeader(req)

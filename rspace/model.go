@@ -269,7 +269,7 @@ type ShareInfoList struct {
 type ShareResult struct {
 	Id         int
 	ItemId     int    `json:"sharedItemId"`
-	ItemName   string `json:"sharedItemName"`
+	ItemName   string `json:"shareItemName"`
 	TargetType string `json:"sharedTargetType"`
 	Permission string
 	Links      []string `json:"_links"`

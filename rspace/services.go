@@ -34,7 +34,7 @@ type BaseService struct {
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
 	time.Sleep(bs.Delay)
 	formData, _ := json.Marshal(post)
-	hc := http.Client{}
+	hc := http.Client{Timeout: time.Duration(10) * time.Second}
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
@@ -47,13 +47,14 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 		return nil, err2
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
+	Log.Debug(string(data))
 	return data, nil
 }
 
 // doDelete  attempts to delete a resource specified by the URL. If successful, returns true, else returns false, with a possible
 // non-null error
 func (bs *BaseService) doDelete(url string) (bool, error) {
-	client := &http.Client{}
+	client := HttpClientNew(10)
 	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 	bs.addAuthHeader(req)
@@ -76,7 +77,7 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 // If the response fails or the file cannot be created returns an error.
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
 func (bs *BaseService) doGetToFile(url string, filepath string) error {
-	client := &http.Client{}
+	client := HttpClientNew(10)
 	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
@@ -128,7 +129,7 @@ func NewRateLimitData(resp *http.Response) RateLimitData {
 // doGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
 func (bs *BaseService) doGet(url string) ([]byte, error) {
-	client := &http.Client{}
+	client := HttpClientNew(10)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
 	retry := NewResilientClient(client)
@@ -140,28 +141,6 @@ func (bs *BaseService) doGet(url string) ([]byte, error) {
 	//	var rld RateLimitData = NewRateLimitData(resp)
 	//	Log.Info(rld.String())
 
-	//fmt.Println("resp:" + string(data))
-	if err := testResponseForError(resp); err != nil {
-		return nil, err
-	}
-	data, _ := ioutil.ReadAll(resp.Body)
-	return data, nil
-}
-
-// doGet makes an authenticated API request to a URL expecting a string
-// response (typically JSON)
-func (bs *BaseService) doGet2(url string) ([]byte, error) {
-	client := &http.Client{}
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	bs.addAuthHeader(req)
-
-	// retry wraps delay
-	retry := NewResilientClient(client)
-	resp, e := retry.Do(req)
-	if e != nil {
-		Log.Error(e)
-		return nil, e
-	}
 	//fmt.Println("resp:" + string(data))
 	if err := testResponseForError(resp); err != nil {
 		return nil, err
@@ -298,6 +277,9 @@ func (fs *RsWebClient) ImportWord(path string, folderId int, imageFolderId int) 
 // Sharer and sharee must have a group in common.
 func (client *RsWebClient) Share(post *SharePost) (*ShareInfoList, error) {
 	return client.sharingS.Share(post)
+}
+func (client *RsWebClient) Unshare(shareId int) (bool, error) {
+	return client.sharingS.Unshare(shareId)
 }
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	base := baseService()

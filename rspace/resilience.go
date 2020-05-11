@@ -12,8 +12,9 @@ import (
 )
 
 // ClientEx abstracts out the http.Client Do() method into an interface
-// for decorating
+// for decorating with resilience patterhs
 type ClientEx interface {
+	//Do follows the same contract as http.Client.Do()
 	Do(req *http.Request) (*http.Response, error)
 }
 
@@ -32,15 +33,19 @@ func RetryClientExNew(retries int, wrappedRequest ClientEx) (*RetryClientEx, err
 	}
 }
 
+// HttpClientNew creates a new http.Client with specified timeout in seconds
+func HttpClientNew(timeOutSeconds int) *http.Client {
+	return &http.Client{Timeout: time.Duration(timeOutSeconds) * time.Second}
+}
+
 func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 	var currErr error
 	var resp *http.Response
 	for i := 0; i < ex.retries; i++ {
-		Log.Infof("Retry attempt %d", i)
 		resp, currErr = ex.cli.Do(req)
 		// e.g. server not available
 		if currErr != nil {
-			Log.Info(" got an client error with no response, retrying: " + currErr.Error())
+			Log.Warning(" got an client error with no response, retrying: " + currErr.Error())
 		} else if resp != nil {
 			if x := testResponseForError(resp); x != nil {
 				Log.Info(x)
@@ -48,7 +53,7 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 				// unless is 429
 				if x.HttpCode == 429 || x.HttpCode >= 500 {
 					// we have an error worth retrying
-					Log.Infof(" Got an error status %d - retrying", x.HttpCode)
+					Log.Warningf(" Got an error status %d - retrying", x.HttpCode)
 				} else {
 					// it's a 4xx client error, so no point retrying
 					return resp, nil
@@ -67,6 +72,7 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 	}
 }
 
+//DelayClientEx reacts to a 429 response by sleeping until next request is permissible
 type DelayClientEx struct {
 	cli ClientEx
 }
@@ -92,7 +98,7 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 
 }
 
-// NewResilientClient decorates an httpClient  with retry and 429 too-many-requests handler
+// NewResilientClient decorates an http.Client  with retry and 429 too-many-requests handler
 // Will make requests 3 times in total if necessary; for 429 responses will wait for the
 // amount of time specified in the response header.
 func NewResilientClient(toWrap *http.Client) ClientEx {
@@ -122,12 +128,13 @@ func testResponseForError(resp *http.Response) *RSpaceError {
 
 //RSpaceError encapsulates server or client side errors leading to a request being rejected.
 type RSpaceError struct {
-	Status             string
-	HttpCode           int
-	InternalCode       int
-	Message            string
-	Errors             []string
-	Timestamp          string `json:"iso8601Timestamp"`
+	Status       string
+	HttpCode     int
+	InternalCode int
+	Message      string
+	Errors       []string
+	Timestamp    string `json:"iso8601Timestamp"`
+	// This will be set in the event that 429 TooManyRequests has been received
 	MillisTillNextCall int
 }
 
