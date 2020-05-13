@@ -24,7 +24,6 @@ func (fs *SharingService) SharedItemList(query string, cfg RecordListingConfig) 
 		urlStr = urlStr + "?" + params.Encode()
 	}
 	data, err := fs.doGet(urlStr)
-	Log.Debug(string(data))
 	if err != nil {
 		return nil, err
 	}

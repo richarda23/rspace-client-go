@@ -48,7 +48,6 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 			Log.Warning(" got an client error with no response, retrying: " + currErr.Error())
 		} else if resp != nil {
 			if x := testResponseForError(resp); x != nil {
-				Log.Info(x)
 				//is this error worth retrying? Don't retry client error
 				// unless is 429
 				if x.HttpCode == 429 || x.HttpCode >= 500 {
@@ -84,8 +83,8 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 		Log.Error(e)
 		return nil, e
 	}
-	var rld RateLimitData = NewRateLimitData(resp)
-	Log.Info(rld.String())
+	//var rld RateLimitData = NewRateLimitData(resp)
+	//Log.Info(rld.String())
 
 	if err := testResponseForError(resp); err != nil {
 		if err.HttpCode == 429 {
@@ -95,7 +94,6 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, nil
-
 }
 
 // NewResilientClient decorates an http.Client  with retry and 429 too-many-requests handler
