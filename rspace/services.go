@@ -30,7 +30,6 @@ type BaseService struct {
 }
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
-	time.Sleep(bs.Delay)
 	formData, _ := json.Marshal(post)
 	hc := http.Client{Timeout: time.Duration(10) * time.Second}
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))

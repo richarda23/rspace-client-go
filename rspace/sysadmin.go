@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-//	"fmt"
+	//	"fmt"
 )
 
 type SysadminService struct {
@@ -18,7 +18,6 @@ func (sysSvc *SysadminService) systemUrl() string {
 
 // UserNew creates a new user account.
 func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
-	time.Sleep(ds.Delay)
 	data, err := ds.doPostJsonBody(post, ds.systemUrl()+"/users")
 	if err != nil {
 		return nil, err
@@ -30,7 +29,6 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 
 //Users lists users' biographical information
 func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
-	time.Sleep(ds.Delay)
 	params := url.Values{}
 	params.Add("tempAccountsOnly", strconv.FormatBool(false))
 	if !lastLoginBefore.IsZero() {
@@ -56,7 +54,6 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 
 //GroupNew creates a new group from existing users
 func (ds *SysadminService) GroupNew(post *GroupPost) (*GroupInfo, error) {
-	time.Sleep(ds.Delay)
 	data, err := ds.doPostJsonBody(post, ds.systemUrl()+"/groups")
 	if err != nil {
 		return nil, err

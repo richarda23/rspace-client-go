@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"time"
 )
 
 type GroupService struct {
@@ -15,7 +14,6 @@ func (fs *GroupService) groupsUrl() string {
 
 // FormTree produces paginated listing of items in form
 func (fs *GroupService) Groups() (*GroupList, error) {
-	time.Sleep(fs.Delay)
 	url := fs.groupsUrl()
 	data, err := fs.doGet(url)
 	if err != nil {

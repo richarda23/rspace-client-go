@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"time"
 )
 
 type FormService struct {
@@ -15,7 +14,6 @@ func (fs *FormService) formsUrl() string {
 
 // FormTree produces paginated listing of items in form
 func (fs *FormService) Forms(config RecordListingConfig) (*FormList, error) {
-	time.Sleep(fs.Delay)
 	url := fs.formsUrl()
 	if paramStr := config.toParams().Encode(); len(paramStr) > 0 {
 		url = url + "?" + paramStr

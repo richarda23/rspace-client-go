@@ -72,13 +72,13 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 	}
 }
 
-//DelayClientEx reacts to a 429 response by sleeping until next request is permissible
+// DelayClientEx listens to response headers for wait time until next client
+// request is available.
 type DelayClientEx struct {
 	cli ClientEx
 }
 
 func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
-
 	resp, e := this.cli.Do(req)
 	if e != nil {
 		Log.Error(e)
@@ -91,13 +91,12 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 	if rld.WaitTimeMillis > 0 {
 		delayTime = rld.WaitTimeMillis
 	}
-	Log.Infof("Sleeping %d ms", delayTime)
+	Log.Debugf("Sleeping %d ms", delayTime)
 	time.Sleep(time.Duration(delayTime) * time.Millisecond)
 
 	if err := testResponseForError(resp); err != nil {
 		if err.HttpCode == 429 {
 			Log.Warningf("429 error, waiting for %d ms till next call", err.MillisTillNextCall)
-			time.Sleep(time.Duration(err.MillisTillNextCall) * time.Millisecond)
 		}
 		return nil, err
 	}

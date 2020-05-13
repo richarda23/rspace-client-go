@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 type FileService struct {
@@ -25,7 +24,7 @@ func (fs *FileService) filesUrl() string {
 // Paginated listing of Files. Optionally the listing can be filtered by a media type
 // of 'document', image', or 'av'
 func (fs *FileService) Files(config RecordListingConfig, mediaType string) (*FileList, error) {
-	time.Sleep(fs.Delay)
+
 	var validMediaTypes = []string{"document", "av", "image"}
 	params := config.toParams()
 	if len(mediaType) > 0 {
@@ -48,7 +47,7 @@ func (fs *FileService) Files(config RecordListingConfig, mediaType string) (*Fil
 
 // FileById retrieves file information for a single File
 func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
-	time.Sleep(fs.Delay)
+
 	url := fmt.Sprintf("%s/%d", fs.filesUrl(), fileId)
 	data, err := fs.doGet(url)
 	if err != nil {
@@ -63,14 +62,12 @@ func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 // appropriate Gallery section
 // Returns either a FileInfo of the created file or an error if operation did not succeed.
 func (fs *FileService) UploadFile(path string) (*FileInfo, error) {
-	time.Sleep(fs.Delay)
 	return fs._doUpload(path, 0)
 }
 
 // UploadFileNewVersion replaces the RSpace file of the given ID with the new file.
 // The new version can have a different name but must be same filetype (i.e. have the same suffix)
 func (fs *FileService) UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
-	time.Sleep(fs.Delay)
 	return fs._doUpload(path, fileToReplaceId)
 }
 

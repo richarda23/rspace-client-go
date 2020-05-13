@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"strconv"
-	"time"
 	//	"io/ioutil"
 )
 
@@ -22,7 +21,6 @@ func (fs *ImportService) importUrl() string {
 // If `imageFolderId` is not specified, any images embedded in the original document will be put in the `ApiInbox`
 // folder of the Image Gallery.
 func (fs *ImportService) ImportWord(path string, folderId int, imageFolderId int) (*DocumentInfo, error) {
-	time.Sleep(fs.Delay)
 	urlStr := fs.importUrl() + "/word"
 	params := url.Values{}
 	if folderId > 0 {
