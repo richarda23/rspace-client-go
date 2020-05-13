@@ -8,15 +8,13 @@ import (
 func TestRateLimitParse(t *testing.T) {
 	resp := createValidRateLimitHeaders()
 	var rld RateLimitData = NewRateLimitData(&resp)
-	assertIntEquals(t, 100, rld.RateLimit, "")
-	assertIntEquals(t, 50, rld.Remaining, "")
-	assertIntEquals(t, 5, rld.MinWaitIntervalMillis, "")
+	assertIntEquals(t, 100, rld.WaitTimeMillis, "")
 
 	// unknown value set to -100
-	resp.Header.Del(RATE_LIMIT_HDR)
-	resp.Header.Add(RATE_LIMIT_HDR, "")
+	resp.Header.Del(RATE_LIMIT_WAIT_TIME)
+	resp.Header.Add(RATE_LIMIT_WAIT_TIME, "")
 	rld = NewRateLimitData(&resp)
-	assertIntEquals(t, -100, rld.RateLimit, "")
+	assertIntEquals(t, -100, rld.WaitTimeMillis, "")
 }
 
 //todo create ttest header
@@ -24,9 +22,7 @@ func createValidRateLimitHeaders() http.Response {
 	resp := http.Response{}
 	hdr := make(map[string][]string)
 	h := http.Header(hdr)
-	h.Add(RATE_LIMIT_HDR, "100")
-	h.Add(RATE_LIMIT_REMAINING_HDR, "50")
-	h.Add(RATE_LIMIT_MIN_WAIT_HDR, "5")
+	h.Add(RATE_LIMIT_WAIT_TIME, "100")
 	resp.Header = h
 	return resp
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type FolderService struct {
@@ -18,7 +17,6 @@ func (fs *FolderService) foldersUrl() string {
 
 // FolderTree produces paginated listing of items in folder. If folderId is 0 then Home Folder is lister
 func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, typesToInclude []string) (*FolderList, error) {
-	time.Sleep(fs.Delay)
 	urlStr := fs.foldersUrl() + "/tree"
 	if folderId != 0 {
 		urlStr = urlStr + "/" + strconv.Itoa(folderId)
@@ -43,7 +41,6 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 
 //DocumentById retrieves full information about the folder
 func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
-	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", fs.foldersUrl(), folderId)
 	data, err := fs.doGet(url)
 	if err != nil {
@@ -56,7 +53,6 @@ func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 
 // DeleteFolder attempts to delete the folder or noteboon with the specified ID
 func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
-	time.Sleep(fs.Delay)
 	url := fmt.Sprintf("%s/%d", fs.foldersUrl(), folderId)
 	resp, err := fs.doDelete(url)
 	if resp == false {
@@ -69,7 +65,6 @@ func (fs *FolderService) DeleteFolder(folderId int) (bool, error) {
 // FolderNew creates a new folder or notebook with  the given name.
 // If a parentFolderId is specified then the folder is created in that folder
 func (fs *FolderService) FolderNew(post *FolderPost) (*Folder, error) {
-	time.Sleep(fs.Delay)
 	data, err := fs.doPostJsonBody(post, fs.foldersUrl())
 
 	if err != nil {

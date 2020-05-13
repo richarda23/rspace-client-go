@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -83,8 +84,15 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 		Log.Error(e)
 		return nil, e
 	}
-	//var rld RateLimitData = NewRateLimitData(resp)
-	//Log.Info(rld.String())
+	var rld RateLimitData = NewRateLimitData(resp)
+	Log.Info(rld.String())
+	//  default delay time
+	delayTime := 500
+	if rld.WaitTimeMillis > 0 {
+		delayTime = rld.WaitTimeMillis
+	}
+	Log.Infof("Sleeping %d ms", delayTime)
+	time.Sleep(time.Duration(delayTime) * time.Millisecond)
 
 	if err := testResponseForError(resp); err != nil {
 		if err.HttpCode == 429 {
@@ -115,9 +123,12 @@ func testResponseForError(resp *http.Response) *RSpaceError {
 		rspaceError := &RSpaceError{}
 		json.Unmarshal(data, rspaceError)
 		if resp.StatusCode == 429 {
-			// set min wait time from header
-			// TODO change
-			rspaceError.MillisTillNextCall = 1000
+			waitTimeHdr := resp.Header.Get(RATE_LIMIT_WAIT_TIME)
+			millis, _ := strconv.Atoi(waitTimeHdr)
+			if millis == 0 {
+				millis = 1000
+			}
+			rspaceError.MillisTillNextCall = millis
 		}
 		return rspaceError
 	}

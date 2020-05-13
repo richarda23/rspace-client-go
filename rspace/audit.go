@@ -5,7 +5,6 @@ import (
 	//	"fmt"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type ActivityService struct {
@@ -13,15 +12,15 @@ type ActivityService struct {
 }
 
 func (as *ActivityService) auditUrl() string {
-	return as.BaseUrl.String()+ "/activity"
+	return as.BaseUrl.String() + "/activity"
 }
 
 // Activities queries the audit trail for activities, by user, date or activity type
 func (as *ActivityService) Activities(q *ActivityQuery, pgCrit RecordListingConfig) (*ActivityList, error) {
-	time.Sleep(as.Delay)
+
 	urlStr := as.auditUrl()
 	var encodedParams string
-	pgCrit.OrderBy="date"
+	pgCrit.OrderBy = "date"
 	var params url.Values = pgCrit.toParams()
 	if q != nil {
 		if len(q.Users) > 0 {

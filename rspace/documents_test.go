@@ -85,7 +85,6 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 		assertIntEquals(t, 1, results4.TotalHits, "")
 		fmt.Println(results4.Documents[0])
 	}
-
 }
 
 func TestDocumentNew(t *testing.T) {
