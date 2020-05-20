@@ -14,6 +14,7 @@ func TestUserNew(t *testing.T) {
 	got, err := webClient.UserNew(userPost)
 	if err != nil {
 		Log.Error(err)
+		t.Fatalf("unexpected error " + err.Error())
 	}
 	if got.Id == 0 {
 		fail(t, "Id was nil but should be set")
@@ -21,14 +22,24 @@ func TestUserNew(t *testing.T) {
 	assertStringEquals(t, userPost.Username, got.Username, "")
 }
 func TestUsers(t *testing.T) {
+	userPost := createRandomUser(Pi)
+	got, _ := webClient.UserNew(userPost)
+	// default ordering is creationDate desc, so new user should be first:
+	var cfg RecordListingConfig = NewRecordListingConfig()
 	// all users were created before a time in the future
-	userList, e := webClient.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0))
+	cfg.OrderBy = "creationDate"
+	userList, e := webClient.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0), cfg)
+
+	assertStringEquals(t, got.Username, userList.Users[0].Username, "new user should be first in list")
+
+	userList, e = webClient.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0), cfg)
 	if e != nil {
 		fmt.Println(e)
+		t.Fatalf("unexpected error : " + e.Error())
 	}
 	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")
 	// no users created 10 years ago
-	userList2, _ := webClient.Users(time.Time{}, time.Now().AddDate(-10, 0, 0))
+	userList2, _ := webClient.Users(time.Time{}, time.Now().AddDate(-10, 0, 0), cfg)
 	assertIntEquals(t, 0, userList2.TotalHits, "")
 }
 

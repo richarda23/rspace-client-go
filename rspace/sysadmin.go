@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"encoding/json"
-	"net/url"
 	"strconv"
 	"time"
 	//	"fmt"
@@ -28,8 +27,9 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 }
 
 //Users lists users' biographical information
-func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
-	params := url.Values{}
+func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore time.Time,
+	pgConfig RecordListingConfig) (*UserList, error) {
+	params := pgConfig.toParams()
 	params.Add("tempAccountsOnly", strconv.FormatBool(false))
 	if !lastLoginBefore.IsZero() {
 		params.Add("lastLoginBefore", lastLoginBefore.Format("2006-01-02"))
@@ -49,7 +49,6 @@ func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore t
 	rc := &UserList{}
 	json.Unmarshal(data, rc)
 	return rc, err
-
 }
 
 //GroupNew creates a new group from existing users

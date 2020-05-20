@@ -160,8 +160,8 @@ type RsWebClient struct {
 func (ws *RsWebClient) Groups() (*GroupList, error) {
 	return ws.groupS.Groups()
 }
-func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.Time) (*UserList, error) {
-	return ws.sysadminS.Users(lastLoginBefore, creationDateBefore)
+func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.Time, cfg RecordListingConfig) (*UserList, error) {
+	return ws.sysadminS.Users(lastLoginBefore, creationDateBefore, cfg)
 }
 
 // UserNew creates a new user account. Requires sysadmin role
