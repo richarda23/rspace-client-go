@@ -39,7 +39,7 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 
 func (bs *BaseService) _postOrPutJsonBody(post interface{}, urlString, httpVerb string) ([]byte, error) {
 	formData, _ := json.Marshal(post)
-	Log.Info(string(formData))
+	//	Log.Info(string(formData))
 	hc := http.Client{Timeout: time.Duration(15) * time.Second}
 	req, err := http.NewRequest(httpVerb, urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
