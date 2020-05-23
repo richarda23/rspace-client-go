@@ -13,9 +13,13 @@ func (fs *FormService) formsUrl() string {
 }
 
 // FormTree produces paginated listing of items in form
-func (fs *FormService) Forms(config RecordListingConfig) (*FormList, error) {
+func (fs *FormService) Forms(config RecordListingConfig, query string) (*FormList, error) {
 	url := fs.formsUrl()
-	if paramStr := config.toParams().Encode(); len(paramStr) > 0 {
+	params := config.toParams()
+	if len(query) > 0 {
+		params.Set("query", query)
+	}
+	if paramStr := params.Encode(); len(paramStr) > 0 {
 		url = url + "?" + paramStr
 	}
 	data, err := fs.doGet(url)

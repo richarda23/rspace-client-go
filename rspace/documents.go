@@ -116,7 +116,7 @@ func (ds *DocumentService) DocumentNew(post *DocumentPost) (*DocumentInfo, error
 func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string, contentHtml string) (*DocumentInfo, error) {
 
 	post := BasicPost(name, tags)
-	content := FieldContent{contentHtml}
+	content := FieldContent{Content: contentHtml}
 	fields := make([]FieldContent, 1)
 	fields[0] = content
 	post.Fields = fields

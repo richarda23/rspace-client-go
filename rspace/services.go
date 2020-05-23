@@ -31,7 +31,8 @@ type BaseService struct {
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
 	formData, _ := json.Marshal(post)
-	hc := http.Client{Timeout: time.Duration(10) * time.Second}
+	Log.Info(string(formData))
+	hc := http.Client{Timeout: time.Duration(15) * time.Second}
 	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
@@ -116,7 +117,7 @@ func NewRateLimitData(resp *http.Response) RateLimitData {
 // doGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
 func (bs *BaseService) doGet(url string) ([]byte, error) {
-	client := HttpClientNew(10)
+	client := HttpClientNew(15)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
 	retry := NewResilientClient(client)
@@ -176,7 +177,12 @@ func (ws *RsWebClient) GroupNew(groupPost *GroupPost) (*GroupInfo, error) {
 
 // Forms returns a paginated listing of Forms
 func (fs *RsWebClient) Forms(config RecordListingConfig) (*FormList, error) {
-	return fs.formS.Forms(config)
+	return fs.formS.Forms(config, "")
+}
+
+// FormSearch returns a paginated listing of Forms filtered by optional search query
+func (fs *RsWebClient) FormSearch(config RecordListingConfig, query string) (*FormList, error) {
+	return fs.formS.Forms(config, query)
 }
 
 //  Documents returns a paginated listing of RSpace documents
@@ -210,6 +216,14 @@ func (ds *RsWebClient) NewEmptyBasicDocument(name, tags string) (*DocumentInfo, 
 }
 func (ds *RsWebClient) NewBasicDocumentWithContent(name, tags, content string) (*DocumentInfo, error) {
 	return ds.documentS.NewBasicDocumentWithContent(name, tags, content)
+}
+
+func (ds *RsWebClient) NewDocumentWithContent(docPost *DocumentPost) (*DocumentInfo, error) {
+	return ds.documentS.DocumentNew(docPost)
+}
+
+func (ds *RsWebClient) DocumentById(docId int) (*Document, error) {
+	return ds.documentS.DocumentById(docId)
 }
 
 // FolderTree returns a list of items in the specified folder

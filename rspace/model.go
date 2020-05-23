@@ -46,20 +46,25 @@ func (config *RecordListingConfig) toParams() url.Values {
 type DocumentPost struct {
 	Name   string         `json:"name"`
 	Tags   string         `json:"tags"`
-	FormId FormId         `json:"formId"`
+	FormID FormId         `json:"form,omitempty"`
 	Fields []FieldContent `json:"fields"`
 }
 type FieldContent struct {
 	Content string `json:"content"`
+	//Id will be null when posting, can be set if editing a specific field
+	Id int `json:"id,omitempty"`
 }
 type FormId struct {
-	Id int
+	Id int `json:"id,omitempty"`
 }
 
 // constructor for a new document
 func DocumentPostNew(name string, tags string, formId int, content []string) *DocumentPost {
 	id := FormId{formId}
-	c := make([]FieldContent, 10)
+	c := make([]FieldContent, 0)
+	for _, v := range content {
+		c = append(c, FieldContent{Content: v})
+	}
 	post := DocumentPost{name, tags, id, c}
 	return &post
 }

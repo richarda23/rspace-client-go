@@ -39,7 +39,7 @@ func (fs *FolderService) FolderTree(config RecordListingConfig, folderId int, ty
 	return &result, nil
 }
 
-//DocumentById retrieves full information about the folder
+//FolderById retrieves full information about the folder
 func (fs *FolderService) FolderById(folderId int) (*Folder, error) {
 	url := fmt.Sprintf("%s/%d", fs.foldersUrl(), folderId)
 	data, err := fs.doGet(url)

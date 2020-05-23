@@ -29,6 +29,7 @@ func (ds *SysadminService) UserNew(post *UserPost) (*UserInfo, error) {
 //Users lists users' biographical information
 func (ds *SysadminService) Users(lastLoginBefore time.Time, creationDateBefore time.Time,
 	pgConfig RecordListingConfig) (*UserList, error) {
+		
 	params := pgConfig.toParams()
 	params.Add("tempAccountsOnly", strconv.FormatBool(false))
 	if !lastLoginBefore.IsZero() {

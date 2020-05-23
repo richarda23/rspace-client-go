@@ -87,6 +87,32 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	}
 }
 
+func TestNewExperimentDocument(t *testing.T) {
+	// we'll create an 'experiment' document with 5 fields: 1 date and 4 text
+	forms, _ := webClient.FormSearch(NewRecordListingConfig(), "Experiment")
+	formId := forms.Forms[0].Id
+	f1 := "2020-05-23"
+	f2 := "Objective ...."
+	f4 := "Results ...."
+	f3 := "Methods ...."
+	f5 := "Conclusion ...."
+	content := []string{f1, f2, f3, f4, f5}
+	docPost := DocumentPostNew("from Test", "", formId, content)
+	newDoc, _ := webClient.NewDocumentWithContent(docPost)
+	assertStringEquals(t, "from Test", newDoc.Name, "")
+
+	// now get By Id
+	fullDoc, _ := webClient.DocumentById(newDoc.Id)
+	assertIntEquals(t, 5, len(fullDoc.Fields), "")
+	assertStringEquals(t, "Objective", fullDoc.Fields[1].Name, "")
+	// all fields have content set
+	for i, v := range fullDoc.Fields {
+		assertTrue(t, len(v.Content) > 0, fmt.Sprintf("unexpected empty field at index [%d]", i))
+	}
+	assertTrue(t, len(fullDoc.UserInfo.Username) > 0, "")
+
+}
+
 func TestDocumentNew(t *testing.T) {
 	//post := DocumentPostNewBasicDocument("go12", "t1,t2,t3")
 	var got, _ = webClient.NewEmptyBasicDocument("go12", "tag1,tag2")
