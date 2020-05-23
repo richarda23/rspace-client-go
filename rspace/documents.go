@@ -2,6 +2,7 @@ package rspace
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	//	"net/url"
 	//	"strconv"
@@ -99,21 +100,36 @@ func (ds *DocumentService) DeleteDocument(documentId int) (bool, error) {
 	return ds.doDelete(url)
 }
 
+// DocumentEdit updates an existing RSpace document
+func (ds *DocumentService) DocumentEdit(docId int, putData *DocumentPost) (*Document, error) {
+	if docId == 0 {
+		return nil, errors.New("docId is required")
+	}
+	url := fmt.Sprintf("%s/%d", ds.documentsUrl(), docId)
+	data, err := ds.doPutJsonBody(putData, url)
+	if err != nil {
+		return nil, err
+	}
+	result := &Document{}
+	json.Unmarshal(data, result)
+	return result, nil
+}
+
 // DocumentNew creates a new RSpace document
-func (ds *DocumentService) DocumentNew(post *DocumentPost) (*DocumentInfo, error) {
+func (ds *DocumentService) DocumentNew(post *DocumentPost) (*Document, error) {
 
 	data, err := ds.doPostJsonBody(post, ds.documentsUrl())
 	if err != nil {
 		return nil, err
 	}
-	result := &DocumentInfo{}
+	result := &Document{}
 	json.Unmarshal(data, result)
 	return result, nil
 }
 
 // NewBasicDocumentWithContent creates a new BasicDocument document with name, tags(optional) and content in a
 // single text field.
-func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string, contentHtml string) (*DocumentInfo, error) {
+func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string, contentHtml string) (*Document, error) {
 
 	post := BasicPost(name, tags)
 	content := FieldContent{Content: contentHtml}
@@ -124,17 +140,17 @@ func (ds *DocumentService) NewBasicDocumentWithContent(name string, tags string,
 }
 
 // NewEmptyBasicDocument creates a new, empty BasicDocument with no content.
-func (ds *DocumentService) NewEmptyBasicDocument(name string, tags string) (*DocumentInfo, error) {
+func (ds *DocumentService) NewEmptyBasicDocument(name string, tags string) (*Document, error) {
 	post := BasicPost(name, tags)
 	return ds.doPostCreateDocument(post)
 }
 
-func (ds *DocumentService) doPostCreateDocument(postData *DocumentPost) (*DocumentInfo, error) {
+func (ds *DocumentService) doPostCreateDocument(postData *DocumentPost) (*Document, error) {
 	data, err := ds.doPostJsonBody(postData, ds.documentsUrl())
 	if err != nil {
 		return nil, err
 	}
-	result := &DocumentInfo{}
+	result := &Document{}
 	json.Unmarshal(data, result)
 	return result, nil
 }

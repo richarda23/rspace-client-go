@@ -85,13 +85,13 @@ func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 		return nil, e
 	}
 	var rld RateLimitData = NewRateLimitData(resp)
-	Log.Info(rld.String())
+	//Log.Info(rld.String())
 	//  default delay time
 	delayTime := 500
 	if rld.WaitTimeMillis > 0 {
 		delayTime = rld.WaitTimeMillis
 	}
-	Log.Debugf("Sleeping %d ms", delayTime)
+	//	Log.Debugf("Sleeping %d ms", delayTime)
 	time.Sleep(time.Duration(delayTime) * time.Millisecond)
 
 	if err := testResponseForError(resp); err != nil {

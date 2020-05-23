@@ -29,11 +29,19 @@ type BaseService struct {
 	BaseUrl *url.URL
 }
 
+func (bs *BaseService) doPutJsonBody(post interface{}, urlString string) ([]byte, error) {
+	return bs._postOrPutJsonBody(post, urlString, "PUT")
+}
+
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
+	return bs._postOrPutJsonBody(post, urlString, "POST")
+}
+
+func (bs *BaseService) _postOrPutJsonBody(post interface{}, urlString, httpVerb string) ([]byte, error) {
 	formData, _ := json.Marshal(post)
 	Log.Info(string(formData))
 	hc := http.Client{Timeout: time.Duration(15) * time.Second}
-	req, err := http.NewRequest("POST", urlString, bytes.NewBuffer(formData))
+	req, err := http.NewRequest(httpVerb, urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 	retry := NewResilientClient(&hc)
@@ -211,15 +219,19 @@ func (ds *RsWebClient) Status() (*Status, error) {
 }
 
 // NewEmptyBasicDocument creates a Basic (single text field) document with no content
-func (ds *RsWebClient) NewEmptyBasicDocument(name, tags string) (*DocumentInfo, error) {
+func (ds *RsWebClient) NewEmptyBasicDocument(name, tags string) (*Document, error) {
 	return ds.documentS.NewEmptyBasicDocument(name, tags)
 }
-func (ds *RsWebClient) NewBasicDocumentWithContent(name, tags, content string) (*DocumentInfo, error) {
+func (ds *RsWebClient) NewBasicDocumentWithContent(name, tags, content string) (*Document, error) {
 	return ds.documentS.NewBasicDocumentWithContent(name, tags, content)
 }
 
-func (ds *RsWebClient) NewDocumentWithContent(docPost *DocumentPost) (*DocumentInfo, error) {
+func (ds *RsWebClient) NewDocumentWithContent(docPost *DocumentPost) (*Document, error) {
 	return ds.documentS.DocumentNew(docPost)
+}
+
+func (ds *RsWebClient) DocumentEdit(docId int, docPost *DocumentPost) (*Document, error) {
+	return ds.documentS.DocumentEdit(docId, docPost)
 }
 
 func (ds *RsWebClient) DocumentById(docId int) (*Document, error) {

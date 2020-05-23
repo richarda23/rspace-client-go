@@ -87,17 +87,22 @@ func TestDocumentAdvancedSearch(t *testing.T) {
 	}
 }
 
-func TestNewExperimentDocument(t *testing.T) {
-	// we'll create an 'experiment' document with 5 fields: 1 date and 4 text
-	forms, _ := webClient.FormSearch(NewRecordListingConfig(), "Experiment")
-	formId := forms.Forms[0].Id
+func buildExperimentDoc(formId int) *DocumentPost {
 	f1 := "2020-05-23"
 	f2 := "Objective ...."
 	f4 := "Results ...."
 	f3 := "Methods ...."
 	f5 := "Conclusion ...."
 	content := []string{f1, f2, f3, f4, f5}
-	docPost := DocumentPostNew("from Test", "", formId, content)
+	docPost := DocumentPostNew("from Test", "tag1", formId, content)
+	return docPost
+}
+
+func TestNewExperimentDocument(t *testing.T) {
+	// we'll create an 'experiment' document with 5 fields: 1 date and 4 text
+	forms, _ := webClient.FormSearch(NewRecordListingConfig(), "Experiment")
+	formId := forms.Forms[0].Id
+	docPost := buildExperimentDoc(formId)
 	newDoc, _ := webClient.NewDocumentWithContent(docPost)
 	assertStringEquals(t, "from Test", newDoc.Name, "")
 
@@ -110,6 +115,28 @@ func TestNewExperimentDocument(t *testing.T) {
 		assertTrue(t, len(v.Content) > 0, fmt.Sprintf("unexpected empty field at index [%d]", i))
 	}
 	assertTrue(t, len(fullDoc.UserInfo.Username) > 0, "")
+}
+
+func TestEditDocument(t *testing.T) {
+	// create
+	forms, _ := webClient.FormSearch(NewRecordListingConfig(), "Experiment")
+	formId := forms.Forms[0].Id
+	docPost := buildExperimentDoc(formId)
+	newDoc, _ := webClient.NewDocumentWithContent(docPost)
+	// we'll reset the name only
+	update := DocumentPost{}
+	update.Name = "newname"
+	edited, _ := webClient.DocumentEdit(newDoc.Id, &update)
+	assertStringEquals(t, "newname", edited.Name, "")
+	// but tags are unchanged
+	assertStringEquals(t, "tag1", edited.Tags, "")
+
+	// now we'll just update the objective field (index 1)
+	objFieldId := newDoc.Fields[1].Id
+	objUpdate := DocumentPost{}
+	objUpdate.Fields = []FieldContent{FieldContent{Id: objFieldId, Content: "xxxxx"}}
+	edited, _ = webClient.DocumentEdit(newDoc.Id, &objUpdate)
+	assertStringEquals(t, "xxxxx", edited.Fields[1].Content, "")
 
 }
 

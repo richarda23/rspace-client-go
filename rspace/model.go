@@ -43,9 +43,10 @@ func (config *RecordListingConfig) toParams() url.Values {
 	return params
 }
 
+// DocumentPost contains optional data for creating or updating an RSpace document
 type DocumentPost struct {
-	Name   string         `json:"name"`
-	Tags   string         `json:"tags"`
+	Name   string         `json:"name,omitempty"`
+	Tags   string         `json:"tags,omitempty"`
 	FormID FormId         `json:"form,omitempty"`
 	Fields []FieldContent `json:"fields"`
 }
