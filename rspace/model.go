@@ -564,6 +564,83 @@ type Form struct {
 	Tags      string
 }
 
+type ExportFormat int
+
+const (
+	XML_FORMAT ExportFormat = iota
+	HTML_FORMAT
+)
+
+func (scope ExportFormat) String() string {
+	switch scope {
+	case XML_FORMAT:
+		return "xml"
+	case HTML_FORMAT:
+		return "html"
+	}
+	return ""
+}
+
+type ExportScope int
+
+const (
+	USER_EXPORT_SCOPE ExportScope = iota
+	GROUP_EXPORT_SCOPE
+)
+
+func (scope ExportScope) String() string {
+	switch scope {
+	case USER_EXPORT_SCOPE:
+		return "user"
+	case GROUP_EXPORT_SCOPE:
+		return "group"
+	}
+	return ""
+}
+
+type ExportPost struct {
+	// XML, HTML
+	Format ExportFormat
+	// user,group
+	Scope ExportScope
+	// The id of a user or group to export
+	Id int
+}
+
+// NewExportPost generates an ExportPost of type USER_EXPORT_SCOPE
+// to HTML format, set as defaults
+func NewExportPost() ExportPost {
+	return ExportPost{HTML_FORMAT, USER_EXPORT_SCOPE, 0}
+}
+
+// Job holds information about a long-running request
+type Job struct {
+	Status string
+	Id     int
+	Links  []string `json:"_links"`
+	Result JobResult
+}
+
+type JobResult struct {
+	ExpiryDate string
+	Size       int
+	Checksum   string
+	Algorithm  string
+}
+
+// DownloadLink returns a URL of the link to access the export,
+// if the Job is in COMPLETED state and has a download link.
+// Otherwise returns nil
+func (job *Job) DownloadLink() *url.URL {
+	if job.Status == "COMPLETED" {
+		if len(job.Links) > 0 {
+			urlO, _ := url.Parse(job.Links[0])
+			return urlO
+		}
+	}
+	return nil
+}
+
 func makeStringSlice(existingSl []string, toAdd string) []string {
 	if len(existingSl) == 0 {
 		existingSl = make([]string, 0, 0)

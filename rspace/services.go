@@ -164,6 +164,7 @@ type RsWebClient struct {
 	importS   *ImportService
 	groupS    *GroupService
 	sharingS  *SharingService
+	exportS   *ExportService
 }
 
 func (ws *RsWebClient) Groups() (*GroupList, error) {
@@ -299,6 +300,10 @@ func (client *RsWebClient) ShareList(query string, cfg RecordListingConfig) (*Sh
 	return client.sharingS.SharedItemList(query, cfg)
 }
 
+func (client *RsWebClient) Export(post ExportPost) (*Job, error) {
+	return client.exportS.Export(post)
+}
+
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	base := baseService()
 	base.ApiKey = apiKey
@@ -313,6 +318,7 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.importS = &ImportService{BaseService: base}
 	wc.groupS = &GroupService{BaseService: base}
 	wc.sharingS = &SharingService{BaseService: base}
+	wc.exportS = &ExportService{BaseService: base}
 
 	return &wc
 }

@@ -12,7 +12,7 @@ func (fs *FormService) formsUrl() string {
 	return fs.BaseUrl.String() + "/forms"
 }
 
-// FormTree produces paginated listing of items in form
+// Forms produces paginated listing of items in form
 func (fs *FormService) Forms(config RecordListingConfig, query string) (*FormList, error) {
 	url := fs.formsUrl()
 	params := config.toParams()
