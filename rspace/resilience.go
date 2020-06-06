@@ -81,7 +81,7 @@ type DelayClientEx struct {
 func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 	resp, e := this.cli.Do(req)
 	if e != nil {
-		Log.Error(e)
+		Log.Errorf("Error with underling request %s, resp is %s", e, resp)
 		return nil, e
 	}
 	var rld RateLimitData = NewRateLimitData(resp)

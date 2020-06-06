@@ -632,13 +632,17 @@ type JobResult struct {
 // if the Job is in COMPLETED state and has a download link.
 // Otherwise returns nil
 func (job *Job) DownloadLink() *url.URL {
-	if job.Status == "COMPLETED" {
+	if job.IsCompleted() {
 		if len(job.Links) > 0 {
 			urlO, _ := url.Parse(job.Links[0])
 			return urlO
 		}
 	}
 	return nil
+}
+
+func (job *Job) IsCompleted() bool {
+	return job.Status == "COMPLETED"
 }
 
 func makeStringSlice(existingSl []string, toAdd string) []string {
