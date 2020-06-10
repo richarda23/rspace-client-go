@@ -250,8 +250,8 @@ func (fs *RsWebClient) FolderById(folderId int) (*Folder, error) {
 }
 
 // Uploads a single file
-func (fs *RsWebClient) UploadFile(path string) (*FileInfo, error) {
-	return fs.fileS.UploadFile(path)
+func (fs *RsWebClient) UploadFile(config FileUploadConfig) (*FileInfo, error) {
+	return fs.fileS.UploadFile(config)
 }
 
 // Lists Gallery files, optionally filtered by a media type
@@ -319,6 +319,5 @@ func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
 	wc.groupS = &GroupService{BaseService: base}
 	wc.sharingS = &SharingService{BaseService: base}
 	wc.exportS = &ExportService{BaseService: base}
-
 	return &wc
 }

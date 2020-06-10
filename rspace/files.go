@@ -8,8 +8,10 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -61,25 +63,36 @@ func (fs *FileService) FileById(fileId int) (*FileInfo, error) {
 // UploadFile uploads the file specified to the 'ApiInbox' subfolder of the
 // appropriate Gallery section
 // Returns either a FileInfo of the created file or an error if operation did not succeed.
-func (fs *FileService) UploadFile(path string) (*FileInfo, error) {
-	return fs._doUpload(path, 0)
+func (fs *FileService) UploadFile(config FileUploadConfig) (*FileInfo, error) {
+	return fs._doUpload(config.FilePath, 0, config.Caption, config.FolderId)
 }
 
 // UploadFileNewVersion replaces the RSpace file of the given ID with the new file.
 // The new version can have a different name but must be same filetype (i.e. have the same suffix)
 func (fs *FileService) UploadFileNewVersion(path string, fileToReplaceId int) (*FileInfo, error) {
-	return fs._doUpload(path, fileToReplaceId)
+	return fs._doUpload(path, fileToReplaceId, "", 0)
 }
 
-func (fs *FileService) _doUpload(path string, fileToReplaceId int) (*FileInfo, error) {
+func (fs *FileService) _doUpload(path string, fileToReplaceId int, caption string, folderId int) (*FileInfo, error) {
 	if fileToReplaceId < 0 {
 		return nil, fmt.Errorf("fileToReplaceId should be 0 or a real ID, not %d", fileToReplaceId)
 	}
-	url := fs.filesUrl()
+	urlS := fs.filesUrl()
 	if fileToReplaceId != 0 {
-		url = fmt.Sprintf("%s/%d/file", url, fileToReplaceId)
+		urlS = fmt.Sprintf("%s/%d/file", urlS, fileToReplaceId)
 	}
-	resp, err := fs.doMultipart(path, url)
+	params := url.Values{}
+	if len(caption) > 0 {
+		params.Add("caption", caption)
+	}
+	if folderId > 0 {
+		params.Add("folderId", strconv.Itoa(folderId))
+	}
+	encoded := params.Encode()
+	if len(encoded) > 0 {
+		urlS = urlS + "?" + encoded
+	}
+	resp, err := fs.doMultipart(path, urlS)
 	if err != nil {
 		return nil, err
 	}

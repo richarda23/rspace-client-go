@@ -18,8 +18,8 @@ const (
 func TestFileList(t *testing.T) {
 	cfg := NewRecordListingConfig()
 
-	_, err1 := webClient.Files(cfg, "invalidMediaType");
-	assertNotNil(t, err1, "invalid media type should cause error")	
+	_, err1 := webClient.Files(cfg, "invalidMediaType")
+	assertNotNil(t, err1, "invalid media type should cause error")
 	got, err := webClient.Files(cfg, "")
 	if err != nil {
 		Log.Error(err)
@@ -27,7 +27,7 @@ func TestFileList(t *testing.T) {
 	if got.TotalHits <= 1 {
 		fail(t, fmt.Sprintf("Expected hits > 1 but was %d", got.TotalHits))
 	}
-	fmt.Printf("Got %d hits\n", got.TotalHits )
+	fmt.Printf("Got %d hits\n", got.TotalHits)
 	id := got.Files[0].Id
 
 	file, _ := webClient.FileById(id)
@@ -37,7 +37,8 @@ func nameFromPath(path string) string {
 	return strings.Split(path, "/")[1]
 }
 func TestFileReplace(t *testing.T) {
-	got, err := webClient.UploadFile(TESTFILEUPLOAD)
+	cfg := FileUploadConfig{FilePath: TESTFILEUPLOAD}
+	got, err := webClient.UploadFile(cfg)
 	fmt.Println(got)
 	fmt.Printf("uploaded id of file to replace is is %d", got.Id)
 	got, err = webClient.UploadFileNewVersion(TESTFILEUPDATE, got.Id)
@@ -49,7 +50,9 @@ func TestFileReplace(t *testing.T) {
 	}
 }
 func TestFileUpload(t *testing.T) {
-	got, err := webClient.UploadFile(TESTFILEUPLOAD)
+	cfg := FileUploadConfig{Caption: "Caption",
+		FilePath: TESTFILEUPLOAD}
+	got, err := webClient.UploadFile(cfg)
 	if err != nil {
 		fmt.Println(err)
 	} else {

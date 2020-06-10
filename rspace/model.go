@@ -121,6 +121,14 @@ func (fi *FileInfo) CreatedTime() (time.Time, error) {
 	return parseTimestamp(fi.Created)
 }
 
+// FileUploadConfig configures file upload. filePath is required, other
+// properties are optional.
+type FileUploadConfig struct {
+	Caption  string
+	FilePath string
+	FolderId int
+}
+
 type Folder struct {
 	*IdentifiableNamable
 	Created        string
