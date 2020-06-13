@@ -2,6 +2,7 @@ package rspace
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
@@ -17,6 +18,17 @@ func TestGetForms(t *testing.T) {
 	for _, v := range got.Forms {
 		assertStringEquals(t, fmt.Sprintf("FM%d", v.Id), v.GlobalId, "")
 	}
+}
+
+func TestCreateForm(t *testing.T) {
+	filePath := "testdata/form.yaml"
+	yamlFormDef, _ := os.Open(filePath)
+	form, _ := webClient.CreateFormYaml(yamlFormDef)
+	assertStringEquals(t, "MyForm", form.Name, "")
+	form, _ = webClient.PublishForm(form.Id)
+	fmt.Println(form)
+	assertStringEquals(t, "PUBLISHED", form.FormState, "")
+
 }
 
 func TestSearchForms(t *testing.T) {

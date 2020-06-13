@@ -223,11 +223,13 @@ type Document struct {
 }
 
 type FormInfo struct {
-	Id       int
-	GlobalId string
-	Name     string
-	StableId string
-	Version  int
+	Id        int
+	GlobalId  string
+	Name      string
+	StableId  string
+	Version   int
+	Tags      string
+	FormState string
 }
 
 type UserInfo struct {

@@ -30,15 +30,16 @@ type BaseService struct {
 }
 
 func (bs *BaseService) doPutJsonBody(post interface{}, urlString string) ([]byte, error) {
-	return bs._postOrPutJsonBody(post, urlString, "PUT")
+	formData, _ := json.Marshal(post)
+	return bs.postOrPutJsonBodyBytes(formData, urlString, "PUT")
 }
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
-	return bs._postOrPutJsonBody(post, urlString, "POST")
+	formData, _ := json.Marshal(post)
+	return bs.postOrPutJsonBodyBytes(formData, urlString, "POST")
 }
 
-func (bs *BaseService) _postOrPutJsonBody(post interface{}, urlString, httpVerb string) ([]byte, error) {
-	formData, _ := json.Marshal(post)
+func (bs *BaseService) postOrPutJsonBodyBytes(formData []byte, urlString, httpVerb string) ([]byte, error) {
 	//	Log.Info(string(formData))
 	hc := http.Client{Timeout: time.Duration(15) * time.Second}
 	req, err := http.NewRequest(httpVerb, urlString, bytes.NewBuffer(formData))
@@ -122,11 +123,19 @@ func NewRateLimitData(resp *http.Response) RateLimitData {
 	return RateLimitData{rl}
 }
 
+func (bs *BaseService) doGet(url string) ([]byte, error) {
+	return bs.getOrPutNoBody(url, http.MethodGet)
+}
+
+func (bs *BaseService) doPut(url string) ([]byte, error) {
+	return bs.getOrPutNoBody(url, http.MethodPut)
+}
+
 // doGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
-func (bs *BaseService) doGet(url string) ([]byte, error) {
+func (bs *BaseService) getOrPutNoBody(url, method string) ([]byte, error) {
 	client := HttpClientNew(15)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, _ := http.NewRequest(method, url, nil)
 	bs.addAuthHeader(req)
 	retry := NewResilientClient(client)
 	resp, e := retry.Do(req)
@@ -134,10 +143,6 @@ func (bs *BaseService) doGet(url string) ([]byte, error) {
 		Log.Error(e)
 		return nil, e
 	}
-	//	var rld RateLimitData = NewRateLimitData(resp)
-	//	Log.Info(rld.String())
-
-	//fmt.Println("resp:" + string(data))
 	if err := testResponseForError(resp); err != nil {
 		return nil, err
 	}
@@ -187,6 +192,18 @@ func (ws *RsWebClient) GroupNew(groupPost *GroupPost) (*GroupInfo, error) {
 // Forms returns a paginated listing of Forms
 func (fs *RsWebClient) Forms(config RecordListingConfig) (*FormList, error) {
 	return fs.formS.Forms(config, "")
+}
+
+func (fs *RsWebClient) CreateFormYaml(yamlFormDef io.Reader) (*FormInfo, error) {
+	return fs.formS.CreateFormYaml(yamlFormDef)
+}
+
+func (fs *RsWebClient) CreateFormJson(jsonFormDef io.Reader) (*FormInfo, error) {
+	return fs.formS.CreateFormJson(jsonFormDef)
+}
+
+func (fs *RsWebClient) PublishForm(formId int) (*FormInfo, error) {
+	return fs.formS.PublishForm(formId)
 }
 
 // FormSearch returns a paginated listing of Forms filtered by optional search query
