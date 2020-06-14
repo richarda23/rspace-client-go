@@ -194,15 +194,15 @@ func (fs *RsWebClient) Forms(config RecordListingConfig) (*FormList, error) {
 	return fs.formS.Forms(config, "")
 }
 
-func (fs *RsWebClient) CreateFormYaml(yamlFormDef io.Reader) (*FormInfo, error) {
+func (fs *RsWebClient) CreateFormYaml(yamlFormDef io.Reader) (*Form, error) {
 	return fs.formS.CreateFormYaml(yamlFormDef)
 }
 
-func (fs *RsWebClient) CreateFormJson(jsonFormDef io.Reader) (*FormInfo, error) {
+func (fs *RsWebClient) CreateFormJson(jsonFormDef io.Reader) (*Form, error) {
 	return fs.formS.CreateFormJson(jsonFormDef)
 }
 
-func (fs *RsWebClient) PublishForm(formId int) (*FormInfo, error) {
+func (fs *RsWebClient) PublishForm(formId int) (*Form, error) {
 	return fs.formS.PublishForm(formId)
 }
 

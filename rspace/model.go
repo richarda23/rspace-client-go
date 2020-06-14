@@ -92,7 +92,7 @@ type DocumentInfo struct {
 	ParentFolderId int
 	Signed         bool
 	Tags           string
-	FormInfo       FormInfo `json:"form"`
+	Form           Form     `json:"form"`
 	UserInfo       UserInfo `json:"owner"`
 }
 
@@ -220,16 +220,6 @@ func (f *Field) LastModifiedTime() (time.Time, error) {
 type Document struct {
 	*DocumentInfo
 	Fields []Field
-}
-
-type FormInfo struct {
-	Id        int
-	GlobalId  string
-	Name      string
-	StableId  string
-	Version   int
-	Tags      string
-	FormState string
 }
 
 type UserInfo struct {

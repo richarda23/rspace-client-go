@@ -19,7 +19,7 @@ func (fs *FormService) formsUrl() string {
 	return fs.BaseUrl.String() + "/forms"
 }
 
-func (fs *FormService) PublishForm(formId int) (*FormInfo, error) {
+func (fs *FormService) PublishForm(formId int) (*Form, error) {
 	if formId <= 0 {
 		return nil, errors.New("Form Id must be >= 1")
 	}
@@ -28,25 +28,25 @@ func (fs *FormService) PublishForm(formId int) (*FormInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	var rc = &FormInfo{}
+	var rc = &Form{}
 	json.Unmarshal(result, &rc)
 	return rc, nil
 
 }
 
-func (fs *FormService) CreateFormJson(jsonFormDef io.Reader) (*FormInfo, error) {
+func (fs *FormService) CreateFormJson(jsonFormDef io.Reader) (*Form, error) {
 	jsonBytes, err := ioutil.ReadAll(jsonFormDef)
 	result, err := fs.postOrPutJsonBodyBytes(jsonBytes, fs.formsUrl(), "POST")
 	if err != nil {
 		return nil, err
 	}
-	var rc = &FormInfo{}
+	var rc = &Form{}
 	json.Unmarshal(result, &rc)
 	return rc, nil
 
 }
 
-func (fs *FormService) CreateFormYaml(yamlFormDef io.Reader) (*FormInfo, error) {
+func (fs *FormService) CreateFormYaml(yamlFormDef io.Reader) (*Form, error) {
 	byteRes, err := ioutil.ReadAll(yamlFormDef)
 
 	if err != nil {
