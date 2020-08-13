@@ -35,7 +35,7 @@ func TestDoExport(t *testing.T) {
 		Log.Info(err)
 		t.Fatalf("Error creating job %s", err)
 	}
-	assertStringEquals(t, "STARTING", job.Status, "")
+	assertStringEquals(t, "COMPLETED", job.Status, "")
 }
 
 func TestMakeExportUrl(t *testing.T) {

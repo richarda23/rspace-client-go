@@ -615,10 +615,11 @@ func NewExportPost() ExportPost {
 
 // Job holds information about a long-running request
 type Job struct {
-	Status string
-	Id     int
-	Links  []string `json:"_links"`
-	Result JobResult
+	Status          string
+	Id              int
+	PercentComplete float32
+	Links           []Link `json:"_links"`
+	Result          JobResult
 }
 
 type JobResult struct {
@@ -634,7 +635,8 @@ type JobResult struct {
 func (job *Job) DownloadLink() *url.URL {
 	if job.IsCompleted() {
 		if len(job.Links) > 0 {
-			urlO, _ := url.Parse(job.Links[0])
+			fmt.Println("links" + job.Links[0].Link)
+			urlO, _ := url.Parse(job.Links[0].Link)
 			return urlO
 		}
 	}
