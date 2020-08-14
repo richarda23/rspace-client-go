@@ -2,6 +2,7 @@ package rspace
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -30,48 +31,66 @@ func (fs *ExportService) GetJob(jobId int) (*Job, error) {
 
 }
 
-// Export does an export, blocking till job has finished.
-// The returned job will contain a download link.
-func (fs *ExportService) Export(post ExportPost) (*Job, error) {
-	url := fs.exportUrl()
-	url = fs.makeUrl(post, url)
+func (ex *ExportService) ExportSubmit(post ExportPost) (*Job, error) {
+	url := ex.exportUrl()
+	url = ex.makeUrl(post, url)
 	var emptyBody struct{}
-	start := time.Now()
-	data, err := fs.doPostJsonBody(emptyBody, url)
+	data, err := ex.doPostJsonBody(emptyBody, url)
 	if err != nil {
 		return nil, err
 	}
 	var job = &Job{}
 	json.Unmarshal(data, job)
+	return job, nil
+}
+
+// Export does an export, blocking till job has finished.
+// The returned job, if completed successfully, will contain a download link.
+func (fs *ExportService) Export(post ExportPost) (*Job, error) {
+	job, err := fs.ExportSubmit(post)
+	if err != nil {
+		return nil, err
+	}
+	start := time.Now()
 	initialSleepDuration := 100
-	sleepDuration := initialSleepDuration
-	time.Sleep(time.Duration(sleepDuration) * time.Millisecond)
-	for i := 0; i < 100; i++ {
+	time.Sleep(time.Duration(initialSleepDuration) * time.Millisecond)
+	for {
 		job, err = fs.GetJob(job.Id)
 		if err != nil {
 			return nil, err
 		}
 		pc := job.PercentComplete
-		if !job.IsCompleted() {
+		if !job.IsTerminated() {
 			if pc > 0 && pc < 100 {
-				elapsedTimeMs := float32(time.Now().Sub(start).Milliseconds())
-				fmt.Printf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeMs, pc)
-				expectedCompletionTime :=
-					(elapsedTimeMs / pc) * 100
-				fmt.Printf("expected completion time is %3.3f ms\n", expectedCompletionTime)
-
-				sleepDurationF := math.Max(3000, float64(expectedCompletionTime-elapsedTimeMs)/5)
-				fmt.Printf("will sleep for %3.2f ms\n", sleepDurationF)
-				sleepDuration = int(sleepDurationF)
-				time.Sleep(time.Duration(sleepDuration) * time.Millisecond)
+				dynamicSleep(pc, start)
 			}
-		} else {
+		} else if job.IsCompleted() {
 			Log.Infof("Completed, download link is %s", job.DownloadLink().String())
+			break
+		} else if job.IsTerminated() {
+			Log.Infof("Job terminated unsuccessfully with status %s", job.Status)
 			break
 		}
 	}
-
 	return job, nil
+}
+
+// sleeps maximum of 3 seconds, or 1/5th of expected remaining time
+
+func dynamicSleep(pcComplete float32, start time.Time) error {
+	if pcComplete == 0 {
+		return errors.New("pcComplete must be > 0 to calculate sleep period")
+	}
+	elapsedTimeMs := float32(time.Now().Sub(start).Milliseconds())
+	fmt.Printf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeMs, pcComplete)
+	expectedCompletionTime :=
+		(elapsedTimeMs / pcComplete) * 100
+	fmt.Printf("expected completion time is %3.3f ms\n", expectedCompletionTime)
+
+	sleepDurationF := math.Max(3000, float64(expectedCompletionTime-elapsedTimeMs)/5)
+	fmt.Printf("will sleep for %3.2f ms\n", sleepDurationF)
+	time.Sleep(time.Duration(int(sleepDurationF)) * time.Millisecond)
+	return nil
 }
 
 func (es *ExportService) makeUrl(post ExportPost, baseUrl string) string {

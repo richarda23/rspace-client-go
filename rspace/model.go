@@ -643,10 +643,15 @@ func (job *Job) DownloadLink() *url.URL {
 	return nil
 }
 
+// Boolean query for Job completed successfully
 func (job *Job) IsCompleted() bool {
 	return job.Status == "COMPLETED"
 }
 
+//Boolean query for job no longer running.
+func (job *Job) IsTerminated() bool {
+	return job.IsCompleted() || job.Status == "FAILED" || job.Status == "ABANDONED"
+}
 func makeStringSlice(existingSl []string, toAdd string) []string {
 	if len(existingSl) == 0 {
 		existingSl = make([]string, 0, 0)
