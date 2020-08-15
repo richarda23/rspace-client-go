@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 	fmt.Println("url is " + url.String())
 	apikey := getenv(APIKEY_ENV_NAME)
 	fmt.Println("api is " + apikey)
-	webClient = NewWebClient(url, apikey)
+	webClient = NewWebClientCustomTimeout(url, apikey, 30)
 	os.Exit(m.Run())
 }
 

@@ -18,15 +18,18 @@ var (
 )
 
 const (
-	APIKEY_ENV_NAME      = "RSPACE_API_KEY"
-	BASE_URL_ENV_NAME    = "RSPACE_URL"
-	RATE_LIMIT_WAIT_TIME = "X-Rate-Limit-WaitTimeMillis"
+	APIKEY_ENV_NAME         = "RSPACE_API_KEY"
+	BASE_URL_ENV_NAME       = "RSPACE_URL"
+	RATE_LIMIT_WAIT_TIME    = "X-Rate-Limit-WaitTimeMillis"
+	DEFAULT_TIMEOUT_SECONDS = 15
 )
 
 type BaseService struct {
 	Delay   time.Duration
 	ApiKey  string
 	BaseUrl *url.URL
+	// request timeout in seconds
+	TimeoutSeconds int
 }
 
 func (bs *BaseService) doPutJsonBody(post interface{}, urlString string) ([]byte, error) {
@@ -41,7 +44,7 @@ func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byt
 
 func (bs *BaseService) postOrPutJsonBodyBytes(formData []byte, urlString, httpVerb string) ([]byte, error) {
 	//	Log.Info(string(formData))
-	hc := http.Client{Timeout: time.Duration(15) * time.Second}
+	hc := http.Client{Timeout: time.Duration(bs.TimeoutSeconds) * time.Second}
 	req, err := http.NewRequest(httpVerb, urlString, bytes.NewBuffer(formData))
 	bs.addAuthHeader(req)
 	req.Header.Set("Content-Type", "application/json")
@@ -61,7 +64,7 @@ func (bs *BaseService) postOrPutJsonBodyBytes(formData []byte, urlString, httpVe
 // doDelete  attempts to delete a resource specified by the URL. If successful, returns true, else returns false, with a possible
 // non-null error
 func (bs *BaseService) doDelete(url string) (bool, error) {
-	client := HttpClientNew(10)
+	client := HttpClientNew(bs.TimeoutSeconds)
 	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 	bs.addAuthHeader(req)
@@ -84,7 +87,7 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 // If the response fails or the file cannot be created returns an error.
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
 func (bs *BaseService) doGetToFile(url string, filepath string) error {
-	client := HttpClientNew(10)
+	client := HttpClientNew(bs.TimeoutSeconds)
 	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
@@ -134,7 +137,7 @@ func (bs *BaseService) doPut(url string) ([]byte, error) {
 // doGet makes an authenticated API request to a URL expecting a string
 // response (typically JSON)
 func (bs *BaseService) getOrPutNoBody(url, method string) ([]byte, error) {
-	client := HttpClientNew(15)
+	client := HttpClientNew(bs.TimeoutSeconds)
 	req, _ := http.NewRequest(method, url, nil)
 	bs.addAuthHeader(req)
 	retry := NewResilientClient(client)
@@ -321,10 +324,20 @@ func (client *RsWebClient) Export(post ExportPost) (*Job, error) {
 	return client.exportS.Export(post)
 }
 
+//create new web client with a default timeout (15s)
 func NewWebClient(baseUrl *url.URL, apiKey string) *RsWebClient {
+	return NewWebClientCustomTimeout(baseUrl, apiKey, DEFAULT_TIMEOUT_SECONDS)
+}
+
+// create new web client with custom timeout ( must be > default timeout)
+func NewWebClientCustomTimeout(baseUrl *url.URL, apiKey string, timeout int) *RsWebClient {
 	base := baseService()
+	if timeout < 1 {
+		timeout = DEFAULT_TIMEOUT_SECONDS
+	}
 	base.ApiKey = apiKey
 	base.BaseUrl = baseUrl
+	base.TimeoutSeconds = timeout
 	wc := RsWebClient{}
 	wc.activityS = &ActivityService{BaseService: base}
 	wc.documentS = &DocumentService{BaseService: base}

@@ -635,7 +635,6 @@ type JobResult struct {
 func (job *Job) DownloadLink() *url.URL {
 	if job.IsCompleted() {
 		if len(job.Links) > 0 {
-			fmt.Println("links" + job.Links[0].Link)
 			urlO, _ := url.Parse(job.Links[0].Link)
 			return urlO
 		}

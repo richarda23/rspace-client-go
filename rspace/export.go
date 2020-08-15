@@ -62,7 +62,8 @@ func (fs *ExportService) Export(post ExportPost) (*Job, error) {
 		pc := job.PercentComplete
 		if !job.IsTerminated() {
 			if pc > 0 && pc < 100 {
-				dynamicSleep(pc, start)
+				sleepMs, _ := calculateSleepTime(pc, start)
+				time.Sleep(*sleepMs)
 			}
 		} else if job.IsCompleted() {
 			Log.Infof("Completed, download link is %s", job.DownloadLink().String())
@@ -76,21 +77,20 @@ func (fs *ExportService) Export(post ExportPost) (*Job, error) {
 }
 
 // sleeps maximum of 3 seconds, or 1/5th of expected remaining time
-
-func dynamicSleep(pcComplete float32, start time.Time) error {
+func calculateSleepTime(pcComplete float32, start time.Time) (*time.Duration, error) {
 	if pcComplete == 0 {
-		return errors.New("pcComplete must be > 0 to calculate sleep period")
+		return nil, errors.New("pcComplete must be > 0 to calculate sleep period")
 	}
 	elapsedTimeMs := float32(time.Now().Sub(start).Milliseconds())
-	fmt.Printf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeMs, pcComplete)
+	Log.Infof("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeMs, pcComplete)
 	expectedCompletionTime :=
 		(elapsedTimeMs / pcComplete) * 100
-	fmt.Printf("expected completion time is %3.3f ms\n", expectedCompletionTime)
+	Log.Infof("expected completion time is %3.3f ms\n", expectedCompletionTime)
 
 	sleepDurationF := math.Max(3000, float64(expectedCompletionTime-elapsedTimeMs)/5)
-	fmt.Printf("will sleep for %3.2f ms\n", sleepDurationF)
-	time.Sleep(time.Duration(int(sleepDurationF)) * time.Millisecond)
-	return nil
+	Log.Infof("will sleep for %3.2f ms\n", sleepDurationF)
+	duration := time.Duration(int64(sleepDurationF)) * time.Millisecond
+	return &duration, nil
 }
 
 func (es *ExportService) makeUrl(post ExportPost, baseUrl string) string {
