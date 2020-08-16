@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
 )
@@ -86,7 +85,7 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 // DoGetToFile saves the response from an HTTP GET request to the specified file.
 // If the response fails or the file cannot be created returns an error.
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
-func (bs *BaseService) doGetToFile(url string, filepath string) error {
+func (bs *BaseService) doGetToFile(url string, writer io.Writer) error {
 	client := HttpClientNew(bs.TimeoutSeconds)
 	retry := NewResilientClient(client)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
@@ -96,11 +95,11 @@ func (bs *BaseService) doGetToFile(url string, filepath string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	out, err := os.Create(filepath)
+
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(writer, resp.Body)
 	return err
 }
 
@@ -316,12 +315,24 @@ func (client *RsWebClient) Unshare(shareId int) (bool, error) {
 	return client.sharingS.Unshare(shareId)
 }
 
+// List shared items
 func (client *RsWebClient) ShareList(query string, cfg RecordListingConfig) (*SharedItemList, error) {
 	return client.sharingS.SharedItemList(query, cfg)
 }
 
-func (client *RsWebClient) Export(post ExportPost) (*Job, error) {
-	return client.exportS.Export(post)
+// Submit an export job, optionally blocking till complete
+func (client *RsWebClient) Export(post ExportPost, waitForDone bool) (*Job, error) {
+	return client.exportS.Export(post, waitForDone)
+}
+
+// gets current state of job
+func (client *RsWebClient) GetJob(jobId int) (*Job, error) {
+	return client.exportS.GetJob(jobId)
+}
+
+// Download the export link to specified file
+func (client *RsWebClient) DownloadExport(url string, writer io.Writer) error {
+	return client.exportS.DownloadExport(url, writer)
 }
 
 //create new web client with a default timeout (15s)

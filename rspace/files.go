@@ -143,7 +143,8 @@ func (fs *FileService) DownloadFile(fileId int, outDir string) (*FileInfo, error
 		return nil, err
 	}
 	path := filepath.Join(outDir, info.GetName())
-	err = fs.doGetToFile(downloadUrl, path)
+	out, err := os.Create(path)
+	err = fs.doGetToFile(downloadUrl, out)
 	if err != nil {
 		return nil, err
 	}

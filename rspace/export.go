@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"time"
 )
@@ -19,19 +20,23 @@ func (fs *ExportService) jobsUrl() string {
 	return fs.BaseUrl.String() + "/jobs"
 }
 
-func (fs *ExportService) GetJob(jobId int) (*Job, error) {
-	url := fmt.Sprintf("%s/%d", fs.jobsUrl(), jobId)
-	data, err := fs.doGet(url)
+func (es *ExportService) GetJob(jobId int) (*Job, error) {
+	url := fmt.Sprintf("%s/%d", es.jobsUrl(), jobId)
+	data, err := es.doGet(url)
 	if err != nil {
 		return nil, err
 	}
 	jobrc := Job{}
 	json.Unmarshal(data, &jobrc)
 	return &jobrc, nil
-
 }
 
-func (ex *ExportService) ExportSubmit(post ExportPost) (*Job, error) {
+//Download export downloads to the supplied filepath on local device
+func (es *ExportService) DownloadExport(url string, outWriter io.Writer) error {
+	return es.doGetToFile(url, outWriter)
+}
+
+func (ex *ExportService) exportSubmit(post ExportPost) (*Job, error) {
 	url := ex.exportUrl()
 	url = ex.makeUrl(post, url)
 	var emptyBody struct{}
@@ -46,14 +51,17 @@ func (ex *ExportService) ExportSubmit(post ExportPost) (*Job, error) {
 
 // Export does an export, blocking till job has finished.
 // The returned job, if completed successfully, will contain a download link.
-func (fs *ExportService) Export(post ExportPost) (*Job, error) {
-	job, err := fs.ExportSubmit(post)
+func (fs *ExportService) Export(post ExportPost, waitForComplete bool) (*Job, error) {
+	job, err := fs.exportSubmit(post)
+	if !waitForComplete {
+		return job, err
+	}
 	if err != nil {
 		return nil, err
 	}
 	start := time.Now()
-	initialSleepDuration := 100
-	time.Sleep(time.Duration(initialSleepDuration) * time.Millisecond)
+	initialSleepDuration := 1
+	time.Sleep(time.Duration(initialSleepDuration) * time.Second)
 	for {
 		job, err = fs.GetJob(job.Id)
 		if err != nil {
@@ -81,15 +89,15 @@ func calculateSleepTime(pcComplete float32, start time.Time) (*time.Duration, er
 	if pcComplete == 0 {
 		return nil, errors.New("pcComplete must be > 0 to calculate sleep period")
 	}
-	elapsedTimeMs := float32(time.Now().Sub(start).Milliseconds())
-	Log.Infof("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeMs, pcComplete)
+	elapsedTimeS := float32(time.Now().Sub(start).Seconds())
+	Log.Infof("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeS, pcComplete)
 	expectedCompletionTime :=
-		(elapsedTimeMs / pcComplete) * 100
-	Log.Infof("expected completion time is %3.3f ms\n", expectedCompletionTime)
-
-	sleepDurationF := math.Max(3000, float64(expectedCompletionTime-elapsedTimeMs)/5)
-	Log.Infof("will sleep for %3.2f ms\n", sleepDurationF)
-	duration := time.Duration(int64(sleepDurationF)) * time.Millisecond
+		(elapsedTimeS / pcComplete) * 100
+	Log.Infof("expected completion time is %3.1f s\n", expectedCompletionTime)
+	var minSleepTime float64 = 3.0
+	sleepDurationF := math.Max(minSleepTime, float64(expectedCompletionTime-elapsedTimeS)/5)
+	Log.Infof("will sleep for %3.2f s\n", sleepDurationF)
+	duration := time.Duration(int64(sleepDurationF)) * time.Second
 	return &duration, nil
 }
 

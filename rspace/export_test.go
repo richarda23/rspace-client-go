@@ -30,12 +30,18 @@ func TestDoExport(t *testing.T) {
 	newUser, _ := webClient.UserNew(userPost)
 	post := NewExportPost()
 	post.Id = newUser.Id
-	job, err := webClient.Export(post)
+	job, err := webClient.Export(post, true)
 	if err != nil {
 		Log.Info(err)
 		t.Fatalf("Error creating job %s", err)
 	}
 	assertStringEquals(t, "COMPLETED", job.Status, "")
+	url := job.DownloadLink()
+	assertNotNil(t, url, "download link should be present")
+
+	// test submit, non-blocking
+	job, err = webClient.Export(post, false)
+	assertStringEquals(t, "STARTING", job.Status, "")
 }
 
 func TestMakeExportUrl(t *testing.T) {
