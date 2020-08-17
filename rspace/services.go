@@ -331,8 +331,8 @@ func (client *RsWebClient) GetJob(jobId int) (*Job, error) {
 }
 
 // Download the export link to specified file
-func (client *RsWebClient) DownloadExport(url string, writer io.Writer) error {
-	return client.exportS.DownloadExport(url, writer)
+func (client *RsWebClient) DownloadExport(link *url.URL, writer io.Writer) error {
+	return client.exportS.DownloadExport(link.String(), writer)
 }
 
 //create new web client with a default timeout (15s)
