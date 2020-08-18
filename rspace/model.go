@@ -586,6 +586,7 @@ type ExportScope int
 const (
 	USER_EXPORT_SCOPE ExportScope = iota
 	GROUP_EXPORT_SCOPE
+	SELECTION_EXPORT_SCOPE
 )
 
 func (scope ExportScope) String() string {
@@ -594,6 +595,8 @@ func (scope ExportScope) String() string {
 		return "user"
 	case GROUP_EXPORT_SCOPE:
 		return "group"
+	case SELECTION_EXPORT_SCOPE:
+		return "selection"
 	}
 	return ""
 }
@@ -605,12 +608,25 @@ type ExportPost struct {
 	Scope ExportScope
 	// The id of a user or group to export
 	Id int
+	// a list of items to export
+	ItemIds []int
+
+	//Link depth to follow
+	MaxLinkLevel int
+}
+
+func (post ExportPost) ItemIdsToRequest() string {
+	if len(post.ItemIds) == 0 {
+		return ""
+	} else {
+		return strings.Join(intListToStringList(post.ItemIds), ",")
+	}
 }
 
 // NewExportPost generates an ExportPost of type USER_EXPORT_SCOPE
-// to HTML format, set as defaults
+// to HTML format, set as defaults, with link depth 1
 func NewExportPost() ExportPost {
-	return ExportPost{HTML_FORMAT, USER_EXPORT_SCOPE, 0}
+	return ExportPost{HTML_FORMAT, USER_EXPORT_SCOPE, 0, []int{}, 1}
 }
 
 // Job holds information about a long-running request
@@ -665,4 +681,13 @@ func find(slice []string, val string) int {
 		}
 	}
 	return -1
+}
+
+func intListToStringList(slice []int) []string {
+	results := make([]string, 0)
+	for _, v := range slice {
+		s := strconv.Itoa(v)
+		results = append(results, s)
+	}
+	return results
 }

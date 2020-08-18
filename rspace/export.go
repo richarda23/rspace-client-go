@@ -38,7 +38,11 @@ func (es *ExportService) DownloadExport(url string, outWriter io.Writer) error {
 
 func (ex *ExportService) exportSubmit(post ExportPost) (*Job, error) {
 	url := ex.exportUrl()
-	url = ex.makeUrl(post, url)
+	url, e := ex.makeUrl(post, url)
+	if e != nil {
+		return nil, e
+	}
+
 	var emptyBody struct{}
 	data, err := ex.doPostJsonBody(emptyBody, url)
 	if err != nil {
@@ -101,14 +105,21 @@ func calculateSleepTime(pcComplete float32, start time.Time) (*time.Duration, er
 	return &duration, nil
 }
 
-func (es *ExportService) makeUrl(post ExportPost, baseUrl string) string {
+func (es *ExportService) makeUrl(post ExportPost, baseUrl string) (string, error) {
 	url := baseUrl
-	if post.Id == 0 {
+	if post.Id == 0 && !(post.Scope == SELECTION_EXPORT_SCOPE) {
 		url = fmt.Sprintf("%s/%s/%s", url, post.Format.String(),
 			post.Scope.String())
+	} else if post.Scope == SELECTION_EXPORT_SCOPE {
+		if len(post.ItemIds) == 0 {
+			return "", errors.New("For selection scope, must supply >= 1 id")
+		}
+		url = fmt.Sprintf("%s/%s/%s?selections=%s&maxLinkLevel=%d", url, post.Format.String(),
+			post.Scope.String(), post.ItemIdsToRequest(), post.MaxLinkLevel)
+		fmt.Print(url)
 	} else {
 		url = fmt.Sprintf("%s/%s/%s/%d", url, post.Format.String(),
 			post.Scope.String(), post.Id)
 	}
-	return url
+	return url, nil
 }

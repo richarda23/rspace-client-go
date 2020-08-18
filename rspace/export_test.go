@@ -39,6 +39,15 @@ func TestDoExport(t *testing.T) {
 	url := job.DownloadLink()
 	assertNotNil(t, url, "download link should be present")
 
+	// now submit selection
+	doc0, _ := webClient.Documents(NewRecordListingConfig())
+	id0 := doc0.Documents[0].Id
+	post.Scope = SELECTION_EXPORT_SCOPE
+	post.Id = 0
+	post.ItemIds = []int{id0}
+	job, err = webClient.Export(post, true)
+	assertStringEquals(t, "COMPLETED", job.Status, "")
+
 	// test submit, non-blocking
 	job, err = webClient.Export(post, false)
 	assertStringEquals(t, "STARTING", job.Status, "")
@@ -46,11 +55,20 @@ func TestDoExport(t *testing.T) {
 
 func TestMakeExportUrl(t *testing.T) {
 	es := ExportService{}
-	post := ExportPost{XML_FORMAT, USER_EXPORT_SCOPE, 5}
-	url := es.makeUrl(post, "/export")
+	post := ExportPost{XML_FORMAT, USER_EXPORT_SCOPE, 5, []int{}, 1}
+	url, _ := es.makeUrl(post, "/export")
 	assertStringEquals(t, "/export/xml/user/5", url, "")
 
 	post = NewExportPost()
-	url = es.makeUrl(post, "/export")
+	url, _ = es.makeUrl(post, "/export")
 	assertStringEquals(t, "/export/html/user", url, "")
+
+	post = NewExportPost()
+	post.ItemIds = []int{1, 2, 3}
+	post.Scope = SELECTION_EXPORT_SCOPE
+
+	url, _ = es.makeUrl(post, "/export")
+
+	assertStringEquals(t, "/export/html/selection?selections=1,2,3&maxLinkLevel=1", url, "")
+
 }
