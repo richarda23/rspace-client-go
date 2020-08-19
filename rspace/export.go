@@ -116,7 +116,6 @@ func (es *ExportService) makeUrl(post ExportPost, baseUrl string) (string, error
 		}
 		url = fmt.Sprintf("%s/%s/%s?selections=%s&maxLinkLevel=%d", url, post.Format.String(),
 			post.Scope.String(), post.ItemIdsToRequest(), post.MaxLinkLevel)
-		fmt.Print(url)
 	} else {
 		url = fmt.Sprintf("%s/%s/%s/%d", url, post.Format.String(),
 			post.Scope.String(), post.Id)
