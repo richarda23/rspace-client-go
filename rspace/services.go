@@ -38,6 +38,7 @@ func (bs *BaseService) doPutJsonBody(post interface{}, urlString string) ([]byte
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
 	formData, _ := json.Marshal(post)
+	fmt.Println(string(formData))
 	return bs.postOrPutJsonBodyBytes(formData, urlString, "POST")
 }
 
@@ -162,16 +163,17 @@ func baseService() BaseService {
 }
 
 type RsWebClient struct {
-	activityS *ActivityService
-	documentS *DocumentService
-	folderS   *FolderService
-	formS     *FormService
-	fileS     *FileService
-	sysadminS *SysadminService
-	importS   *ImportService
-	groupS    *GroupService
-	sharingS  *SharingService
-	exportS   *ExportService
+	activityS  *ActivityService
+	documentS  *DocumentService
+	folderS    *FolderService
+	formS      *FormService
+	fileS      *FileService
+	sysadminS  *SysadminService
+	importS    *ImportService
+	groupS     *GroupService
+	sharingS   *SharingService
+	exportS    *ExportService
+	inventoryS *InventoryService
 }
 
 func (ws *RsWebClient) Groups() (*GroupList, error) {
@@ -360,5 +362,7 @@ func NewWebClientCustomTimeout(baseUrl *url.URL, apiKey string, timeout int) *Rs
 	wc.groupS = &GroupService{BaseService: base}
 	wc.sharingS = &SharingService{BaseService: base}
 	wc.exportS = &ExportService{BaseService: base}
+	wc.inventoryS = &InventoryService{BaseService: base}
+
 	return &wc
 }

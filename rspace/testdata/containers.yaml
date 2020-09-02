@@ -1,0 +1,12 @@
+name: freezer
+containers:
+- name: draw 1
+  containers:
+  - name: box1
+  - name: box2
+  - name: box3
+- name: draw2
+  containers: 
+  - name: rack1
+  - name: rack2
+- name: draw3
