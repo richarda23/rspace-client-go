@@ -1,6 +1,7 @@
 package rspace
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -17,6 +18,7 @@ func TestCreateContainer(t *testing.T) {
 		return
 	}
 	con.ParentContainer = nil
-	webClient.inventoryS.CreateContainers(con)
+	res, _ := webClient.inventoryS.CreateContainers(con)
+	fmt.Println(len(res.Containers))
 
 }

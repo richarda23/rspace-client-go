@@ -38,7 +38,6 @@ func (bs *BaseService) doPutJsonBody(post interface{}, urlString string) ([]byte
 
 func (bs *BaseService) doPostJsonBody(post interface{}, urlString string) ([]byte, error) {
 	formData, _ := json.Marshal(post)
-	fmt.Println(string(formData))
 	return bs.postOrPutJsonBodyBytes(formData, urlString, "POST")
 }
 
@@ -335,6 +334,11 @@ func (client *RsWebClient) GetJob(jobId int) (*Job, error) {
 // Download the export link to specified file
 func (client *RsWebClient) DownloadExport(link *url.URL, writer io.Writer) error {
 	return client.exportS.DownloadExport(link.String(), writer)
+}
+
+// Download the export link to specified file
+func (client *RsWebClient) CreateContainerTree(post *ContainerPost) (*ContainerList, error) {
+	return client.inventoryS.CreateContainers(post)
 }
 
 //create new web client with a default timeout (15s)

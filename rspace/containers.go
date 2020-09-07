@@ -25,19 +25,32 @@ type Container struct {
 	IdentifiableNamable
 	ParentId int `json:"parentContainer"`
 }
+
+type ContainerList struct {
+	Containers []*Container
+}
 type InventoryService struct {
 	BaseService
 }
 
-func (is *InventoryService) CreateContainers(toCreate *ContainerPost) {
+func (is *InventoryService) CreateContainers(toCreate *ContainerPost) (*ContainerList, error) {
+	list := make([]*Container, 0)
+	results := &ContainerList{list}
+
+	is.doCreateContainers(toCreate, results)
+	return results, nil
+
+}
+func (is *InventoryService) doCreateContainers(toCreate *ContainerPost, results *ContainerList) {
 	result, err := is.createContainer(toCreate)
+	results.Containers = append(results.Containers, result)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for _, v := range toCreate.Containers {
 		copy := v
 		copy.ParentContainer = &ParentRef{Id: result.Id}
-		is.CreateContainers(&copy)
+		is.doCreateContainers(&copy, results)
 	}
 }
 
@@ -54,7 +67,6 @@ func (is *InventoryService) createContainer(toCreate *ContainerPost) (*Container
 	}
 	var result = Container{}
 	json.Unmarshal(data, &result)
-	fmt.Println(result)
 
 	return &result, nil
 }
