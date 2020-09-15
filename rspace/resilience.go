@@ -46,14 +46,19 @@ func (ex RetryClientEx) Do(req *http.Request) (*http.Response, error) {
 		resp, currErr = ex.cli.Do(req)
 		// e.g. server not available
 		if currErr != nil {
-			Log.Warning(" got an client error with no response, retrying: " + currErr.Error())
+			if t, ok := currErr.(*RSpaceError); ok == true {
+				if t.HttpCode < 500 {
+					return nil, currErr
+				}
+			}
+
 		} else if resp != nil {
 			if x := testResponseForError(resp); x != nil {
 				//is this error worth retrying? Don't retry client error
 				// unless is 429
 				if x.HttpCode == 429 || x.HttpCode >= 500 {
 					// we have an error worth retrying
-					Log.Warningf(" Got an error status %d - retrying", x.HttpCode)
+					//Log.Warningf(" Got an error status %d - retrying", x.HttpCode)
 				} else {
 					// it's a 4xx client error, so no point retrying
 					return resp, nil
@@ -81,7 +86,7 @@ type DelayClientEx struct {
 func (this *DelayClientEx) Do(req *http.Request) (*http.Response, error) {
 	resp, e := this.cli.Do(req)
 	if e != nil {
-		Log.Errorf("Error with underling request %s, resp is %s", e, resp)
+		Log.Errorf("Error with underlying request %s, resp is %s", e, resp)
 		return nil, e
 	}
 	var rld RateLimitData = NewRateLimitData(resp)

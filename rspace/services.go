@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -49,6 +50,12 @@ func (bs *BaseService) postOrPutJsonBodyBytes(formData []byte, urlString, httpVe
 	req.Header.Set("Content-Type", "application/json")
 	retry := NewResilientClient(&hc)
 	resp, err := retry.Do(req)
+	// close response when complete
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +93,22 @@ func (bs *BaseService) doDelete(url string) (bool, error) {
 // If the response fails or the file cannot be created returns an error.
 // 'filepath' argument should be absolute path to a file. If the file exists, it will be overwritten. If it doesn't exist, it will be created.
 func (bs *BaseService) doGetToFile(url string, writer io.Writer) error {
-	client := HttpClientNew(bs.TimeoutSeconds)
-	retry := NewResilientClient(client)
+	fmt.Printf("timeout is %d\n", bs.TimeoutSeconds)
+	client := &http.Client{
+		Transport: &http.Transport{
+			Dial: (&net.Dialer{
+				Timeout:   time.Duration(bs.TimeoutSeconds) * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
+
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	bs.addAuthHeader(req)
-	resp, err := retry.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
