@@ -34,7 +34,6 @@ func TestUsers(t *testing.T) {
 
 	userList, e = webClient.Users(time.Now().AddDate(1, 0, 0), time.Now().AddDate(1, 0, 0), cfg)
 	if e != nil {
-		fmt.Println(e)
 		t.Fatalf("unexpected error : " + e.Error())
 	}
 	assertTrue(t, userList.TotalHits > 0, "Expected some users but was 0")

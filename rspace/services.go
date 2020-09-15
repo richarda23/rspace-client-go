@@ -50,6 +50,12 @@ func (bs *BaseService) postOrPutJsonBodyBytes(formData []byte, urlString, httpVe
 	req.Header.Set("Content-Type", "application/json")
 	retry := NewResilientClient(&hc)
 	resp, err := retry.Do(req)
+	// close response when complete
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
 	if err != nil {
 		return nil, err
 	}
