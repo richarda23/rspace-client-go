@@ -3,6 +3,7 @@ package rspace
 import (
 	"testing"
 	"time"
+
 	//"errors"
 	"fmt"
 	//"encoding/json"
@@ -39,6 +40,10 @@ func TestUserPost(t *testing.T) {
 	userpost, err = builder.Username("user1234").Password(tooShortPwd).FirstName("first").LastName("last").Email(tooShortEmail).Role(User).Affiliation("u-somewhere").ApiKey("abcdefg").Build()
 	assertNotNil(t, userpost, "error was nil")
 
+}
+func TestFmtString(t *testing.T) {
+	seconds := 4546345342.14343
+	fmt.Printf("answer is: %3.0f", seconds)
 }
 
 func TestGroupPost(t *testing.T) {

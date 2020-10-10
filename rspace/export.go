@@ -55,7 +55,8 @@ func (ex *ExportService) exportSubmit(post ExportPost) (*Job, error) {
 
 // Export does an export, blocking till job has finished.
 // The returned job, if completed successfully, will contain a download link.
-func (fs *ExportService) Export(post ExportPost, waitForComplete bool) (*Job, error) {
+// reporter callback can be used to report or log progress  to client
+func (fs *ExportService) Export(post ExportPost, waitForComplete bool, reporter func(string)) (*Job, error) {
 	job, err := fs.exportSubmit(post)
 	if !waitForComplete {
 		return job, err
@@ -63,6 +64,7 @@ func (fs *ExportService) Export(post ExportPost, waitForComplete bool) (*Job, er
 	if err != nil {
 		return nil, err
 	}
+	reporter(fmt.Sprintf("Waiting for job id %d: %s", job.Id, job.Links[0].Link))
 	start := time.Now()
 	initialSleepDuration := 1
 	time.Sleep(time.Duration(initialSleepDuration) * time.Second)
@@ -73,12 +75,16 @@ func (fs *ExportService) Export(post ExportPost, waitForComplete bool) (*Job, er
 		}
 		pc := job.PercentComplete
 		if !job.IsTerminated() {
+			// if pc is 0, we have no info on which to base calculation
 			if pc > 0 && pc < 100 {
-				sleepMs, _ := calculateSleepTime(pc, start)
+				sleepMs, _ := calculateSleepTime(pc, start, reporter)
 				time.Sleep(*sleepMs)
+			} else {
+				// a long job might still be on 0% progress for a while.
+				time.Sleep(time.Duration(3 * time.Second))
 			}
 		} else if job.IsCompleted() {
-			Log.Infof("Completed, download link is %s", job.DownloadLink().String())
+			reporter(fmt.Sprintf("Completed, download link is %s", job.DownloadLink().String()))
 			break
 		} else if job.IsTerminated() {
 			Log.Infof("Job terminated unsuccessfully with status %s", job.Status)
@@ -89,18 +95,19 @@ func (fs *ExportService) Export(post ExportPost, waitForComplete bool) (*Job, er
 }
 
 // sleeps maximum of 3 seconds, or 1/5th of expected remaining time
-func calculateSleepTime(pcComplete float32, start time.Time) (*time.Duration, error) {
+func calculateSleepTime(pcComplete float32, start time.Time, progressReporter func(string)) (*time.Duration, error) {
 	if pcComplete == 0 {
 		return nil, errors.New("pcComplete must be > 0 to calculate sleep period")
 	}
 	elapsedTimeS := float32(time.Now().Sub(start).Seconds())
-	Log.Infof("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeS, pcComplete)
+	//progressReporter(fmt.Sprintf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeS, pcComplete)
 	expectedCompletionTime :=
-		(elapsedTimeS / pcComplete) * 100
-	Log.Infof("expected completion time is %3.1f s\n", expectedCompletionTime)
+		((elapsedTimeS / pcComplete) * 100) - elapsedTimeS
 	var minSleepTime float64 = 3.0
 	sleepDurationF := math.Max(minSleepTime, float64(expectedCompletionTime-elapsedTimeS)/5)
-	Log.Infof("will sleep for %3.2f s\n", sleepDurationF)
+	progressReporter(fmt.Sprintf("%3.1f%% complete. "+
+		"Estimated remaining time: %3.1fs. Polling again in %4.1fs",
+		pcComplete, expectedCompletionTime, sleepDurationF))
 	duration := time.Duration(int64(sleepDurationF)) * time.Second
 	return &duration, nil
 }

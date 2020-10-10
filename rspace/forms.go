@@ -67,6 +67,7 @@ func (fs *FormService) Forms(config RecordListingConfig, query string) (*FormLis
 	if len(query) > 0 {
 		params.Set("query", query)
 	}
+
 	if paramStr := params.Encode(); len(paramStr) > 0 {
 		url = url + "?" + paramStr
 	}

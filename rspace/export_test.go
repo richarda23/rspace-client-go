@@ -30,7 +30,7 @@ func TestDoExport(t *testing.T) {
 	newUser, _ := webClient.UserNew(userPost)
 	post := NewExportPost()
 	post.Id = newUser.Id
-	job, err := webClient.Export(post, true)
+	job, err := webClient.Export(post, true, func(string) {})
 	if err != nil {
 		Log.Info(err)
 		t.Fatalf("Error creating job %s", err)
@@ -45,11 +45,11 @@ func TestDoExport(t *testing.T) {
 	post.Scope = SELECTION_EXPORT_SCOPE
 	post.Id = 0
 	post.ItemIds = []int{id0}
-	job, err = webClient.Export(post, true)
+	job, err = webClient.Export(post, true, func(string) {})
 	assertStringEquals(t, "COMPLETED", job.Status, "")
 
 	// test submit, non-blocking
-	job, err = webClient.Export(post, false)
+	job, err = webClient.Export(post, false, func(string) {})
 	assertStringEquals(t, "STARTING", job.Status, "")
 }
 

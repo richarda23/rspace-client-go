@@ -339,8 +339,8 @@ func (client *RsWebClient) ShareList(query string, cfg RecordListingConfig) (*Sh
 }
 
 // Submit an export job, optionally blocking till complete
-func (client *RsWebClient) Export(post ExportPost, waitForDone bool) (*Job, error) {
-	return client.exportS.Export(post, waitForDone)
+func (client *RsWebClient) Export(post ExportPost, waitForDone bool, progressWriter func(string)) (*Job, error) {
+	return client.exportS.Export(post, waitForDone, progressWriter)
 }
 
 // gets current state of job
