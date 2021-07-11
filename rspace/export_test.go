@@ -3,6 +3,7 @@ package rspace
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestExportScope(t *testing.T) {
@@ -51,6 +52,35 @@ func TestDoExport(t *testing.T) {
 	// test submit, non-blocking
 	job, err = webClient.Export(post, false, func(string) {})
 	assertStringEquals(t, "STARTING", job.Status, "")
+}
+
+var messages = make([]string, 1)
+
+func reporter(s string) {
+	messages = append(messages, s)
+}
+func TestCalculateRemainingTime(t *testing.T) {
+	start := time.Now().Add(time.Second * -100)
+	//50% done in 100s means 50% left to do - another 100s
+	// poll with 1/5th interval, expected interval = 100/5= 20
+	dur, _ := calculateSleepTime(50, start, reporter)
+	for _, item := range messages {
+		println(item)
+	}
+	assertDurationEquals(t, time.Duration(time.Second*20), *dur, "")
+
+	// max of 60 seconds re-polling time
+	dur, _ = calculateSleepTime(0.01, start, reporter)
+	assertDurationEquals(t, time.Duration(time.Second*60), *dur, "")
+
+	// minimum of 3 second interval
+	dur, _ = calculateSleepTime(99.999, start, reporter)
+	assertDurationEquals(t, time.Duration(time.Second*3), *dur, "")
+
+	//error if progress is 0 - can't calculate
+	_, err := calculateSleepTime(0.0, start, reporter)
+	assertNotNil(t, err, "")
+
 }
 
 func TestMakeExportUrl(t *testing.T) {

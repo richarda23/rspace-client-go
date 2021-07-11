@@ -57,12 +57,31 @@ func (r StringTestResult) IsEqual() bool {
 	return r.Expected == r.Actual
 }
 
+type DurationTestResult struct {
+	Expected time.Duration
+	Actual   time.Duration
+}
+
+func (r DurationTestResult) String() string {
+	return fmt.Sprintf("Expected [%s] but was [%s]", r.Expected.String(),
+		r.Actual.String())
+}
+func (r DurationTestResult) IsEqual() bool {
+	return r.Expected == r.Actual
+}
+
 func assertIntEquals(t *testing.T, expected int, actual int, message string) {
 	result := IntTestResult{expected, actual}
 	_assertEquals(t, result, message)
 }
 func assertStringEquals(t *testing.T, expected string, actual string, message string) {
 	result := StringTestResult{expected, actual}
+	_assertEquals(t, result, message)
+}
+
+func assertDurationEquals(t *testing.T, expected time.Duration,
+	actual time.Duration, message string) {
+	result := DurationTestResult{expected, actual}
 	_assertEquals(t, result, message)
 }
 

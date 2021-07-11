@@ -56,7 +56,8 @@ func (ex *ExportService) exportSubmit(post ExportPost) (*Job, error) {
 // Export does an export, blocking till job has finished.
 // The returned job, if completed successfully, will contain a download link.
 // reporter callback can be used to report or log progress  to client
-func (fs *ExportService) Export(post ExportPost, waitForComplete bool, reporter func(string)) (*Job, error) {
+func (fs *ExportService) Export(post ExportPost, waitForComplete bool,
+	reporter func(string)) (*Job, error) {
 	job, err := fs.exportSubmit(post)
 	if !waitForComplete {
 		return job, err
@@ -100,11 +101,12 @@ func calculateSleepTime(pcComplete float32, start time.Time, progressReporter fu
 		return nil, errors.New("pcComplete must be > 0 to calculate sleep period")
 	}
 	elapsedTimeS := float32(time.Now().Sub(start).Seconds())
-	//progressReporter(fmt.Sprintf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeS, pcComplete)
+	progressReporter(fmt.Sprintf("elapsed time is %3.2f ms, pc = %.2f\n", elapsedTimeS, pcComplete))
 	expectedCompletionTime :=
 		((elapsedTimeS / pcComplete) * 100) - elapsedTimeS
 	var minSleepTime float64 = 3.0
-	sleepDurationF := math.Max(minSleepTime, float64(expectedCompletionTime-elapsedTimeS)/5)
+	sleepDurationF := math.Max(minSleepTime, float64(expectedCompletionTime/5))
+	sleepDurationF = math.Min(sleepDurationF, 60.0)
 	progressReporter(fmt.Sprintf("%3.1f%% complete. "+
 		"Estimated remaining time: %3.1fs. Polling again in %4.1fs",
 		pcComplete, expectedCompletionTime, sleepDurationF))
