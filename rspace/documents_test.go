@@ -97,10 +97,23 @@ func buildExperimentDoc(formId int) *DocumentPost {
 	f3 := "Methods ...."
 	f5 := "Conclusion ...."
 	content := []string{f1, f2, f3, f4, f5}
-	docPost := DocumentPostNew("from Test", "tag1", formId, content)
+	docPost := DocumentPostNew("from Test", "tag1", formId, content, 0)
 	return docPost
 }
 
+func TestCreateDocumentInFolder(t *testing.T) {
+	post := FolderPost{}
+	post.Name = "notebook with doc"
+	post.IsNotebook = true
+	got, err := webClient.FolderNew(&post)
+	if err != nil {
+		Log.Error(err)
+	}
+	pfId := got.Id
+	docPost := DocumentPostNew("from Test", "tag1", 0, []string{"content"}, pfId)
+	newDoc, _ := webClient.NewDocumentWithContent(docPost)
+	assertStringEquals(t, "from Test", newDoc.Name, "")
+}
 func TestNewExperimentDocument(t *testing.T) {
 	// we'll create an 'experiment' document with 5 fields: 1 date and 4 text
 	forms, _ := webClient.FormSearch(NewRecordListingConfig(), "Experiment")
