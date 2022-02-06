@@ -45,10 +45,11 @@ func (config *RecordListingConfig) toParams() url.Values {
 
 // DocumentPost contains optional data for creating or updating an RSpace document
 type DocumentPost struct {
-	Name   string         `json:"name,omitempty"`
-	Tags   string         `json:"tags,omitempty"`
-	FormID FormId         `json:"form,omitempty"`
-	Fields []FieldContent `json:"fields,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	Tags           string         `json:"tags,omitempty"`
+	FormID         FormId         `json:"form,omitempty"`
+	Fields         []FieldContent `json:"fields,omitempty"`
+	ParentFolderId int            `json:"parentFolderId,omitempty"`
 }
 type FieldContent struct {
 	Content string `json:"content"`
@@ -60,13 +61,13 @@ type FormId struct {
 }
 
 // constructor for a new document
-func DocumentPostNew(name string, tags string, formId int, content []string) *DocumentPost {
+func DocumentPostNew(name string, tags string, formId int, content []string, parentFolderId int) *DocumentPost {
 	id := FormId{formId}
 	c := make([]FieldContent, 0)
 	for _, v := range content {
 		c = append(c, FieldContent{Content: v})
 	}
-	post := DocumentPost{name, tags, id, c}
+	post := DocumentPost{name, tags, id, c, parentFolderId}
 	return &post
 }
 
