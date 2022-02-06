@@ -112,7 +112,7 @@ func TestCreateDocumentInFolder(t *testing.T) {
 	pfId := got.Id
 	docPost := DocumentPostNew("from Test", "tag1", 0, []string{"content"}, pfId)
 	newDoc, _ := webClient.NewDocumentWithContent(docPost)
-	assertStringEquals(t, "from Test", newDoc.Name, "")
+	assertIntEquals(t, pfId, newDoc.ParentFolderId, "incorrect parent folder id")
 }
 func TestNewExperimentDocument(t *testing.T) {
 	// we'll create an 'experiment' document with 5 fields: 1 date and 4 text
