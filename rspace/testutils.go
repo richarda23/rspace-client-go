@@ -10,6 +10,7 @@ import (
 
 func fail(t *testing.T, message string) {
 	t.Errorf(message)
+	t.FailNow()
 }
 
 var seededRand *rand.Rand = rand.New(

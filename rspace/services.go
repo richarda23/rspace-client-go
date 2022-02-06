@@ -180,17 +180,16 @@ func baseService() BaseService {
 }
 
 type RsWebClient struct {
-	activityS  *ActivityService
-	documentS  *DocumentService
-	folderS    *FolderService
-	formS      *FormService
-	fileS      *FileService
-	sysadminS  *SysadminService
-	importS    *ImportService
-	groupS     *GroupService
-	sharingS   *SharingService
-	exportS    *ExportService
-	inventoryS *InventoryService
+	activityS *ActivityService
+	documentS *DocumentService
+	folderS   *FolderService
+	formS     *FormService
+	fileS     *FileService
+	sysadminS *SysadminService
+	importS   *ImportService
+	groupS    *GroupService
+	sharingS  *SharingService
+	exportS   *ExportService
 }
 
 func (ws *RsWebClient) Groups() (*GroupList, error) {
@@ -379,6 +378,5 @@ func NewWebClientCustomTimeout(baseUrl *url.URL, apiKey string, timeout int) *Rs
 	wc.groupS = &GroupService{BaseService: base}
 	wc.sharingS = &SharingService{BaseService: base}
 	wc.exportS = &ExportService{BaseService: base}
-	wc.inventoryS = &InventoryService{BaseService: base}
 	return &wc
 }

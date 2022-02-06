@@ -41,7 +41,10 @@ func TestDocumentBasicSearch(t *testing.T) {
 	name := randomAlphanumeric(6)
 	tag := randomAlphanumeric(6)
 	cfg := NewRecordListingConfig()
-	created, _ := webClient.documentS.NewEmptyBasicDocument(name, tag)
+	created, err := webClient.documentS.NewEmptyBasicDocument(name, tag)
+	if err != nil {
+		fail(t, "http response was error - doc was not created")
+	}
 	results, _ := webClient.documentS.SearchDocuments(cfg, name)
 	assertIntEquals(t, 1, results.TotalHits, "")
 	assertIntEquals(t, created.Id, results.Documents[0].Id, "")

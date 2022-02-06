@@ -48,7 +48,7 @@ type DocumentPost struct {
 	Name   string         `json:"name,omitempty"`
 	Tags   string         `json:"tags,omitempty"`
 	FormID FormId         `json:"form,omitempty"`
-	Fields []FieldContent `json:"fields"`
+	Fields []FieldContent `json:"fields,omitempty"`
 }
 type FieldContent struct {
 	Content string `json:"content"`
