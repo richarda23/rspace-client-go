@@ -31,7 +31,7 @@ func (ds *DocumentService) GetStatus() (*Status, error) {
 	return &res, nil
 }
 
-// Paginated listing of Documents
+// Documents performs a paginated listing of Documents
 func (ds *DocumentService) Documents(config RecordListingConfig) (*DocumentList, error) {
 
 	url := ds._generateUrl(config, "", false)

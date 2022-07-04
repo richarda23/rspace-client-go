@@ -36,10 +36,9 @@ func TestActivityGet(t *testing.T) {
 func TestActivityForDocumentGet(t *testing.T) {
 	name := randomAlphanumeric(6)
 	created, err := webClient.NewEmptyBasicDocument(name, "")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Sprintf("created is %s", created.Name)
+
+	fmt.Println(created)
+	fmt.Println(err)
 	builder := ActivityQueryBuilder{}
 	q, _ := builder.Oid(GlobalId(created.GlobalId)).Build()
 	result, err := webClient.Activities(q, NewRecordListingConfig())

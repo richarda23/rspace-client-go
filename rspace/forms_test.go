@@ -39,7 +39,7 @@ func TestSearchForms(t *testing.T) {
 	}
 	Log.Info("searching for '" + got.Forms[0].Name + "'")
 	// there must be at least 1 form, now search by its name
-	hits, err := webClient.FormSearch(cfg, lower(got.Forms[0].Name))
+	hits, _ := webClient.FormSearch(cfg, lower(got.Forms[0].Name))
 	assertTrue(t, hits.TotalHits > 0, "expected at least 1 search hit")
 	for _, v := range hits.Forms {
 		fmt.Println(v)

@@ -35,7 +35,7 @@ func (fs *FormService) PublishForm(formId int) (*Form, error) {
 }
 
 func (fs *FormService) CreateFormJson(jsonFormDef io.Reader) (*Form, error) {
-	jsonBytes, err := ioutil.ReadAll(jsonFormDef)
+	jsonBytes, _ := ioutil.ReadAll(jsonFormDef)
 	result, err := fs.postOrPutJsonBodyBytes(jsonBytes, fs.formsUrl(), "POST")
 	if err != nil {
 		return nil, err

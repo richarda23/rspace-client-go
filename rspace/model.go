@@ -60,7 +60,7 @@ type FormId struct {
 	Id int `json:"id,omitempty"`
 }
 
-// constructor for a new document
+// DocumentPostNew is a constructor for a new document
 func DocumentPostNew(name string, tags string, formId int, content []string, parentFolderId int) *DocumentPost {
 	id := FormId{formId}
 	c := make([]FieldContent, 0)
@@ -85,7 +85,7 @@ type UserList struct {
 	Links      []Link `json:"_links"`
 }
 
-//Summary information about a Document
+//DocumentInfo provides summary information about a Document
 type DocumentInfo struct {
 	*IdentifiableNamable
 	Created        string
@@ -384,16 +384,16 @@ func (b *UserPostBuilder) Build() (*UserPost, error) {
 		return nil, errors.New("username must be >= 6 characters")
 	}
 	if len(b.password) < 6 {
-		return nil, errors.New("Password must be >= 8 characters")
+		return nil, errors.New("password must be >= 8 characters")
 	}
 	if len(b.firstName) == 0 {
-		return nil, errors.New("Please supply first name")
+		return nil, errors.New("please supply first name")
 	}
 	if len(b.lastName) == 0 {
-		return nil, errors.New("Please supply last name")
+		return nil, errors.New("please supply last name")
 	}
 	if len(string(b.email)) < 3 {
-		return nil, errors.New("Please supply valid email address")
+		return nil, errors.New("please supply valid email address")
 	}
 	rc.FirstName = b.firstName
 	rc.Password = strings.TrimSpace(b.password)
@@ -416,23 +416,23 @@ type GroupPost struct {
 func GroupPostNew(name string, userGroups []UserGroupPost) (*GroupPost, error) {
 	rc := GroupPost{}
 	if len(name) == 0 {
-		return nil, errors.New("Please supply a name for the group")
+		return nil, errors.New("please supply a name for the group")
 	}
 	rc.DisplayName = name
 	if len(userGroups) == 0 {
-		return nil, errors.New("Please supply at least 1 group member")
+		return nil, errors.New("please supply at least 1 group member")
 	}
 	var piExists bool
 	for _, upost := range userGroups {
 		if find(userInGroupRoles, upost.RoleInGroup) < 0 {
-			return nil, errors.New("Please supply a valid group role for this user")
+			return nil, errors.New("please supply a valid group role for this user")
 		}
 		if upost.RoleInGroup == "PI" {
 			piExists = true
 		}
 	}
 	if !piExists {
-		return nil, errors.New("There must be exactly 1 PI in the group")
+		return nil, errors.New("there must be exactly 1 PI in the group")
 	}
 
 	rc.Members = userGroups
@@ -670,7 +670,7 @@ func (job *Job) IsTerminated() bool {
 }
 func makeStringSlice(existingSl []string, toAdd string) []string {
 	if len(existingSl) == 0 {
-		existingSl = make([]string, 0, 0)
+		existingSl = make([]string, 0)
 	}
 	return append(existingSl, toAdd)
 }

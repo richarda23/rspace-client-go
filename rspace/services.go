@@ -195,6 +195,10 @@ type RsWebClient struct {
 func (ws *RsWebClient) Groups() (*GroupList, error) {
 	return ws.groupS.Groups()
 }
+
+// Users lists information about users, optionally filtering by account creation
+// and lastLogin time.
+// Note this requires an admin role
 func (ws *RsWebClient) Users(lastLoginBefore time.Time, creationDateBefore time.Time, cfg RecordListingConfig) (*UserList, error) {
 	return ws.sysadminS.Users(lastLoginBefore, creationDateBefore, cfg)
 }
@@ -260,10 +264,13 @@ func (ds *RsWebClient) Status() (*Status, error) {
 func (ds *RsWebClient) NewEmptyBasicDocument(name, tags string) (*Document, error) {
 	return ds.documentS.NewEmptyBasicDocument(name, tags)
 }
+
+// NewEmptyBasicDocument creates a Basic (single text field) document with some content
 func (ds *RsWebClient) NewBasicDocumentWithContent(name, tags, content string) (*Document, error) {
 	return ds.documentS.NewBasicDocumentWithContent(name, tags, content)
 }
 
+// NewDocumentWithContent creates a new document as configured by the DocumentPost argument
 func (ds *RsWebClient) NewDocumentWithContent(docPost *DocumentPost) (*Document, error) {
 	return ds.documentS.DocumentNew(docPost)
 }

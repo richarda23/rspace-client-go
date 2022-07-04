@@ -26,7 +26,7 @@ func TestNewFolderGetFolder(t *testing.T) {
 	folder, _ := webClient.FolderById(got.Id)
 	fmt.Println(folder)
 	if !folder.IsNotebook {
-		fail(t, fmt.Sprintf("expected folder, not notebook"))
+		fail(t, "expected folder, not notebook")
 	}
 	if folder.Id != got.Id {
 		fail(t, fmt.Sprintf("expected ID = %d, but was %d", got.Id, folder.Id))
@@ -51,17 +51,17 @@ func TestListFolderTree(t *testing.T) {
 	}
 	for _, v := range result.Records {
 		if v.Type != "NOTEBOOK" {
-			fail(t, fmt.Sprintf("Folder listing should be notebooks only"))
+			fail(t, "Folder listing should be notebooks only")
 		}
 	}
 }
 func TestErrorHandling(t *testing.T) {
 	folder, e := webClient.FolderById(-233)
 	if folder != nil {
-		fail(t, fmt.Sprintf("Should have invoked an error"))
+		fail(t, "Should have invoked an error")
 	}
 	if e == nil {
-		fail(t, fmt.Sprintf("Error object should not be nil"))
+		fail(t, "Error object should not be nil")
 	}
 	Log.Info(e)
 }

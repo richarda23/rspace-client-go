@@ -114,7 +114,7 @@ func (bs *BaseService) doMultipart(path string, url string) (*http.Response, err
 	if err != nil {
 		return nil, err
 	}
-	_, err = io.Copy(part, file)
+	_, _ = io.Copy(part, file)
 
 	err = writer.Close()
 	if err != nil {
@@ -123,7 +123,7 @@ func (bs *BaseService) doMultipart(path string, url string) (*http.Response, err
 
 	hc := HttpClientNew(10)
 	retry := NewResilientClient(hc)
-	req, err := http.NewRequest("POST", url, body)
+	req, _ := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	bs.addAuthHeader(req)
 	resp, err := retry.Do(req)
@@ -143,7 +143,7 @@ func (fs *FileService) DownloadFile(fileId int, outDir string) (*FileInfo, error
 		return nil, err
 	}
 	path := filepath.Join(outDir, info.GetName())
-	out, err := os.Create(path)
+	out, _ := os.Create(path)
 	err = fs.doGetToFile(downloadUrl, out)
 	if err != nil {
 		return nil, err
